@@ -16,11 +16,15 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
+  couponCode: string | null;
+  discountPercentage: number;
   openDrawer: () => void;
   closeDrawer: () => void;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
+  applyCoupon: (code: string) => void;
+  removeCoupon: () => void;
   clear: () => void;
 }
 
@@ -29,6 +33,8 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       items: [],
       isOpen: false,
+      couponCode: null,
+      discountPercentage: 0,
 
       openDrawer: () => set({ isOpen: true }),
       closeDrawer: () => set({ isOpen: false }),
@@ -75,11 +81,28 @@ export const useCartStore = create<CartState>()(
           ),
         })),
 
-      clear: () => set({ items: [] }),
+      applyCoupon: (code) => {
+        // Mock coupon logic: ZAYA10 gives 10% off, ZAYA20 gives 20% off
+        const validCoupons: Record<string, number> = {
+          'ZAYA10': 10,
+          'ZAYA20': 20,
+        };
+        const upperCode = code.toUpperCase();
+        if (validCoupons[upperCode]) {
+          set({ couponCode: upperCode, discountPercentage: validCoupons[upperCode] });
+        } else {
+          // If invalid, we could optionally handle error state, for now just ignore or reset
+          set({ couponCode: null, discountPercentage: 0 });
+        }
+      },
+
+      removeCoupon: () => set({ couponCode: null, discountPercentage: 0 }),
+
+      clear: () => set({ items: [], couponCode: null, discountPercentage: 0 }),
     }),
     {
       name: 'Zaya-cart',
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ items: state.items, couponCode: state.couponCode, discountPercentage: state.discountPercentage }),
     },
   ),
 );
@@ -89,3 +112,14 @@ export const selectCartCount = (state: CartState): number =>
 
 export const selectCartSubtotal = (state: CartState): number =>
   state.items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+
+export const selectCartDiscount = (state: CartState): number => {
+  const subtotal = selectCartSubtotal(state);
+  return (subtotal * state.discountPercentage) / 100;
+};
+
+export const selectCartTotal = (state: CartState): number => {
+  const subtotal = selectCartSubtotal(state);
+  const discount = selectCartDiscount(state);
+  return subtotal - discount;
+};

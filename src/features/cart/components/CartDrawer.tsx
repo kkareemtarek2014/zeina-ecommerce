@@ -1,6 +1,7 @@
 'use client';
 
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Trash2 } from 'lucide-react';
@@ -11,6 +12,8 @@ import { useHydrated } from '@/shared/hooks/useHydrated';
 import {
   selectCartCount,
   selectCartSubtotal,
+  selectCartDiscount,
+  selectCartTotal,
   useCartStore,
 } from '../store/cart.store';
 
@@ -23,8 +26,15 @@ export function CartDrawer() {
   const items = useCartStore((s) => s.items);
   const count = useCartStore(selectCartCount);
   const subtotal = useCartStore(selectCartSubtotal);
+  const discount = useCartStore(selectCartDiscount);
+  const total = useCartStore(selectCartTotal);
+  const couponCode = useCartStore((s) => s.couponCode);
+  const applyCoupon = useCartStore((s) => s.applyCoupon);
+  const removeCoupon = useCartStore((s) => s.removeCoupon);
   const setQuantity = useCartStore((s) => s.setQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
+  
+  const [couponInput, setCouponInput] = useState('');
 
   const remainingForFree = FREE_SHIPPING_THRESHOLD - subtotal;
 
@@ -123,9 +133,41 @@ export function CartDrawer() {
                 </p>
               )}
 
-              <div className="mb-3 flex items-center justify-between text-sm">
-                <span className="text-text-secondary">Subtotal</span>
-                <span className="font-semibold">{formatEGP(subtotal)}</span>
+              <div className="mb-4">
+                {couponCode ? (
+                  <div className="flex items-center justify-between rounded-(--radius) bg-brand-blush px-3 py-2 text-sm">
+                    <span className="font-medium text-brand-primary">Code: {couponCode}</span>
+                    <button type="button" onClick={removeCoupon} className="text-brand-secondary underline text-xs">Remove</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Coupon Code (e.g. ZAYA10)" 
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value)}
+                      className="flex-1 rounded-(--radius) border border-border px-3 py-1.5 text-sm outline-none focus:border-brand-primary"
+                    />
+                    <Button variant="outline" size="sm" onClick={() => { applyCoupon(couponInput); setCouponInput(''); }}>Apply</Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="mb-3 space-y-1 text-sm">
+                <div className="flex items-center justify-between text-text-secondary">
+                  <span>Subtotal</span>
+                  <span>{formatEGP(subtotal)}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex items-center justify-between text-status-success">
+                    <span>Discount</span>
+                    <span>-{formatEGP(discount)}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between font-semibold pt-2 border-t border-border mt-2">
+                  <span>Total</span>
+                  <span>{formatEGP(total)}</span>
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">
