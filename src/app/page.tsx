@@ -45,7 +45,7 @@ export default function HomePage() {
           >
             <Image
               src="/images/hero.svg"
-              alt="Zeena accessories collection"
+              alt="Zaya accessories collection"
               width={880}
               height={660}
               priority

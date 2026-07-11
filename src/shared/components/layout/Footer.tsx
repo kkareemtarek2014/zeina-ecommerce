@@ -28,7 +28,7 @@ export function Footer() {
           {/* Brand & Newsletter Column */}
           <div className="flex flex-col gap-6 lg:col-span-5">
             <div>
-              <p className="font-(family-name:--font-display) text-3xl font-bold tracking-tight text-brand-primary">
+              <p className="font-(family-name:--font-display) text-4xl font-bold tracking-tight text-brand-primary italic">
                 {SITE.name}
               </p>
               <p className="mt-4 max-w-md text-base leading-relaxed text-text-secondary">

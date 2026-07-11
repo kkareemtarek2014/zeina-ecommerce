@@ -18,7 +18,7 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
         }),
     }),
     {
-      name: 'zeena-recently-viewed',
+      name: 'Zaya-recently-viewed',
       storage: createJSONStorage(() => localStorage),
     }
   )

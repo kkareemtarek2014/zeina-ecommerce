@@ -37,6 +37,6 @@ export const useOrdersStore = create<OrdersState>()(
 
       getOrder: (id) => get().orders.find((o) => o.id === id),
     }),
-    { name: 'zeena-orders' },
+    { name: 'Zaya-orders' },
   ),
 );

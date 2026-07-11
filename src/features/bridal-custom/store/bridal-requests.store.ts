@@ -50,6 +50,6 @@ export const useBridalRequestsStore = create<BridalRequestsState>()(
         return request;
       },
     }),
-    { name: 'zeena-bridal-requests' },
+    { name: 'Zaya-bridal-requests' },
   ),
 );

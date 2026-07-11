@@ -1,14 +1,14 @@
 /**
- * Zeena — single place to tune business rules.
+ * Zaya — single place to tune business rules.
  * Change a value here and the whole storefront follows.
  */
 export const SITE = {
-  name: 'Zeena',
+  name: 'Zaya',
   tagline: 'Adorn yourself, effortlessly.',
   description:
     'Shop women’s accessories online in Egypt — jewelry, bags, scarves, sunglasses & watches. Cash on delivery, shipping to Cairo, Giza and all governorates.',
   /** Production domain — UPDATE when you buy the real domain. */
-  url: 'https://zeena-eg.com',
+  url: 'https://Zaya-eg.com',
   currency: 'EGP',
   locale: 'en-EG',
   keywords: [
@@ -21,7 +21,7 @@ export const SITE = {
     'شنط حريمي',
     'مجوهرات',
     'cash on delivery Egypt',
-    'Zeena',
+    'Zaya',
   ],
 } as const;
 

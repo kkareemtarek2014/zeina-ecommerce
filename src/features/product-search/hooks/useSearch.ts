@@ -27,7 +27,7 @@ export const useRecentSearches = create<RecentSearchesState>()(
         })),
       clear: () => set({ recent: [] }),
     }),
-    { name: 'zeena-recent-searches' },
+    { name: 'Zaya-recent-searches' },
   ),
 );
 

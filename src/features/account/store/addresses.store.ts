@@ -33,6 +33,6 @@ export const useAddressesStore = create<AddressesState>()(
           addresses: state.addresses.filter((a) => a.id !== id),
         })),
     }),
-    { name: 'zeena-addresses' },
+    { name: 'Zaya-addresses' },
   ),
 );

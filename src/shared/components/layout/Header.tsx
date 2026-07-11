@@ -29,7 +29,7 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-container items-center justify-between gap-4 px-4 lg:px-8">
         <Link
           href="/"
-          className="font-(family-name:--font-display) text-2xl font-bold tracking-wide text-brand-primary"
+          className="font-(family-name:--font-display) text-3xl font-bold tracking-wide text-brand-primary italic"
         >
           {SITE.name}
         </Link>

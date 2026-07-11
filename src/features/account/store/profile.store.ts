@@ -21,6 +21,6 @@ export const useProfileStore = create<ProfileState>()(
       profile: { fullName: '', phone: '', email: '' },
       updateProfile: (profile) => set({ profile }),
     }),
-    { name: 'zeena-profile' },
+    { name: 'Zaya-profile' },
   ),
 );

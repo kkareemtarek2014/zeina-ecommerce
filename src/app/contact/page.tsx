@@ -3,14 +3,14 @@ import { Mail, MapPin, Phone, MessageCircle } from 'lucide-react';
 import { SITE } from '@/config/site.config';
 
 export const metadata: Metadata = {
-  title: `Contact Us | Zeena Customer Support`,
+  title: `Contact Us | Zaya Customer Support`,
   description:
-    'Need help with your Zeena order? Get in touch with our support team for inquiries about our accessories, shipping, and returns in Egypt.',
+    'Need help with your Zaya order? Get in touch with our support team for inquiries about our accessories, shipping, and returns in Egypt.',
   alternates: { canonical: '/contact' },
   openGraph: {
-    title: `Contact Us | Zeena Customer Support`,
+    title: `Contact Us | Zaya Customer Support`,
     description:
-      'Need help with your Zeena order? Get in touch with our support team for inquiries about our accessories, shipping, and returns in Egypt.',
+      'Need help with your Zaya order? Get in touch with our support team for inquiries about our accessories, shipping, and returns in Egypt.',
     url: `${SITE.url}/contact`,
     type: 'website',
   },
@@ -41,8 +41,8 @@ export default function ContactPage() {
           <p className="mt-2 text-sm text-text-secondary">
             Our friendly team is here to help.
           </p>
-          <a href="mailto:support@zeena.com" className="mt-4 font-medium text-brand-primary hover:underline">
-            support@zeena.com
+          <a href="mailto:support@Zaya.com" className="mt-4 font-medium text-brand-primary hover:underline">
+            support@Zaya.com
           </a>
         </div>
 

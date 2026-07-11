@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Search } from 'lucide-react';
 import { CATEGORIES } from '@/shared/data/categories.data';
 import { useProducts } from '../hooks/useProducts';
 import { CategoryPills } from './CategoryPills';
@@ -9,9 +10,18 @@ import { ProductGrid } from './ProductGrid';
 
 export function ShopView({ category }: { category?: string }) {
   const { data, isLoading } = useProducts(category);
+  const [searchQuery, setSearchQuery] = useState('');
+  
   const categoryName = category
     ? (CATEGORIES.find((c) => c.slug === category)?.name ?? 'Shop')
     : 'All Products';
+
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    if (!searchQuery.trim()) return data;
+    const query = searchQuery.toLowerCase();
+    return data.filter((product) => product.name.toLowerCase().includes(query));
+  }, [data, searchQuery]);
 
   return (
     <div className="mx-auto max-w-container px-4 py-10 lg:px-8">
@@ -22,8 +32,18 @@ export function ShopView({ category }: { category?: string }) {
         {categoryName}
       </h1>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CategoryPills active={category} />
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-10 w-full rounded-(--radius) border border-border bg-surface-raised pl-9 pr-4 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
+          />
+        </div>
       </div>
 
       {category === 'bride' && (
@@ -42,7 +62,7 @@ export function ShopView({ category }: { category?: string }) {
       )}
 
       <div className="mt-8">
-        <ProductGrid products={data ?? []} isLoading={isLoading} />
+        <ProductGrid products={filteredData} isLoading={isLoading} />
       </div>
     </div>
   );

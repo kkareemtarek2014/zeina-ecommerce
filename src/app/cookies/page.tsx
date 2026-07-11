@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'How Zeena uses cookies and local storage in your browser.',
+  description: 'How Zaya uses cookies and local storage in your browser.',
   alternates: { canonical: '/cookies' },
 };
 

@@ -1,5 +1,5 @@
 :root {
-  /* ─── Zeena brand palette ───────────────────────────────
+  /* ─── Zaya brand palette ───────────────────────────────
      Feminine, warm, premium. Edit here → whole site updates. */
 
   /* Brand colours */
@@ -30,8 +30,8 @@
   --color-status-info:     #4a6b8a;
 
   /* Typography */
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-heading), Georgia, serif;
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
 
   /* Border radius */
   --radius:    0.5rem;    /* inputs, buttons */

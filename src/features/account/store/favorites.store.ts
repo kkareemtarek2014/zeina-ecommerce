@@ -21,6 +21,6 @@ export const useFavoritesStore = create<FavoritesState>()(
         })),
       isFavorite: (productId) => get().ids.includes(productId),
     }),
-    { name: 'zeena-favorites' },
+    { name: 'Zaya-favorites' },
   ),
 );
