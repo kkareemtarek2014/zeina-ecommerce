@@ -66,6 +66,12 @@ search (name/category/tags match, cap 8). Backs `getProducts`, `getProductsByCat
 > full status/stock/SEO fields. Admin enhancement endpoints (inventory, bulk, duplicate, import/export,
 > media, notifications, audit-log, activity) are in `08` + `10`.
 
+> **Sourcing/pricing (`11`):** `price` is computed by the landed-cost engine when the `dynamic_pricing`
+> flag is ON (else the flat model) — cost inputs are never serialized. `ProductDTO` also carries
+> `fulfilmentType`, a `shippingEta` label (1–2 days vs 2–3 weeks), and `preorder?` when OOS + enabled.
+> Admin adds `POST /api/admin/import/temu` (paste URL → draft product), `/api/admin/bundles` CRUD, and
+> pre-order management — full spec in `11-sourcing-pricing-merchandising.md`.
+
 ### GET `/api/products/[id]` → `ProductDTO` or 404 `NOT_FOUND`. Backs `getProductById`.
 ### GET `/api/products/[id]/related?limit=4` → `ProductDTO[]` (same category, excludes self). Backs `getRelatedProducts`.
 ### GET `/api/products/new?limit=8` → `ProductDTO[]` newest first. Backs `getNewArrivals`.

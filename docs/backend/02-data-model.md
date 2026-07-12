@@ -74,6 +74,26 @@ stored as **integer EGP** (no fractions — prices round to 5 EGP), enums as `te
 | `description_format` | text | `plain` \| `html` (rich text), default `plain` — `10` §12 |
 | `archived_at` | integer(ts) null | set when `status='archived'` (soft delete) — `10` §15 |
 
+**Sourcing & pricing-engine columns (see `11`):**
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `base_price_usd` | real null | Temu item price in USD (from importer) — server-only — `11` §1 |
+| `landed_cost` | integer null | computed EGP landed-cost snapshot (item+shipping+customs+VAT+handling) — server-only — `11` §1 |
+| `source_provider` | text null | `temu` |
+| `source_url` | text null | original Temu product URL |
+| `source_product_id` | text null | provider product id |
+| `source_variant_map` | text (JSON) null | mapped variants from import |
+| `source_in_stock` | integer(bool) null | last known Temu stock status (sync) — `11` §3 |
+| `last_synced_at` | integer(ts) null | last stock/price sync |
+| `fulfilment_type` | text | `local_stock` \| `dropship` (CHECK), default `local_stock` — drives timeline — `11` §4 |
+| `preorder_enabled` | integer(bool) | allow ordering when OOS — `11` §6.2 |
+| `preorder_eta_days` | integer null | pre-order lead time / timeline label source |
+
+> **Pricing authority:** `price` is computed by `computeSellPrice(product, settings)` — the landed-cost
+> engine (`11` §1) when the `dynamic_pricing` flag is ON, else the flat `getSellPrice(base_price)`. Cost
+> inputs (`base_price`, `base_price_usd`, `landed_cost`, rates) are **never** serialized to the browser.
+
 > `price` (sell price) is **computed**, not stored: `getSellPrice(base_price)`. The product DTO exposes
 > `price` + `compareAtPrice`, never `base_price`.
 > **Storefront reads only `status='published'`** (product service filter — `03` §3). Seeded products
@@ -158,6 +178,7 @@ current `Order.address` shape.
 | `image` | text | snapshot |
 | `unit_price` | integer | **server-recomputed** sell price at order time |
 | `quantity` | integer | 1–10 (matches cart cap) |
+| `is_preorder` | integer(bool) | line is a pre-order (OOS + `preorder_enabled`) — extended ETA — `11` §6.2 |
 
 ### 2.9 `addresses` — *why:* account address book
 | Column | Type | Notes |
@@ -329,6 +350,32 @@ view. (Conversion rate needs visit analytics — deferred.)
 this table only if permissions must be editable at runtime.
 
 > Optional `webhook_events` (idempotency, `09` §C.1) and a settings-driven cron config round these out.
+
+---
+
+## 2c. Sourcing / pricing / merchandising tables (see `11`)
+
+### 2.25 `bundles` — *why:* bundle offers / upsell (`11` §6.1)
+`id PK · name · type (bxgy|set|fixed_price, CHECK) · config (JSON: e.g. {buyQty,getQty} or {price}) ·
+active (bool) · starts_at null · ends_at null · created_at`. Evaluated server-side in cart/checkout;
+best applicable discount wins; never client-computed.
+
+### 2.26 `bundle_items` — *why:* products in a bundle
+`bundle_id FK→bundles (cascade) · product_id FK→products (cascade) · qty` (composite PK
+`bundle_id,product_id`).
+
+### 2.27 `fx_rates` — *why:* USD→EGP history for stable landed-cost pricing (`11` §1/§5)
+`id PK · base ('USD') · quote ('EGP') · rate (real) · source · fetched_at`. `fx-rate-refresh` cron
+inserts; pricing reads the latest; history kept for audit + re-price traceability.
+
+### 2.28 `instagram_posts` — *why:* social-proof feed cache (`11` §6.4, optional/flagged)
+`id PK · permalink · image_url · caption null · posted_at · fetched_at`. Refreshed by cron; avoids heavy
+third-party JS on render. Optional — a settings embed can replace it.
+
+> `settings` also gains pricing-engine keys (`usd_egp_rate, bulk_shipping_usd, customs_duty_rate,
+> vat_rate, handling_fee_egp, target_margin, price_rounding_egp`), shipping-timeline labels, and
+> Instagram config (`02` §2.15 is key-value, so no new columns). New feature flags: `dynamic_pricing,
+> bundles, preorders, social_proof` (`config/features.config.ts`).
 
 ---
 

@@ -182,8 +182,11 @@ Worker's `scheduled` handler (see `01` update).
 | Expired session cleanup | daily | delete `sessions` past `expires_at` |
 | Daily sales summary | daily 06:00 | write a summary row / notification (feeds §3) |
 | Payment/shipment sync | hourly | reconcile Paymob/Bosta state vs local (`09` §D) for missed webhooks |
+| Temu stock sync | every few hours | source OOS → local `stock_qty=0` + notify (`11` §3) |
+| FX rate refresh | daily | update USD/EGP → re-price Temu-linked products (`11` §5) |
 
 Config (windows, cadences) lives in `settings`. Jobs write to `audit_log`/`notifications` where useful.
+The last two jobs belong to the sourcing/pricing spec (`11`) but run through the same `scheduled` handler.
 
 ---
 

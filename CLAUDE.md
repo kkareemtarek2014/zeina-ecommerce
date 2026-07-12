@@ -29,10 +29,16 @@ R2), add an admin dashboard, and integrate Bosta + Paymob lives in **`docs/backe
 | Fulfilment | Manual today; **Bosta** delivery (COD collection + tracking) planned | orders feature |
 | Domain (placeholder) | `SITE.url` — update when real domain bought | |
 
-**Pricing model:** products store `basePrice` (sourcing cost in EGP). Customer price = `getSellPrice()`
-in `src/shared/utils/price.ts` — cost + margin, rounded UP to nearest 5 EGP. Never hardcode selling
-prices. `basePrice` is a secret sourcing cost and must **never** be sent to the browser once the backend
-exists (only admin sees it).
+**Pricing model (current):** products store `basePrice` (sourcing cost in EGP). Customer price =
+`getSellPrice()` in `src/shared/utils/price.ts` — cost + margin, rounded UP to nearest 5 EGP. Never
+hardcode selling prices. `basePrice` is a secret sourcing cost and must **never** be sent to the browser
+once the backend exists (only admin sees it).
+
+**Pricing model (target — `docs/backend/11`):** a server-side **landed-cost engine** replaces the flat
+margin when the `dynamic_pricing` flag is ON — Temu USD base × live USD/EGP rate + ~$2 bulk shipping +
+10.5% customs (Gamarek) + 14% VAT + ~100 EGP handling → **50% margin on landed cost**, rounded to 5 EGP.
+`getSellPrice` becomes `computeSellPrice(product, settings)` (single price authority). All rates are
+settings-driven and **must be verified** against current regulations; all cost inputs stay server-only.
 
 **Governorate → zone mapping:** `src/shared/data/governorates.data.ts` (all 27 governorates → zone).
 Shipping cost = `getShippingCost(governorateId, subtotal)` in `features/checkout/utils/shipping.ts`.
@@ -140,7 +146,9 @@ Components PascalCase · hooks `useX` · dirs kebab-case · `*.types.ts` / `*.st
 
 Full, phased specs live in **`docs/backend/`** — read the index first (`README.md`):
 `00-analysis` · `01-architecture` · `02-data-model` · `03-api-contracts` · `04-frontend-integration` ·
-`05-plan` · `06-tasks` · `07-checklist` · `08-admin-dashboard` · `09-integrations-bosta-paymob`.
+`05-plan` · `06-tasks` · `07-checklist` · `08-admin-dashboard` · `09-integrations-bosta-paymob` ·
+`10-enhancements` (inventory, timeline, analytics, RBAC, cron) ·
+`11-sourcing-pricing-merchandising` (Temu import, landed-cost pricing, bundles, pre-orders).
 
 ## Known Placeholders / TODO
 
@@ -152,4 +160,9 @@ Full, phased specs live in **`docs/backend/`** — read the index first (`README
 - Auth is a plaintext mock — becomes hashed users + httpOnly session (see `03`).
 - `API.md` doesn't exist yet — create it when defining the backend contract (`07` Phase 7).
 - **Roadmap:** Cloudflare backend, admin dashboard, **Paymob** (card + mobile wallet), **Bosta**
-  (shipping/fulfilment + COD collection + tracking), Arabic RTL.
+  (shipping/fulfilment + COD collection + tracking), production enhancements (`docs/backend/10`:
+  inventory, order timeline, analytics, RBAC, cron), **Temu sourcing + landed-cost dynamic pricing +
+  bundles/pre-orders + micro-warehousing fulfilment** (`docs/backend/11`), Arabic RTL.
+- **Sourcing/fulfilment model:** Temu is used to **sync catalog + track inventory** only. Automation
+  never auto-orders at checkout — items are bulk-bought, repackaged in Zaya boxes, and shipped locally
+  via Bosta (Temu prohibits direct dropshipping — verify their ToS). See `docs/backend/11` §4.

@@ -32,6 +32,12 @@ The storefront UI/UX is **unchanged**; the dashboard is a new, separate surface 
 > feed, and **Cron Triggers** — are specified in **`10-enhancements.md`** (phases P16–P22). The top-5
 > (⭐ inventory, order timeline, bulk actions, duplication, audit log) build first.
 
+> **Sourcing, pricing & merchandising** — the **Temu Importer** (paste URL → draft product via a scraper
+> API), the **landed-cost dynamic pricing engine** (USD base + customs/VAT/handling/FX → 50% margin),
+> real-time **stock sync**, **bundles**, **pre-orders**, shipping-timeline settings, and social proof —
+> are specified in **`11-sourcing-pricing-merchandising.md`** (phases P24–P26). Admin gains an Importer
+> tool, a Bundles module, Pre-order management, and Pricing settings.
+
 Not built (no data exists): product **variants** (the `Product` type has none — do **not** add a variants
 UI), gift cards, multi-warehouse, tax. Product "variants" from the generic prompt is intentionally
 **skipped** because the schema has no variant concept.

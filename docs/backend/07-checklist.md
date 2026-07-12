@@ -101,6 +101,20 @@ Remaining:
 - [ ] Cron Triggers: auto-cancel unpaid + release stock, reminders, session cleanup, daily summary, payment/shipment sync — all idempotent.
 - [ ] (Future/flagged) Homepage builder via `homepage_blocks`.
 
+## Sourcing, pricing & merchandising (P24–P26 — see `11-sourcing-pricing-merchandising.md`)
+- [ ] Landed-cost engine: `computeSellPrice` matches the §1.2 formula for a sample USD item.
+- [ ] Pricing inputs (FX rate, customs, VAT, handling, margin) are in `settings` and audit-logged; rates verified against current regulations.
+- [ ] `fx-rate-refresh` cron updates USD/EGP and re-prices Temu-linked products; `fx_rates` history kept.
+- [ ] `dynamic_pricing` flag: OFF = current flat model unchanged; ON = landed-cost engine; cutover re-prices.
+- [ ] No cost inputs (`base_price`, `base_price_usd`, `landed_cost`, rates) appear in any API response.
+- [ ] Temu importer: paste URL → review-ready **draft** with images in R2, USD base, mapped variants; no auto-publish; rate-limited + audit-logged.
+- [ ] `temu-stock-sync` cron: source OOS → local `stock_qty=0` + notification; idempotent; respects API limits.
+- [ ] Fulfilment: `fulfilment_type` drives stock + shipping timeline; **checkout never orders from Temu** (Bosta only).
+- [ ] Bundles (e.g. Buy-2-Get-1) evaluated + discounted **server-side**; admin CRUD + scheduling.
+- [ ] Pre-orders allowed only when `preorder_enabled` + OOS, clearly labelled with extended ETA.
+- [ ] Product shipping timeline shown (1–2 days local vs 2–3 weeks dropship/pre-order).
+- [ ] Social proof (reviews + Instagram feed) and localized descriptions render; each behind a flag.
+
 ## Build gates (must be green every phase)
 - [ ] `pnpm build` — 0 errors.
 - [ ] `pnpm typecheck` — 0 errors.

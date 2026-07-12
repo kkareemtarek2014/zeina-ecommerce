@@ -142,6 +142,23 @@ Operational depth from the review. **Full spec — data model, APIs, prioritizat
 
 > Audit log (⭐) is already built in P8–P12 (`02` §2.16); P18 adds its viewer + activity feed.
 
+## Sourcing, pricing & merchandising phases (P24–P26)
+
+Temu-sourced operating model. **Full spec — landed-cost formula, importer, sync, fulfilment, bundles,
+pre-orders — in `11-sourcing-pricing-merchandising.md`.** Summary:
+
+- **P24 — Dynamic pricing engine:** landed-cost calc (USD base + FX + customs/VAT/handling → 50%
+  margin), pricing `settings` + `fx_rates`, `fx-rate-refresh` + reprice cron, `dynamic_pricing` flag,
+  migrate/re-price from the flat model.
+- **P25 — Temu importer + stock sync:** scraper-API import (paste URL → draft product, images→R2),
+  product source columns, `temu-stock-sync` cron (source OOS → `stock_qty=0`).
+- **P26 — Merchandising & trust:** bundles (Buy-2-Get-1 etc.), pre-orders for OOS popular items, product
+  shipping timelines (local vs dropship), social proof (reviews already present + Instagram feed),
+  localized descriptions.
+
+> **Fulfilment (compliance):** micro-warehousing — sync catalog/inventory only, bulk-buy, repackage in
+> Zaya boxes, ship via Bosta. Checkout **never** auto-orders from Temu (`11` §4).
+
 ---
 
 ## Dependency graph

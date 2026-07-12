@@ -36,6 +36,7 @@ Create once (commands in `05-plan.md` Phase 0). Names are proposals — keep the
 | Secret | — | `PASSWORD_PEPPER` | appended before hashing |
 | Secrets | — | `PAYMOB_SECRET_KEY`, `PAYMOB_PUBLIC_KEY`, `PAYMOB_HMAC_SECRET`, `PAYMOB_INTEGRATION_ID_CARD`, `PAYMOB_INTEGRATION_ID_WALLET` | Paymob payments (see `09`) |
 | Secrets | — | `BOSTA_API_KEY`, `BOSTA_WEBHOOK_SECRET`, `BOSTA_BUSINESS_ID` | Bosta shipping (see `09`) |
+| Secrets | — | `SCRAPER_API_KEY`, `FX_API_KEY?` | Temu importer + USD/EGP rate (see `11`) |
 | Worker | `zaya-store` | — | the OpenNext-built app |
 
 `wrangler.toml` (or `wrangler.jsonc`) declares the bindings; the OpenNext build wires them into the
@@ -142,10 +143,12 @@ src/
 │   │   ├── envelope.ts               # ok(data) / fail(code,msg,status)
 │   │   ├── errors.ts                 # AppError, NotFound, Unauthorized, ...
 │   │   └── handler.ts                # withHandler(): try/catch → envelope
-│   └── jobs/                         # scheduled Workers (Cron Triggers) — see 10 §21
+│   └── jobs/                         # scheduled Workers (Cron Triggers) — see 10 §21 + 11 §5
 │       ├── cancel-unpaid-orders.ts   # + release reserved stock
 │       ├── order-reminders.ts  session-cleanup.ts
 │       ├── daily-sales-summary.ts  payment-shipment-sync.ts
+│       ├── temu-stock-sync.ts        # source OOS → stock_qty=0 (11 §3)
+│       ├── fx-rate-refresh.ts        # USD/EGP → reprice (11 §5)
 │       └── index.ts                  # dispatch from the Worker `scheduled` handler
 │
 ├── shared/
@@ -190,6 +193,12 @@ src/
 > pending-order reminders, expired-session cleanup, daily sales summary, payment/shipment sync) are
 > small, idempotent, and read config from `settings`. Cron never touches the request path, keeping the
 > storefront responsive.
+
+> **Sourcing & pricing (`11-sourcing-pricing-merchandising.md`)** adds `server/services/{temu-import,
+> pricing}.service.ts` (scraper API abstracted; landed-cost engine as the single price authority), the
+> `temu-stock-sync` + `fx-rate-refresh` cron jobs, and bundle/pre-order logic in the cart/checkout
+> service. External calls (scraper, FX) use plain `fetch`; automation covers catalog + inventory only —
+> **never** auto-purchasing at checkout (compliance, `11` §4).
 
 ---
 

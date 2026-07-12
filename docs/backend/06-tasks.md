@@ -85,6 +85,14 @@ cron triggers, homepage builder) lives in **`10-enhancements.md`**. Key schema a
 `product_views`) plus product columns (`status/slug/sku/stock_qty/reserved_qty/SEO`). Storefront reads
 only `published`, stock-aware products. Cron jobs go in `server/jobs/` (`01`).
 
+## Phases 24–26 — Sourcing, pricing & merchandising
+The full, granular task list (landed-cost pricing engine, Temu importer, stock sync, bundles,
+pre-orders, shipping timelines, social proof) lives in **`11-sourcing-pricing-merchandising.md`** Part 8.
+Key adds: product source/pricing columns + `bundles`/`bundle_items`/`fx_rates` (`02` §2.25–2.28),
+`SCRAPER_API_KEY`/`FX_API_KEY` (`01`), `temu-stock-sync` + `fx-rate-refresh` cron (`server/jobs/`),
+`computeSellPrice` as the single price authority, and flags `dynamic_pricing/bundles/preorders/
+social_proof`. Automation is catalog+inventory only — never auto-purchasing at checkout.
+
 ## Phases 13–15 — Payments (Paymob) & Shipping (Bosta)
 The full, granular integration task list lives in **`09-integrations-bosta-paymob.md` Part E**. Key
 adds: `payments`/`shipments` tables (`02`), `PAYMOB_*`/`BOSTA_*` secrets (`01`), HMAC-SHA512 Paymob

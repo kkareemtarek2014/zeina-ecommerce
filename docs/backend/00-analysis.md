@@ -164,6 +164,13 @@ wallet, alongside COD) and **Bosta** fulfilment (delivery creation, COD collecti
 current `cod` literal is the baseline; these extend checkout without changing its look. The CLAUDE.md
 roadmap already names Paymob and Bosta.
 
+**In scope — sourcing, dynamic pricing & merchandising** (`11-sourcing-pricing-merchandising.md`): a
+**Temu importer**, a **landed-cost pricing engine** (this **changes** the current flat `basePrice × 1.25`
+model — behind the `dynamic_pricing` flag), real-time stock sync, a micro-warehousing fulfilment model,
+and merchandising (bundles, pre-orders, shipping timelines, social proof). These are deliberate
+business-logic changes / net-new capabilities — **not** derived from today's storefront — so they ship
+flag-gated with a migration step. Tax/customs rates and Temu's ToS must be independently verified.
+
 **Explicitly NOT being built (no data/feature for it):**
 
 - Product **variants** — the `Product` type has none; no variant UI or table.
