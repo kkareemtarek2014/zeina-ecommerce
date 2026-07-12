@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.14.0",
   "scripts": {
-    "build": "next build",
+    "build": "if [ \"$OPEN_NEXT_BUILD\" = \"1\" ]; then next build; else OPEN_NEXT_BUILD=1 opennextjs-cloudflare build; fi",
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",
