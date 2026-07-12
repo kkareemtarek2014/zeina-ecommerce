@@ -14,14 +14,23 @@ The storefront UI/UX is **unchanged**; the dashboard is a new, separate surface 
 | Module | Backing data (already in the project) | Operations |
 | --- | --- | --- |
 | **Dashboard** | `orders`, `products`, `order_items` | stats (counts, revenue), recent orders, latest products, sales summary |
-| **Products** | `products` + `categories` + R2 images | list (search/filter/paginate), create, edit, delete, image upload/replace/delete |
+| **Products** | `products` + `categories` + R2 images | list (search/filter/paginate), create, edit, delete, image upload/replace/delete. **Enhanced (`10`):** drafts/status, SEO fields, slug/SKU, duplication, bulk actions, CSV import/export, media library, rich-text description, archive/restore |
+| **Inventory** ⭐ | `products.stock_qty` + `inventory_movements` | stock adjustments with reason, movement history, low-stock warnings, reserved stock (`10` §1) |
 | **Categories** | `categories` | list, create, edit, delete |
 | **Orders** | `orders` + `order_items` (+ `payments`, `shipments`) | list (search/filter/paginate), details, update status, **view Paymob payment status**, **create/refresh Bosta shipment + tracking** (see `09`) |
 | **Users** | `users` | list, view, edit (name/phone/role), delete |
 | **Locations** | `governorates`, `shipping_zones` | manage governorates (name, zone), edit zone delivery fees + free-shipping threshold |
 | **Promo codes** | `promos` | list, create, edit, activate/deactivate, delete |
 | **Bridal requests** | `bridal_requests` (+R2 media) | list, view media, mark answered |
-| **Settings** | `settings` (new key-value) | profit margin, shipping rates, free-shipping threshold, site meta |
+| **Settings** | `settings` (new key-value) | profit margin, shipping rates, free-shipping threshold, site meta. **Enhanced (`10` §18):** logo/favicon, contact + social + WhatsApp, SEO defaults, footer, maintenance mode |
+| **Customers** | `users` + derived | Customer 360: total orders/spent, last order, favorites, addresses (`10` §13) |
+| **Notifications / Activity** | `notifications` + `audit_log` | bell (new order, low stock, payment failed, bridal) + activity feed (`10` §10/§16/§20) |
+| **Roles & permissions** | `users.role` (+ perms) | Admin/Manager/Order/Product/Content roles (`10` §19) |
+
+> **Production enhancements** — inventory history, order timeline, dashboard analytics, drafts, SEO,
+> duplication, bulk actions, CSV, media library, notifications, coupon usage, soft-delete, RBAC, activity
+> feed, and **Cron Triggers** — are specified in **`10-enhancements.md`** (phases P16–P22). The top-5
+> (⭐ inventory, order timeline, bulk actions, duplication, audit log) build first.
 
 Not built (no data exists): product **variants** (the `Product` type has none — do **not** add a variants
 UI), gift cards, multi-warehouse, tax. Product "variants" from the generic prompt is intentionally

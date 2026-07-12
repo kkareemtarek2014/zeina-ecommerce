@@ -138,10 +138,15 @@ src/
 │   │   ├── session.ts                # create/verify/destroy + cookie helpers
 │   │   ├── require-auth.ts           # guard used inside Route Handlers
 │   │   └── require-admin.ts          # requireAuth + role==='admin' (see 08)
-│   └── http/
-│       ├── envelope.ts               # ok(data) / fail(code,msg,status)
-│       ├── errors.ts                 # AppError, NotFound, Unauthorized, ...
-│       └── handler.ts                # withHandler(): try/catch → envelope
+│   ├── http/
+│   │   ├── envelope.ts               # ok(data) / fail(code,msg,status)
+│   │   ├── errors.ts                 # AppError, NotFound, Unauthorized, ...
+│   │   └── handler.ts                # withHandler(): try/catch → envelope
+│   └── jobs/                         # scheduled Workers (Cron Triggers) — see 10 §21
+│       ├── cancel-unpaid-orders.ts   # + release reserved stock
+│       ├── order-reminders.ts  session-cleanup.ts
+│       ├── daily-sales-summary.ts  payment-shipment-sync.ts
+│       └── index.ts                  # dispatch from the Worker `scheduled` handler
 │
 ├── shared/
 │   ├── contracts/                    # ⭐ zod schemas + inferred DTO types shared client+server
@@ -177,6 +182,14 @@ src/
 > `server/repositories/{payments,shipments}.repo.ts`, and webhook handlers under `app/api/webhooks/*`.
 > Providers are called with plain `fetch` (no SDKs → Workers-safe). Webhooks bypass session auth but must
 > verify the provider signature. Full spec in `09-integrations-bosta-paymob.md`.
+
+> **Production enhancements** (`10-enhancements.md`) add operational tables/APIs (inventory, order
+> timeline, notifications, media library, RBAC, …) and **scheduled Workers (Cron Triggers)**. Jobs live
+> in `server/jobs/` and are dispatched from the Worker's `scheduled` handler; register cadences in
+> `wrangler.toml` under `[triggers] crons`. Jobs (auto-cancel unpaid orders + release reserved stock,
+> pending-order reminders, expired-session cleanup, daily sales summary, payment/shipment sync) are
+> small, idempotent, and read config from `settings`. Cron never touches the request path, keeping the
+> storefront responsive.
 
 ---
 

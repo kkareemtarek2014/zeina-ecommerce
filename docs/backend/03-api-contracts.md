@@ -61,6 +61,11 @@ type ProductDTO = {
 search (name/category/tags match, cap 8). Backs `getProducts`, `getProductsByCategory`,
 `getFeaturedProducts`.
 
+> **Storefront reads only `status='published'`** and stock-aware products once enhancements land
+> (`10` §4). `ProductDTO` gains `slug` and an out-of-stock signal; admin uses `AdminProductDTO` with the
+> full status/stock/SEO fields. Admin enhancement endpoints (inventory, bulk, duplicate, import/export,
+> media, notifications, audit-log, activity) are in `08` + `10`.
+
 ### GET `/api/products/[id]` → `ProductDTO` or 404 `NOT_FOUND`. Backs `getProductById`.
 ### GET `/api/products/[id]/related?limit=4` → `ProductDTO[]` (same category, excludes self). Backs `getRelatedProducts`.
 ### GET `/api/products/new?limit=8` → `ProductDTO[]` newest first. Backs `getNewArrivals`.

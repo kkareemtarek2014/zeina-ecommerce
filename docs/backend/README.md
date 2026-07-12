@@ -4,7 +4,7 @@ Turn the frontend-only Zaya storefront into a full-stack app on **Cloudflare** (
 **without changing the storefront UI/UX**, then add a **production-ready admin dashboard** (`08`) to
 manage all existing data. These docs are the complete, detailed spec so implementation (by a person or
 an AI agent) is mechanical: read in order, follow the phases (P0–P7 storefront, P8–P12 admin, P13–P15
-payments/shipping), check the boxes.
+payments/shipping, P16–P23 production enhancements), check the boxes.
 
 > Ground rule (from the original brief): **every backend feature maps to an existing frontend feature.**
 > Nothing is invented. Re-verify against the code before building — see `00-analysis.md`.
@@ -23,6 +23,7 @@ payments/shipping), check the boxes.
 | 07 | [07-checklist.md](./07-checklist.md) | Master acceptance checklist for sign-off. |
 | 08 | [08-admin-dashboard.md](./08-admin-dashboard.md) | **Admin dashboard**: modules, auth/roles, admin API, folder structure, phases P8–P12, seeders, checklist. |
 | 09 | [09-integrations-bosta-paymob.md](./09-integrations-bosta-paymob.md) | **Paymob** (card/wallet payments, Intention API + HMAC webhook) & **Bosta** (delivery, COD, tracking webhook): flows, data, phases P13–P15. |
+| 10 | [10-enhancements.md](./10-enhancements.md) | **Production enhancements**: inventory, order timeline, analytics, drafts/SEO, duplication, bulk, CSV, media library, RBAC, notifications, audit viewer, **Cron Triggers** — phases P16–P23 (top-5 flagged). |
 
 ## Decisions locked for this project
 - **Docs location:** `docs/backend/` (this folder).
@@ -38,6 +39,10 @@ payments/shipping), check the boxes.
   COD. Webhooks (HMAC-SHA512) are the source of truth (`09`).
 - **Shipping:** **Bosta** delivery with COD collection + live tracking; delivery state → order status via
   webhook (`09`).
+- **Production enhancements (`10`):** inventory + stock history, order timeline, dashboard analytics,
+  product drafts/SEO/duplication, bulk actions, CSV, media library, notifications, customer 360, coupon
+  usage, soft-delete, audit viewer, RBAC, activity feed, and **Cron Triggers**. Top-5 build first;
+  homepage builder + dynamic RBAC table are flagged/future.
 - **Cloudflare account:** `kkareemtarek2@gmail.com`. Resources: `zaya-db` (D1), `zaya-uploads` (R2).
 
 ## Golden rules while implementing

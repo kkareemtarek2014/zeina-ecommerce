@@ -55,13 +55,29 @@ stored as **integer EGP** (no fractions — prices round to 5 EGP), enums as `te
 | `images` | text (JSON array) | `["/images/p-001.svg", ...]` |
 | `rating` | real | denormalized avg (kept in sync from reviews, seeded from data) |
 | `review_count` | integer | denormalized count |
-| `in_stock` | integer(bool) | |
+| `in_stock` | integer(bool) | admin override; effective stock = `stock_qty - reserved_qty > 0` (see `10` §1) |
 | `featured` | integer(bool) | drives home featured row |
 | `tags` | text (JSON array) null | `["best seller"]`; used by search |
 | `created_at` | integer(ts) | drives "new arrivals" ordering (seed preserves array order) |
 
+**Enhancement columns (see `10`):**
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `slug` | text UNIQUE null | SEO slug; `/product/[slug]` (keep `[id]` working) — `10` §5 |
+| `sku` | text UNIQUE null | stock-keeping unit; admin search + CSV upsert key — `10` §9 |
+| `status` | text | `draft` \| `published` \| `hidden` \| `archived` (CHECK), default `draft` — `10` §4/§15 |
+| `stock_qty` | integer | on-hand quantity — `10` §1 |
+| `reserved_qty` | integer | reserved during checkout, released by cron — `10` §1/§21 |
+| `seo_title` / `seo_description` | text null | per-product SEO overrides — `10` §5 |
+| `og_image` / `canonical_url` | text null | SEO overrides — `10` §5 |
+| `description_format` | text | `plain` \| `html` (rich text), default `plain` — `10` §12 |
+| `archived_at` | integer(ts) null | set when `status='archived'` (soft delete) — `10` §15 |
+
 > `price` (sell price) is **computed**, not stored: `getSellPrice(base_price)`. The product DTO exposes
 > `price` + `compareAtPrice`, never `base_price`.
+> **Storefront reads only `status='published'`** (product service filter — `03` §3). Seeded products
+> are seeded as `published` with `stock_qty` set (e.g. a default) so the current catalog is unchanged.
 
 ### 2.3 `governorates` — *why:* checkout select + shipping zone
 | Column | Type | Notes |
@@ -90,7 +106,7 @@ shipping is authoritative server-side. Seed from `governorates.data.ts` (27 rows
 | `name` | text | |
 | `phone` | text null | |
 | `password_hash` | text | PBKDF2 output `salt:hash` (base64) — **never returned** |
-| `role` | text | `customer` \| `admin` (CHECK), default `customer` — gates the admin dashboard (see `08`) |
+| `role` | text | RBAC role — `customer` \| `admin` \| `manager` \| `order_manager` \| `product_manager` \| `content_manager` (CHECK), default `customer`. Permissions per role via a code-defined `ROLE_PERMISSIONS` map (or optional `role_permissions` table) — see `08` + `10` §19 |
 | `created_at` | integer(ts) | |
 
 Public `UserDTO` = `{ id, email, name, phone, role }`. `password_hash` never leaves the server. The
@@ -270,7 +286,49 @@ the `site.config.ts` constant (kept as fallback so nothing breaks before seeding
 | `meta` | text (JSON) null | before/after summary |
 | `created_at` | integer(ts) | |
 
-Written on admin mutations. Not read by the storefront.
+Written on admin mutations. Not read by the storefront. Powers the audit-log viewer (`10` §16) and the
+activity feed (`10` §20).
+
+---
+
+## 2b. Enhancement tables (see `10`)
+
+### 2.17 `inventory_movements` — *why:* stock history + adjustments (`10` §1) ⭐
+`id PK · product_id FK→products (cascade) · old_qty · new_qty · delta · reason (restock|sale|adjustment|
+return|reservation|release, CHECK) · order_id FK→orders null · actor_id FK→users null · note null ·
+created_at`. One row per stock change; drives the low-stock dashboard and the "why did stock change" view.
+
+### 2.18 `order_status_history` — *why:* order timeline (`10` §2) ⭐
+`id PK · order_id FK→orders (cascade) · from_status null · to_status · actor (admin|system|paymob|bosta) ·
+actor_id null · note null · created_at`. One row per transition (checkout, admin, Paymob/Bosta webhooks).
+Feeds the existing `OrderStatusTimeline` component + admin timeline.
+
+### 2.19 `notifications` — *why:* dashboard bell (`10` §10)
+`id PK · type (new_order|low_stock|payment_failed|bridal_request|...) · title · body · entity · entity_id ·
+read (bool, default false) · created_at`. Written by the triggering event; polled by the admin bell.
+
+### 2.20 `media_assets` — *why:* media library / image reuse (`10` §11)
+`id PK · r2_key · url · filename · mime · size · width null · height null · alt null · folder null ·
+uploaded_by FK→users · created_at`. Product/category/logo image pickers select from here.
+
+### 2.21 `promo_redemptions` — *why:* coupon usage stats (`10` §14)
+`id PK · promo_code FK→promos.code · order_id FK→orders (cascade) · user_id FK→users null · discount ·
+created_at`. Written when an order applies a promo. `promos` gains optional `max_redemptions` for
+"remaining". Usage/revenue-per-coupon derived from this table.
+
+### 2.22 `product_views` — *why:* "most viewed" analytics (`10` §3)
+`product_id PK FK→products (cascade) · views (int, default 0) · updated_at`. Incremented on product-page
+view. (Conversion rate needs visit analytics — deferred.)
+
+### 2.23 `homepage_blocks` — *why:* homepage builder (`10` §17, **future/flagged**)
+`id PK · type (hero|featured|new_arrivals|collection|promo, CHECK) · position · config (JSON) · active
+(bool) · created_at`. Home renders active blocks in `position` order. Behind a feature flag.
+
+### 2.24 `role_permissions` — *why:* dynamic RBAC (`10` §19, optional)
+`role · permission` (composite PK). Optional — ship the code-defined `ROLE_PERMISSIONS` map first; add
+this table only if permissions must be editable at runtime.
+
+> Optional `webhook_events` (idempotency, `09` §C.1) and a settings-driven cron config round these out.
 
 ---
 
@@ -367,7 +425,8 @@ storefront looks identical after migration:
 
 - `CATEGORIES` (7) → `categories` (assign `sort_order` by array index).
 - `PRODUCTS` (12) → `products` (`created_at` = base time + index, preserving new-arrivals order which
-  currently uses reversed array order).
+  currently uses reversed array order). Seed `status='published'`, a `slug` from the name, a generated
+  `sku`, and a default `stock_qty` (e.g. 50) + `reserved_qty=0` so the catalog looks unchanged (`10` §1/§4).
 - `GOVERNORATES` (27) → `governorates`.
 - `PROMOS_DB` (2) → `promos` (`active=true`).
 - `SEED_USERS` (1) → `users` — **re-hash** the plaintext `password123` with PBKDF2 during seed; never

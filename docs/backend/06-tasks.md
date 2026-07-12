@@ -77,6 +77,14 @@ locations/promos/bridal/settings, dashboard stats) lives in **`08-admin-dashboar
 after P0–P7 are green. Note the extra `users.role` migration in P8 and that pricing/shipping must read
 **effective settings** once P11 lands.
 
+## Phases 16–23 — Production enhancements
+The full, granular enhancement task list (inventory ⭐, order timeline ⭐, bulk ⭐, duplication ⭐, audit
+viewer ⭐, drafts/SEO, CSV, media library, notifications, customer 360, coupon usage, analytics, RBAC,
+cron triggers, homepage builder) lives in **`10-enhancements.md`**. Key schema adds are in `02` §2b
+(`inventory_movements`, `order_status_history`, `notifications`, `media_assets`, `promo_redemptions`,
+`product_views`) plus product columns (`status/slug/sku/stock_qty/reserved_qty/SEO`). Storefront reads
+only `published`, stock-aware products. Cron jobs go in `server/jobs/` (`01`).
+
 ## Phases 13–15 — Payments (Paymob) & Shipping (Bosta)
 The full, granular integration task list lives in **`09-integrations-bosta-paymob.md` Part E**. Key
 adds: `payments`/`shipments` tables (`02`), `PAYMOB_*`/`BOSTA_*` secrets (`01`), HMAC-SHA512 Paymob

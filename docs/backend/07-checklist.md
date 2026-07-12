@@ -79,6 +79,28 @@ Worker and the local build is green. Grouped by concern.
 - [ ] Secrets (`PAYMOB_*`, `BOSTA_*`) set in Wrangler; **production** keys used at go-live.
 - [ ] Reconciliation: order ↔ payment ↔ shipment states are consistent.
 
+## Production enhancements (P16–P23 — see `10-enhancements.md`)
+Top-5 first (⭐):
+- [ ] ⭐ **Inventory:** `stock_qty`/`reserved_qty`, `inventory_movements` history, manual adjustments with reason, low-stock warnings, out-of-stock badge; stock reserved at checkout and released on cancel/expiry.
+- [ ] ⭐ **Order timeline:** every status transition written to `order_status_history` (checkout, admin, Paymob, Bosta) and rendered as a timeline.
+- [ ] ⭐ **Bulk actions:** select-many → archive/publish/hide/change-category/export with confirm dialog.
+- [ ] ⭐ **Product duplication:** clone → `draft` copy (new id/slug/SKU) ready to edit.
+- [ ] ⭐ **Audit log viewer + activity feed** over `audit_log`; every admin write is logged.
+
+Remaining:
+- [ ] Product `status` (draft/published/hidden/archived); storefront shows only `published`.
+- [ ] Per-product SEO fields (title/description/OG/canonical/slug) with fallback to auto-generation.
+- [ ] Soft delete/archive + restore; order history keeps referencing archived products.
+- [ ] CSV import/export (products/orders/customers); import upserts by SKU/slug as `draft`.
+- [ ] Media library (reuse images) backed by `media_assets`; rich-text descriptions (sanitized).
+- [ ] Better admin search (SKU/tags/description); dashboard notifications bell.
+- [ ] Customer 360 (orders/spent/last/favorites/addresses); coupon usage stats (`promo_redemptions`).
+- [ ] Expanded dashboard analytics (revenue today/month, best sellers, most viewed, top categories, AOV, new customers).
+- [ ] Expanded site settings (logo/favicon/contacts/social/WhatsApp/SEO defaults/footer/maintenance mode).
+- [ ] RBAC roles (Admin/Manager/Order/Product/Content) + permission checks on routes/menus.
+- [ ] Cron Triggers: auto-cancel unpaid + release stock, reminders, session cleanup, daily summary, payment/shipment sync — all idempotent.
+- [ ] (Future/flagged) Homepage builder via `homepage_blocks`.
+
 ## Build gates (must be green every phase)
 - [ ] `pnpm build` — 0 errors.
 - [ ] `pnpm typecheck` — 0 errors.

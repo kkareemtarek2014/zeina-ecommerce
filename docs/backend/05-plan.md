@@ -120,6 +120,28 @@ tasks — in `09-integrations-bosta-paymob.md`.** Summary:
 - **P15 — Hardening & go-live:** idempotent/deduped webhooks, provider retries/backoff, reconciliation,
   production keys, security review, deploy.
 
+## Production enhancement phases (P16–P23)
+
+Operational depth from the review. **Full spec — data model, APIs, prioritization — in
+`10-enhancements.md`.** Top-5 (⭐) first. Summary:
+
+- **P16 — Catalog depth:** product `status` (draft/published/hidden/archived), `slug`, `sku`, SEO fields,
+  soft-delete/archive + restore.
+- **P17 — Inventory ⭐:** `stock_qty`/`reserved_qty`, `inventory_movements`, manual adjustments,
+  low-stock warnings, out-of-stock badge, reserved stock at checkout.
+- **P18 — Order timeline ⭐ + ops:** `order_status_history` + timeline UI, `notifications` (bell),
+  activity feed over `audit_log`.
+- **P19 — Catalog productivity:** bulk actions ⭐, product duplication ⭐, CSV import/export, media
+  library, rich-text descriptions, better admin search (SKU/tags/description).
+- **P20 — Insight:** Customer 360, coupon usage (`promo_redemptions`), expanded dashboard analytics,
+  expanded site settings (logo/contacts/social/SEO/maintenance mode).
+- **P21 — RBAC:** roles (Admin/Manager/Order/Product/Content) + permissions (code-config first).
+- **P22 — Automation:** Cron Triggers (auto-cancel unpaid + release stock, reminders, session cleanup,
+  daily summary, payment/shipment sync).
+- **P23 — Homepage builder (future, flagged):** `homepage_blocks` managed from the dashboard.
+
+> Audit log (⭐) is already built in P8–P12 (`02` §2.16); P18 adds its viewer + activity feed.
+
 ---
 
 ## Dependency graph
