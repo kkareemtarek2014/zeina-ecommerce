@@ -287,10 +287,13 @@ are green. Pricing/shipping must read **effective settings** once P11 lands.
 >   No new nav item (Dashboard already active).
 > - **Deploy:** ⏳ `pnpm run deploy` + remote migrate for `audit_log` is a verify step on your machine
 >   (agent implements code + local migrate scripts; does not force production deploy).
-- [ ] `audit_log` schema + migration; `writeAuditLog` wired to admin mutations.
-- [ ] `GET /api/admin/stats` + dashboard UI (cards, chart, recent/latest).
-- [ ] Admin API rate-limit (60/min/IP).
-- [ ] [V] stats match DB; migrate audit_log; ⏳ deploy smoke.
+> **Reviewed 2026-07-12 — complete.** `audit_log` migration (`0001_…`); stats API + live `/admin`
+> dashboard; audit writes on mutations; admin rate-limit 60/min. `typecheck`/`lint`/`assert:no-secrets`
+> green. ⏳ remote migrate + deploy smoke on your machine.
+- [x] `audit_log` schema + migration; `writeAuditLog` wired to admin mutations.
+- [x] `GET /api/admin/stats` + dashboard UI (cards, chart, recent/latest).
+- [x] Admin API rate-limit (60/min/IP).
+- [ ] ⏳ [V] stats match DB; migrate audit_log remote; deploy smoke.
 
 ## Phases 16–23 — Production enhancements
 The full, granular enhancement task list (inventory ⭐, order timeline ⭐, bulk ⭐, duplication ⭐, audit

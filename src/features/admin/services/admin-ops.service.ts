@@ -8,6 +8,7 @@ import type {
   OrderStatus,
 } from '@/shared/contracts/admin-ops.contract';
 import type { Paginated } from '@/shared/contracts/admin-catalog.contract';
+import type { AdminStatsDTO } from '@/shared/contracts/admin-stats.contract';
 
 export type AdminOrderListParams = {
   page?: number;
@@ -87,5 +88,11 @@ export const adminUsersService = {
 
   delete(id: string): Promise<{ ok: true }> {
     return api.del(`/api/admin/users/${encodeURIComponent(id)}`);
+  },
+};
+
+export const adminStatsService = {
+  get(): Promise<AdminStatsDTO> {
+    return api.get('/api/admin/stats');
   },
 };

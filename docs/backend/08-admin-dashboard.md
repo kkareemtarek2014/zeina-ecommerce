@@ -311,10 +311,10 @@ users, and the sample order — matching what the frontend shows today.
 - [ ] ⏳ [V] zone-fee change alters checkout shipping; margin change alters storefront prices.
 
 **P12** *(revision locked in `06-tasks.md` — AdminStatsDTO; audit write-only; admin 60/min rate-limit; CSS chart)*
-- [ ] `audit_log` migration + `writeAuditLog` on admin mutations (no viewer).
-- [ ] `GET /api/admin/stats`; dashboard cards + sales chart + recent orders/latest products.
-- [ ] Rate-limit `/api/admin/**` (60/min/IP).
-- [ ] [V] stats match DB; ⏳ migrate remote + deploy smoke.
+- [x] `audit_log` migration + `writeAuditLog` on admin mutations (no viewer).
+- [x] `GET /api/admin/stats`; dashboard cards + sales chart + recent orders/latest products.
+- [x] Rate-limit `/api/admin/**` (60/min/IP).
+- [ ] ⏳ [V] stats match DB; migrate remote + deploy smoke.
 
 ## 11. Definition of done
 Admin can manage products, categories, orders, users, locations, promos, bridal requests, and settings;

@@ -153,9 +153,13 @@ All `/api/admin/**` require session + `role=admin` (`requireAdmin`).
 | PUT/PATCH/DELETE | `/api/admin/promos/[code]` | PATCH `{ active }`; code immutable on PUT |
 | GET | `/api/admin/bridal-requests` | Paginated `?status&page&pageSize` |
 | GET/PATCH | `/api/admin/bridal-requests/[id]` | PATCH `{ status }` |
-| GET/PUT | `/api/admin/settings` | Margin 0.20–0.30; threshold ≥ 0 |
+| GET | `/api/admin/settings` | Margin 0.20–0.30; threshold ≥ 0 |
+| PUT | `/api/admin/settings` | Partial update |
+| GET | `/api/admin/stats` | Dashboard: revenue, counts, ordersByStatus, recentOrders, latestProducts, salesByDay (14d) |
 
-UI: `/admin/**` modules through settings (noindex). Dashboard stats: P12 — see `docs/backend/08`.
+All `/api/admin/**` are rate-limited (~60 req/min/IP). Admin mutations write `audit_log` (viewer = later enhancement).
+
+UI: `/admin/**` through settings + live dashboard stats (noindex).
 
 ---
 
@@ -175,6 +179,7 @@ Feature services under `src/features/*/services/` call `api` / `api.postForm` on
 
 ```bash
 pnpm db:migrate:remote
+# after P12: applies audit_log migration too
 # set secrets (once): SESSION_SECRET, PASSWORD_PEPPER
 pnpm db:seed:remote   # export local seeded data → remote D1 (no wipe)
 pnpm run deploy       # note: use `pnpm run deploy` (not bare `pnpm deploy`)

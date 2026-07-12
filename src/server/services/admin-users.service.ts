@@ -17,6 +17,7 @@ import * as ordersRepo from '@/server/repositories/orders.repo';
 import type { UserRow } from '@/server/repositories/users.repo';
 import { toAdminOrderDTO } from '@/server/services/admin-orders.service';
 import { ok } from '@/server/http/envelope';
+import { writeAuditLog } from '@/server/services/audit.service';
 
 function toAdminUserDTO(row: UserRow, ordersCount: number): AdminUserDTO {
   return {
@@ -109,6 +110,13 @@ export async function updateAdminUser(
   });
   if (!updated) throw new NotFoundError('User not found');
 
+  await writeAuditLog({
+    actorId,
+    action: 'update',
+    entity: 'user',
+    entityId: id,
+  });
+
   const ordersCount = await ordersRepo.countOrdersByUserId(db, id);
   return toAdminUserDTO(updated, ordersCount);
 }
@@ -134,5 +142,13 @@ export async function deleteAdminUser(
 
   const removed = await usersRepo.deleteUser(db, id);
   if (!removed) throw new NotFoundError('User not found');
+
+  await writeAuditLog({
+    actorId,
+    action: 'delete',
+    entity: 'user',
+    entityId: id,
+  });
+
   return { ok: true };
 }

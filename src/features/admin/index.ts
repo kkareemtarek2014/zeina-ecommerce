@@ -16,6 +16,11 @@ export {
 export { UserForm } from './components/UserForm';
 export { SettingsForm } from './components/SettingsForm';
 export { PromoForm, type PromoFormSubmit } from './components/PromoForm';
+export { StatCard } from './components/StatCard';
+export { SalesChart } from './components/SalesChart';
+export { RecentOrders } from './components/RecentOrders';
+export { LatestProducts } from './components/LatestProducts';
+export { DashboardView } from './components/DashboardView';
 export {
   useAdminProducts,
   useAdminProduct,
@@ -29,6 +34,7 @@ export {
   adminKeys,
 } from './hooks/useAdminCatalog';
 export {
+  useAdminStats,
   useAdminOrders,
   useAdminOrder,
   useUpdateAdminOrderStatus,
@@ -41,6 +47,7 @@ export {
 export { adminCatalogService } from './services/admin-catalog.service';
 export {
   adminOrdersService,
+  adminStatsService,
   adminUsersService,
 } from './services/admin-ops.service';
 export {

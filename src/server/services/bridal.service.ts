@@ -51,6 +51,10 @@ export async function createBridalRequestFromForm(
     if (!type.startsWith('image/') && !type.startsWith('video/')) {
       throw new ValidationError('Only photos or videos are accepted');
     }
+    // Reject SVG (script-carrying vector) from untrusted public uploads.
+    if (type === 'image/svg+xml') {
+      throw new ValidationError('SVG files are not accepted');
+    }
   }
 
   const id = generateBridalId();

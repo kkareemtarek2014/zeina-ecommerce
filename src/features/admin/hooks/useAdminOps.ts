@@ -7,18 +7,27 @@ import type {
 } from '@/shared/contracts/admin-ops.contract';
 import {
   adminOrdersService,
+  adminStatsService,
   adminUsersService,
   type AdminOrderListParams,
   type AdminUserListParams,
 } from '../services/admin-ops.service';
 
 export const adminOpsKeys = {
+  stats: () => ['admin', 'stats'] as const,
   orders: (params: AdminOrderListParams) =>
     ['admin', 'orders', params] as const,
   order: (id: string) => ['admin', 'orders', id] as const,
   users: (params: AdminUserListParams) => ['admin', 'users', params] as const,
   user: (id: string) => ['admin', 'users', id] as const,
 };
+
+export function useAdminStats() {
+  return useQuery({
+    queryKey: adminOpsKeys.stats(),
+    queryFn: () => adminStatsService.get(),
+  });
+}
 
 export function useAdminOrders(params: AdminOrderListParams) {
   return useQuery({
