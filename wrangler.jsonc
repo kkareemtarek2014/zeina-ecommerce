@@ -19,15 +19,24 @@
 			"service": "zaya-ecommerce"
 		}
 	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "zaya-db",
+			"database_id": "dafeb5da-f487-48ea-be66-8d8c0c014d00",
+			"migrations_dir": "src/server/db/migrations"
+		}
+	],
 	"r2_buckets": [
 		// Use R2 incremental cache
 		// See https://opennext.js.org/cloudflare/caching
 		{
 			"binding": "NEXT_INC_CACHE_R2_BUCKET",
-			// Create the bucket before deploying
-			// You can change the bucket name if you want
-			// See https://developers.cloudflare.com/workers/wrangler/commands/#r2-bucket-create
 			"bucket_name": "zaya-store-opennext-cache"
+		},
+		{
+			"binding": "UPLOADS",
+			"bucket_name": "zaya-uploads"
 		}
 	],
 	"images": {

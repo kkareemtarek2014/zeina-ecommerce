@@ -1,0 +1,8 @@
+# Copy to .dev.vars for local development (never commit .dev.vars)
+NEXTJS_ENV=development
+SESSION_SECRET=replace-with-long-random-string
+PASSWORD_PEPPER=replace-with-long-random-string
+
+# Seeded local accounts (after pnpm db:seed):
+#   customer  test@example.com / password123
+#   admin     admin@zaya-eg.com / password123

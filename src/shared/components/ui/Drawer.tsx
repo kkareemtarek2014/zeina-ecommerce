@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef, useId, useState, useEffect, type ReactNode } from 'react';
+import { useRef, useId, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { useScrollLock } from '@/shared/hooks/useScrollLock';
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey';
+import { useHydrated } from '@/shared/hooks/useHydrated';
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -22,11 +23,7 @@ export interface DrawerProps {
 export function Drawer({ isOpen, onClose, title, children }: DrawerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   useFocusTrap(containerRef, isOpen);
   useScrollLock(isOpen);
