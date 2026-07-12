@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/shared/utils/cn';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { useLogout } from '@/features/auth/hooks/useAuth';
 import { useFeature } from '@/shared/contexts/FeatureContext';
 import type { FeatureKey } from '@/config/features.config';
 
@@ -35,14 +36,19 @@ const LINKS: {
 export function AccountNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const logout = useAuthStore((state) => state.logout);
+  const logoutMutation = useLogout();
   const isAuthEnabled = useFeature('auth');
   const isWalletEnabled = useFeature('wallet');
 
   const links = LINKS.filter((link) => !link.feature || isWalletEnabled);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+    } catch {
+      // Clear local session even if the network call fails.
+      useAuthStore.getState().logout();
+    }
     router.push('/');
   };
 

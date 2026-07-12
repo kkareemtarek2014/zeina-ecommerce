@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FeatureProvider } from '@/shared/contexts/FeatureContext';
+import { SessionHydrator } from '@/features/auth';
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -16,7 +17,10 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FeatureProvider>{children}</FeatureProvider>
+      <FeatureProvider>
+        <SessionHydrator />
+        {children}
+      </FeatureProvider>
     </QueryClientProvider>
   );
 }

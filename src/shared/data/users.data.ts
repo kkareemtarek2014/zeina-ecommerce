@@ -1,17 +1,17 @@
-export interface User {
+/**
+ * Seed-only user shape (plaintext password for hashing during `pnpm db:seed`).
+ * Never sent to the browser — public identity is `UserDTO`.
+ */
+export interface SeedUser {
   id: string;
   email: string;
   name: string;
   phone?: string;
-  /**
-   * Plaintext for the static mock ONLY. When the backend exists this becomes a
-   * server-side hash and never reaches the client. Do not ship this as-is.
-   */
   password: string;
 }
 
-/** Seed accounts for the dummy auth layer. */
-export const SEED_USERS: User[] = [
+/** Seed accounts for D1 (`pnpm db:seed`). */
+export const SEED_USERS: SeedUser[] = [
   {
     id: 'user_1',
     email: 'test@example.com',

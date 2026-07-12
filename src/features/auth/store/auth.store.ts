@@ -1,26 +1,42 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User } from '@/shared/data/users.data';
+import type { UserDTO } from '@/shared/contracts/auth.contract';
 
 interface AuthState {
-  user: User | null;
+  user: UserDTO | null;
   isAuthenticated: boolean;
-  login: (user: User) => void;
+  /** True once /api/auth/me has resolved (success or 401). */
+  sessionChecked: boolean;
+  setSession: (user: UserDTO | null) => void;
+  login: (user: UserDTO) => void;
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
+/**
+ * Client auth mirror of the httpOnly session cookie.
+ * Not persisted — hydrate exclusively via GET /api/auth/me.
+ */
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  isAuthenticated: false,
+  sessionChecked: false,
+  setSession: (user) =>
+    set({
+      user,
+      isAuthenticated: user !== null,
+      sessionChecked: true,
+    }),
+  login: (user) =>
+    set({
+      user,
+      isAuthenticated: true,
+      sessionChecked: true,
+    }),
+  logout: () =>
+    set({
       user: null,
       isAuthenticated: false,
-      login: (user) => set({ user, isAuthenticated: true }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      sessionChecked: true,
     }),
-    {
-      name: 'Zaya-auth',
-    }
-  )
-);
+}));

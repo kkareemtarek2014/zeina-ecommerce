@@ -6,29 +6,34 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@/shared/components/ui';
-import { authService } from '../services/auth.service';
-import { useAuthStore } from '../store/auth.store';
+import { AppError } from '@/shared/contracts/errors';
+import { useLogin } from '../hooks/useAuth';
 import { loginSchema, type LoginValues } from '../schema/auth.schema';
 
 export function LoginForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const loginMutation = useLogin();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (values: LoginValues) => {
     setFormError(null);
     try {
-      const user = await authService.login(values.email, values.password);
-      login(user);
+      await loginMutation.mutateAsync(values);
       router.push('/account');
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Login failed');
+      setFormError(
+        err instanceof AppError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Login failed',
+      );
     }
   };
 
@@ -57,7 +62,7 @@ export function LoginForm() {
           Forgot password?
         </Link>
       </div>
-      <Button type="submit" isLoading={isSubmitting} className="w-full">
+      <Button type="submit" isLoading={loginMutation.isPending} className="w-full">
         Sign In
       </Button>
       <p className="mt-4 text-center text-sm text-text-muted">

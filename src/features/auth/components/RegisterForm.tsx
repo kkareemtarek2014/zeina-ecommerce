@@ -6,33 +6,34 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@/shared/components/ui';
-import { authService } from '../services/auth.service';
-import { useAuthStore } from '../store/auth.store';
+import { AppError } from '@/shared/contracts/errors';
+import { useRegister } from '../hooks/useAuth';
 import { registerSchema, type RegisterValues } from '../schema/auth.schema';
 
 export function RegisterForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const registerMutation = useRegister();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RegisterValues>({ resolver: zodResolver(registerSchema) });
 
   const onSubmit = async (values: RegisterValues) => {
     setFormError(null);
     try {
-      const user = await authService.register(
-        values.email,
-        values.name,
-        values.password,
-      );
-      login(user);
+      await registerMutation.mutateAsync(values);
       router.push('/account');
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Registration failed');
+      setFormError(
+        err instanceof AppError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Registration failed',
+      );
     }
   };
 
@@ -60,7 +61,11 @@ export function RegisterForm() {
         error={errors.password?.message}
         {...register('password')}
       />
-      <Button type="submit" isLoading={isSubmitting} className="mt-2 w-full">
+      <Button
+        type="submit"
+        isLoading={registerMutation.isPending}
+        className="mt-2 w-full"
+      >
         Create Account
       </Button>
       <p className="mt-4 text-center text-sm text-text-muted">

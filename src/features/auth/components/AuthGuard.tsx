@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/auth.store';
+import { useSession } from '../hooks/useAuth';
 import { useFeature } from '@/shared/contexts/FeatureContext';
 import { useHydrated } from '@/shared/hooks/useHydrated';
 import { Loader } from '@/shared/components/ui/Loader';
@@ -10,22 +11,21 @@ import { Loader } from '@/shared/components/ui/Loader';
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const isAuthEnabled = useFeature('auth');
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const sessionChecked = useAuthStore((state) => state.sessionChecked);
   const hydrated = useHydrated();
   const router = useRouter();
+  useSession();
 
   useEffect(() => {
-    if (isAuthEnabled && hydrated && !isAuthenticated) {
+    if (isAuthEnabled && hydrated && sessionChecked && !isAuthenticated) {
       router.push('/auth/login');
     }
-  }, [isAuthEnabled, hydrated, isAuthenticated, router]);
+  }, [isAuthEnabled, hydrated, sessionChecked, isAuthenticated, router]);
 
-  // Wait for the persisted auth store to hydrate before deciding.
-  if (!hydrated) {
+  if (!hydrated || !sessionChecked) {
     return <Loader fullscreen={false} className="p-12" />;
   }
 
-  // Auth on + not signed in: render nothing while the redirect above runs,
-  // to avoid flashing protected content.
   if (isAuthEnabled && !isAuthenticated) {
     return null;
   }

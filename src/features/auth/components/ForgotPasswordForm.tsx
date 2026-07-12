@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@/shared/components/ui';
-import { authService } from '../services/auth.service';
+import { AppError } from '@/shared/contracts/errors';
+import { useForgotPassword } from '../hooks/useAuth';
 import {
   forgotPasswordSchema,
   type ForgotPasswordValues,
@@ -14,11 +15,12 @@ import {
 export function ForgotPasswordForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const forgotMutation = useForgotPassword();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
   });
@@ -26,11 +28,15 @@ export function ForgotPasswordForm() {
   const onSubmit = async (values: ForgotPasswordValues) => {
     setFormError(null);
     try {
-      await authService.resetPassword(values.email);
+      await forgotMutation.mutateAsync(values);
       setSentTo(values.email);
     } catch (err) {
       setFormError(
-        err instanceof Error ? err.message : 'Failed to send reset link',
+        err instanceof AppError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Failed to send reset link',
       );
     }
   };
@@ -65,7 +71,11 @@ export function ForgotPasswordForm() {
         error={errors.email?.message}
         {...register('email')}
       />
-      <Button type="submit" isLoading={isSubmitting} className="mt-2 w-full">
+      <Button
+        type="submit"
+        isLoading={forgotMutation.isPending}
+        className="mt-2 w-full"
+      >
         Send Reset Link
       </Button>
       <p className="mt-4 text-center text-sm text-text-muted">
