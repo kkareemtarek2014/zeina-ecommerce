@@ -12,6 +12,7 @@ const formSchema = z.object({
     .min(0.2, 'Minimum 20%')
     .max(0.3, 'Maximum 30%'),
   freeShippingThreshold: z.coerce.number().int().min(0),
+  lowStockThreshold: z.coerce.number().int().min(0),
   siteName: z.string().trim().min(1),
   siteTagline: z.string().trim().min(1),
   siteUrl: z.string().trim().url('Enter a valid URL'),
@@ -35,6 +36,7 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
     defaultValues: {
       profitMargin: initial.profitMargin,
       freeShippingThreshold: initial.freeShippingThreshold,
+      lowStockThreshold: initial.lowStockThreshold,
       siteName: initial.siteName,
       siteTagline: initial.siteTagline,
       siteUrl: initial.siteUrl,
@@ -65,6 +67,14 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
         min={0}
         error={errors.freeShippingThreshold?.message}
         {...register('freeShippingThreshold')}
+      />
+      <Input
+        label="Low-stock threshold"
+        type="number"
+        step="1"
+        min={0}
+        error={errors.lowStockThreshold?.message}
+        {...register('lowStockThreshold')}
       />
       <Input
         label="Site name"

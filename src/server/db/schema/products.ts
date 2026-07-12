@@ -26,4 +26,12 @@ export const products = sqliteTable('products', {
     .default('draft'),
   stockQty: integer('stock_qty').notNull().default(0),
   reservedQty: integer('reserved_qty').notNull().default(0),
+  seoTitle: text('seo_title'),
+  seoDescription: text('seo_description'),
+  ogImage: text('og_image'),
+  canonicalUrl: text('canonical_url'),
+  descriptionFormat: text('description_format', { enum: ['plain', 'html'] })
+    .notNull()
+    .default('plain'),
+  archivedAt: integer('archived_at', { mode: 'timestamp_ms' }),
 });

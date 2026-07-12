@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SITE } from '@/config/site.config';
 import { ProductDetails } from '@/features/product';
-import { getProductOrNull } from '@/server/services/product.service';
+import {
+  getProductMetadataSource,
+  getProductOrNull,
+} from '@/server/services/product.service';
 import type { ProductDTO } from '@/shared/contracts/product.contract';
 
 interface Props {
@@ -19,19 +22,29 @@ async function loadProduct(id: string): Promise<ProductDTO | null> {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const product = await loadProduct(id);
+  const product = await getProductMetadataSource(id);
   if (!product) return { title: 'Product not found' };
 
+  const title = product.seoTitle?.trim() || product.name;
+  const description =
+    product.seoDescription?.trim() || product.description;
+  const canonical =
+    product.canonicalUrl?.trim() || `/product/${product.id}`;
+  const ogImage =
+    product.ogImage?.trim() || product.images[0] || undefined;
+
   return {
-    title: product.name,
-    description: product.description,
-    alternates: { canonical: `/product/${product.id}` },
+    title,
+    description,
+    alternates: { canonical },
     openGraph: {
       type: 'website',
-      title: `${product.name} · ${SITE.name}`,
-      description: product.description,
-      url: `${SITE.url}/product/${product.id}`,
-      images: product.images[0] ? [{ url: product.images[0] }] : undefined,
+      title: `${title} · ${SITE.name}`,
+      description,
+      url: canonical.startsWith('http')
+        ? canonical
+        : `${SITE.url}${canonical.startsWith('/') ? '' : '/'}${canonical}`,
+      images: ogImage ? [{ url: ogImage }] : undefined,
     },
     other: {
       'product:price:amount': String(product.price),
@@ -50,7 +63,9 @@ export default async function ProductPage({ params }: Props) {
     '@type': 'Product',
     name: product.name,
     description: product.description,
-    image: product.images.map((src) => `${SITE.url}${src}`),
+    image: product.images.map((src) =>
+      src.startsWith('http') ? src : `${SITE.url}${src}`,
+    ),
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: product.rating,

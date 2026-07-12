@@ -14,3 +14,4 @@ export { bridalRequests } from './bridal-requests';
 export { shippingZones } from './shipping-zones';
 export { settings } from './settings';
 export { auditLog } from './audit-log';
+export { inventoryMovements } from './inventory-movements';

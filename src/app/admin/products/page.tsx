@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import {
   AdminBreadcrumbs,
   useAdminProducts,
   useAdminCategories,
   useDeleteAdminProduct,
+  useRestoreAdminProduct,
 } from '@/features/admin';
 import type { AdminProductDTO } from '@/shared/contracts/admin-catalog.contract';
 import {
@@ -25,13 +26,23 @@ import { AppError } from '@/shared/contracts/errors';
 
 const PAGE_SIZE = 20;
 
+const STATUS_LABELS: Record<AdminProductDTO['status'], string> = {
+  draft: 'Draft',
+  published: 'Published',
+  hidden: 'Hidden',
+  archived: 'Archived',
+};
+
 export default function AdminProductsPage() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [q, setQ] = useState('');
   const [qDraft, setQDraft] = useState('');
   const [category, setCategory] = useState('');
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [status, setStatus] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<AdminProductDTO | null>(
+    null,
+  );
 
   const params = useMemo(
     () => ({
@@ -39,14 +50,16 @@ export default function AdminProductsPage() {
       pageSize: PAGE_SIZE,
       q: q || undefined,
       category: category || undefined,
+      status: status || undefined,
       sort: 'newest',
     }),
-    [page, q, category],
+    [page, q, category, status],
   );
 
   const { data, isLoading, isError } = useAdminProducts(params);
   const { data: categories = [] } = useAdminCategories();
   const deleteMutation = useDeleteAdminProduct();
+  const restoreMutation = useRestoreAdminProduct();
 
   const columns: DataTableColumn<AdminProductDTO>[] = [
     {
@@ -77,6 +90,25 @@ export default function AdminProductsPage() {
       cell: (row) => row.category,
     },
     {
+      key: 'status',
+      header: 'Status',
+      cell: (row) => (
+        <span
+          className={
+            row.status === 'published'
+              ? 'text-status-success'
+              : row.status === 'archived'
+                ? 'text-text-muted'
+                : row.status === 'hidden'
+                  ? 'text-status-warning'
+                  : ''
+          }
+        >
+          {STATUS_LABELS[row.status]}
+        </span>
+      ),
+    },
+    {
       key: 'base',
       header: 'Cost',
       cell: (row) => formatEGP(row.basePrice),
@@ -91,7 +123,8 @@ export default function AdminProductsPage() {
       header: 'Stock',
       cell: (row) => (
         <span className={row.inStock ? '' : 'text-status-error'}>
-          {row.stockQty}
+          {row.availableQty ?? row.stockQty}
+          {row.reservedQty ? ` (${row.reservedQty} res.)` : ''}
           {!row.inStock ? ' · OOS' : ''}
         </span>
       ),
@@ -99,7 +132,7 @@ export default function AdminProductsPage() {
     {
       key: 'actions',
       header: '',
-      className: 'w-28 text-right',
+      className: 'w-32 text-right',
       cell: (row) => (
         <div className="flex justify-end gap-1">
           <Link
@@ -109,11 +142,38 @@ export default function AdminProductsPage() {
           >
             <Pencil className="size-4" />
           </Link>
+          {row.status === 'archived' ? (
+            <button
+              type="button"
+              aria-label={`Restore ${row.name}`}
+              className="inline-flex size-9 items-center justify-center rounded-(--radius) text-text-secondary hover:bg-brand-blush/50 hover:text-brand-primary"
+              disabled={restoreMutation.isPending}
+              onClick={() => {
+                restoreMutation.mutate(row.id, {
+                  onSuccess: () => toast('Product restored as draft', 'success'),
+                  onError: (err) => {
+                    toast(
+                      err instanceof AppError
+                        ? err.message
+                        : 'Could not restore product',
+                      'error',
+                    );
+                  },
+                });
+              }}
+            >
+              <RotateCcw className="size-4" />
+            </button>
+          ) : null}
           <button
             type="button"
-            aria-label={`Delete ${row.name}`}
+            aria-label={
+              row.status === 'archived'
+                ? `Permanently delete ${row.name}`
+                : `Archive ${row.name}`
+            }
             className="inline-flex size-9 items-center justify-center rounded-(--radius) text-text-secondary hover:bg-brand-blush/50 hover:text-status-error"
-            onClick={() => setDeleteId(row.id)}
+            onClick={() => setDeleteTarget(row)}
           >
             <Trash2 className="size-4" />
           </button>
@@ -121,6 +181,8 @@ export default function AdminProductsPage() {
       ),
     },
   ];
+
+  const isHardDelete = deleteTarget?.status === 'archived';
 
   return (
     <div>
@@ -136,7 +198,7 @@ export default function AdminProductsPage() {
             Products
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Manage catalog, cost, and images.
+            Manage catalog, status, SEO, and images.
           </p>
         </div>
         <Link href="/admin/products/new">
@@ -178,6 +240,22 @@ export default function AdminProductsPage() {
             </option>
           ))}
         </Select>
+        <Select
+          aria-label="Filter by status"
+          className="w-40"
+          value={status}
+          onChange={(e) => {
+            setPage(1);
+            setStatus(e.target.value);
+          }}
+        >
+          <option value="">Active (excl. archived)</option>
+          <option value="all">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+          <option value="hidden">Hidden</option>
+          <option value="archived">Archived</option>
+        </Select>
         <Button
           type="button"
           variant="outline"
@@ -216,27 +294,36 @@ export default function AdminProductsPage() {
       ) : null}
 
       <ConfirmDialog
-        open={deleteId != null}
-        onClose={() => setDeleteId(null)}
-        title="Delete product?"
-        description="This permanently removes the product. Blocked if it appears on any order."
-        confirmLabel="Delete"
+        open={deleteTarget != null}
+        onClose={() => setDeleteTarget(null)}
+        title={isHardDelete ? 'Permanently delete?' : 'Archive product?'}
+        description={
+          isHardDelete
+            ? 'This permanently removes the product and its images. Blocked if it appears on any order.'
+            : 'The product will be archived and hidden from the storefront. You can restore it later as a draft.'
+        }
+        confirmLabel={isHardDelete ? 'Delete forever' : 'Archive'}
         danger
         isLoading={deleteMutation.isPending}
         onConfirm={() => {
-          if (!deleteId) return;
-          deleteMutation.mutate(deleteId, {
+          if (!deleteTarget) return;
+          deleteMutation.mutate(deleteTarget.id, {
             onSuccess: () => {
-              toast('Product deleted', 'success');
-              setDeleteId(null);
+              toast(
+                isHardDelete ? 'Product deleted' : 'Product archived',
+                'success',
+              );
+              setDeleteTarget(null);
             },
             onError: (err) => {
               const msg =
                 err instanceof AppError
                   ? err.message
-                  : 'Could not delete product';
+                  : isHardDelete
+                    ? 'Could not delete product'
+                    : 'Could not archive product';
               toast(msg, 'error');
-              setDeleteId(null);
+              setDeleteTarget(null);
             },
           });
         }}

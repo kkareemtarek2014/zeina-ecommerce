@@ -8,6 +8,10 @@ import type {
   AdminProductWrite,
   Paginated,
 } from '@/shared/contracts/admin-catalog.contract';
+import type {
+  AdminStockAdjust,
+  InventoryMovementDTO,
+} from '@/shared/contracts/admin-inventory.contract';
 
 export type AdminProductListParams = {
   page?: number;
@@ -16,6 +20,7 @@ export type AdminProductListParams = {
   category?: string;
   featured?: boolean;
   inStock?: boolean;
+  status?: string;
   sort?: string;
 };
 
@@ -27,6 +32,7 @@ function productsQuery(params: AdminProductListParams): string {
   if (params.category) sp.set('category', params.category);
   if (params.featured != null) sp.set('featured', String(params.featured));
   if (params.inStock != null) sp.set('inStock', String(params.inStock));
+  if (params.status) sp.set('status', params.status);
   if (params.sort) sp.set('sort', params.sort);
   const q = sp.toString();
   return q ? `?${q}` : '';
@@ -73,6 +79,10 @@ export const adminCatalogService = {
     return api.del(`/api/admin/products/${encodeURIComponent(id)}`);
   },
 
+  restoreProduct(id: string): Promise<AdminProductDTO> {
+    return api.post(`/api/admin/products/${encodeURIComponent(id)}/restore`, {});
+  },
+
   uploadProductImages(id: string, files: File[]): Promise<AdminProductDTO> {
     const fd = new FormData();
     for (const f of files) fd.append('file', f);
@@ -86,6 +96,22 @@ export const adminCatalogService = {
     return delWithBody(
       `/api/admin/products/${encodeURIComponent(id)}/images`,
       { url },
+    );
+  },
+
+  adjustStock(
+    id: string,
+    input: AdminStockAdjust,
+  ): Promise<AdminProductDTO> {
+    return api.post(
+      `/api/admin/products/${encodeURIComponent(id)}/stock`,
+      input,
+    );
+  },
+
+  listInventory(id: string): Promise<InventoryMovementDTO[]> {
+    return api.get(
+      `/api/admin/products/${encodeURIComponent(id)}/inventory`,
     );
   },
 

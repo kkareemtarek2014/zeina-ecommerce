@@ -5,6 +5,7 @@ import {
   type AdminCategoryDTO,
   type AdminProductDTO,
   type Paginated,
+  type ProductStatus,
 } from '@/shared/contracts/admin-catalog.contract';
 import { getRequestDb } from '@/server/db/request';
 import {
@@ -13,6 +14,7 @@ import {
   ValidationError,
 } from '@/server/http/errors';
 import * as categoriesRepo from '@/server/repositories/categories.repo';
+import * as inventoryRepo from '@/server/repositories/inventory.repo';
 import * as productsRepo from '@/server/repositories/products.repo';
 import {
   computeSellPrice,
@@ -23,6 +25,10 @@ import {
   mediaUrlToKey,
   putCatalogImage,
 } from '@/server/services/upload.service';
+import {
+  availableQty,
+  isEffectivelyInStock,
+} from '@/server/lib/stock';
 import type { ProductRow } from '@/server/repositories/products.repo';
 
 function slugify(name: string): string {
@@ -32,6 +38,12 @@ function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
     .slice(0, 48);
+}
+
+function emptyToNull(value: string | null | undefined): string | null {
+  if (value == null) return null;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : null;
 }
 
 function toAdminProduct(row: ProductRow, margin: number): AdminProductDTO {
@@ -45,9 +57,12 @@ function toAdminProduct(row: ProductRow, margin: number): AdminProductDTO {
     images: row.images ?? [],
     rating: row.rating,
     reviewCount: row.reviewCount,
-    inStock: row.inStock,
+    inStock: isEffectivelyInStock(row),
     status: row.status,
     stockQty: row.stockQty,
+    reservedQty: row.reservedQty,
+    availableQty: availableQty(row),
+    descriptionFormat: row.descriptionFormat,
     createdAt: row.createdAt.toISOString(),
   };
   if (row.compareAtPrice != null) dto.compareAtPrice = row.compareAtPrice;
@@ -55,6 +70,11 @@ function toAdminProduct(row: ProductRow, margin: number): AdminProductDTO {
   if (row.tags?.length) dto.tags = row.tags;
   if (row.slug) dto.slug = row.slug;
   if (row.sku) dto.sku = row.sku;
+  if (row.seoTitle) dto.seoTitle = row.seoTitle;
+  if (row.seoDescription) dto.seoDescription = row.seoDescription;
+  if (row.ogImage) dto.ogImage = row.ogImage;
+  if (row.canonicalUrl) dto.canonicalUrl = row.canonicalUrl;
+  dto.archivedAt = row.archivedAt ? row.archivedAt.toISOString() : null;
   return dto;
 }
 
@@ -70,6 +90,32 @@ function toAdminCategory(
   };
 }
 
+async function assertUniqueSlugSku(
+  db: Awaited<ReturnType<typeof getRequestDb>>,
+  slug: string | null,
+  sku: string | null,
+  excludeId?: string,
+): Promise<void> {
+  if (slug) {
+    const clash = await productsRepo.findProductBySlug(db, slug, excludeId);
+    if (clash) throw new ConflictError('Product slug already exists');
+  }
+  if (sku) {
+    const clash = await productsRepo.findProductBySku(db, sku, excludeId);
+    if (clash) throw new ConflictError('Product SKU already exists');
+  }
+}
+
+function archivedAtForStatus(
+  next: ProductStatus,
+  existing: ProductRow | null,
+): Date | null {
+  if (next === 'archived') {
+    return existing?.archivedAt ?? new Date();
+  }
+  return null;
+}
+
 export async function listAdminProducts(url: URL): Promise<Paginated<AdminProductDTO>> {
   const page = Number(url.searchParams.get('page') ?? '1') || 1;
   const pageSize = Number(url.searchParams.get('pageSize') ?? '20') || 20;
@@ -78,6 +124,20 @@ export async function listAdminProducts(url: URL): Promise<Paginated<AdminProduc
   const sort = (url.searchParams.get('sort') as productsRepo.ProductListFilters['sort']) ?? undefined;
   const featuredParam = url.searchParams.get('featured');
   const inStockParam = url.searchParams.get('inStock');
+  const statusParam = url.searchParams.get('status');
+
+  let status: productsRepo.ProductListFilters['status'];
+  if (statusParam === 'all') status = 'all';
+  else if (
+    statusParam === 'draft' ||
+    statusParam === 'published' ||
+    statusParam === 'hidden' ||
+    statusParam === 'archived'
+  ) {
+    status = statusParam;
+  } else {
+    status = undefined;
+  }
 
   const db = await getRequestDb();
   const margin = await getProfitMargin(db);
@@ -87,6 +147,7 @@ export async function listAdminProducts(url: URL): Promise<Paginated<AdminProduc
     q,
     category,
     sort,
+    status,
     featured: featuredParam === 'true' ? true : undefined,
     inStock:
       inStockParam === 'true' ? true : inStockParam === 'false' ? false : undefined,
@@ -119,8 +180,15 @@ export async function createAdminProduct(raw: unknown): Promise<AdminProductDTO>
   if (!cat) throw new ValidationError('Invalid category');
 
   const id = `p-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
-  const slug = `${slugify(parsed.data.name)}-${id.slice(2, 6)}`;
+  const status: ProductStatus = parsed.data.status ?? 'draft';
+  const slug =
+    emptyToNull(parsed.data.slug) ??
+    `${slugify(parsed.data.name)}-${id.slice(2, 6)}`;
+  const sku =
+    emptyToNull(parsed.data.sku) ?? `ZAYA-${id.toUpperCase()}`;
   const stockQty = parsed.data.stockQty ?? (parsed.data.inStock ? 50 : 0);
+
+  await assertUniqueSlugSku(db, slug, sku);
 
   const row = await productsRepo.insertProduct(db, {
     id,
@@ -132,16 +200,38 @@ export async function createAdminProduct(raw: unknown): Promise<AdminProductDTO>
     images: parsed.data.images ?? [],
     rating: 0,
     reviewCount: 0,
-    inStock: parsed.data.inStock,
+    inStock: parsed.data.inStock && stockQty > 0,
     featured: parsed.data.featured,
     tags: parsed.data.tags ?? null,
     createdAt: new Date(),
     slug,
-    sku: `ZAYA-${id.toUpperCase()}`,
-    status: 'published',
+    sku,
+    status,
     stockQty,
     reservedQty: 0,
+    seoTitle: emptyToNull(parsed.data.seoTitle),
+    seoDescription: emptyToNull(parsed.data.seoDescription),
+    ogImage: emptyToNull(parsed.data.ogImage),
+    canonicalUrl: emptyToNull(parsed.data.canonicalUrl),
+    descriptionFormat: 'plain',
+    archivedAt: archivedAtForStatus(status, null),
   });
+
+  if (stockQty > 0) {
+    await inventoryRepo.insertMovement(db, {
+      id: `im_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`,
+      productId: id,
+      oldQty: 0,
+      newQty: stockQty,
+      delta: stockQty,
+      reason: 'restock',
+      orderId: null,
+      actorId: null,
+      note: 'Initial stock',
+      createdAt: new Date(),
+    });
+  }
+
   const margin = await getProfitMargin(db);
   return toAdminProduct(row, margin);
 }
@@ -161,9 +251,19 @@ export async function updateAdminProduct(
   const cat = await categoriesRepo.findCategoryBySlug(db, parsed.data.categorySlug);
   if (!cat) throw new ValidationError('Invalid category');
 
-  const stockQty =
-    parsed.data.stockQty ??
-    (parsed.data.inStock ? Math.max(existing.stockQty, 1) : 0);
+  const status: ProductStatus = parsed.data.status ?? existing.status;
+  const slug =
+    parsed.data.slug !== undefined
+      ? emptyToNull(parsed.data.slug) ?? existing.slug
+      : existing.slug;
+  const sku =
+    parsed.data.sku !== undefined
+      ? emptyToNull(parsed.data.sku) ?? existing.sku
+      : existing.sku;
+
+  await assertUniqueSlugSku(db, slug, sku, id);
+
+  const stockQty = existing.stockQty;
 
   const row = await productsRepo.updateProduct(db, id, {
     name: parsed.data.name,
@@ -176,6 +276,26 @@ export async function updateAdminProduct(
     featured: parsed.data.featured,
     tags: parsed.data.tags ?? null,
     stockQty,
+    status,
+    slug,
+    sku,
+    seoTitle:
+      parsed.data.seoTitle !== undefined
+        ? emptyToNull(parsed.data.seoTitle)
+        : existing.seoTitle,
+    seoDescription:
+      parsed.data.seoDescription !== undefined
+        ? emptyToNull(parsed.data.seoDescription)
+        : existing.seoDescription,
+    ogImage:
+      parsed.data.ogImage !== undefined
+        ? emptyToNull(parsed.data.ogImage)
+        : existing.ogImage,
+    canonicalUrl:
+      parsed.data.canonicalUrl !== undefined
+        ? emptyToNull(parsed.data.canonicalUrl)
+        : existing.canonicalUrl,
+    archivedAt: archivedAtForStatus(status, existing),
   });
   const margin = await getProfitMargin(db);
   return toAdminProduct(row, margin);
@@ -186,10 +306,18 @@ export async function deleteAdminProduct(id: string): Promise<{ ok: true }> {
   const existing = await productsRepo.findProductByIdAny(db, id);
   if (!existing) throw new NotFoundError('Product not found');
 
+  if (existing.status !== 'archived') {
+    await productsRepo.updateProduct(db, id, {
+      status: 'archived',
+      archivedAt: new Date(),
+    });
+    return { ok: true };
+  }
+
   const refs = await productsRepo.countOrderItemsForProduct(db, id);
   if (refs > 0) {
     throw new ConflictError(
-      'Cannot delete product referenced by existing orders',
+      'Cannot permanently delete product referenced by existing orders',
     );
   }
 
@@ -200,6 +328,22 @@ export async function deleteAdminProduct(id: string): Promise<{ ok: true }> {
 
   await productsRepo.deleteProduct(db, id);
   return { ok: true };
+}
+
+export async function restoreAdminProduct(id: string): Promise<AdminProductDTO> {
+  const db = await getRequestDb();
+  const existing = await productsRepo.findProductByIdAny(db, id);
+  if (!existing) throw new NotFoundError('Product not found');
+  if (existing.status !== 'archived') {
+    throw new ValidationError('Only archived products can be restored');
+  }
+
+  const row = await productsRepo.updateProduct(db, id, {
+    status: 'draft',
+    archivedAt: null,
+  });
+  const margin = await getProfitMargin(db);
+  return toAdminProduct(row, margin);
 }
 
 export async function addProductImages(

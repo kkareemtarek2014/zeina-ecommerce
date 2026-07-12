@@ -13,7 +13,8 @@ export type AuditEntity =
   | 'governorate'
   | 'shipping_zone'
   | 'settings'
-  | 'bridal_request';
+  | 'bridal_request'
+  | 'inventory';
 
 /**
  * Best-effort audit write. Never throws to the caller — mutations must succeed even if logging fails.

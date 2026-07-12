@@ -33,12 +33,12 @@ badge, and stock reserved during checkout.
 `id, product_id, old_qty, new_qty, delta, reason(enum: restock|sale|adjustment|return|reservation|release),
 order_id?, actor_id?, note?, created_at`. (See `02` §2.2 update + §2.17.)
 **Reserved stock at checkout:** on `POST /api/orders`, increment `reserved_qty` for each line
-(atomic); on payment success / delivery it converts to a `sale` movement; on cancel/expiry it's released
-(see Cron, §22). Prevents overselling between add-to-cart and payment.
+(atomic); on **delivered** it converts to a `sale` movement (COD today — Paymob payment success in P13);
+on cancel it's released. Unpaid expiry release is Cron (P22).
 **API/admin:** `POST /api/admin/products/[id]/stock` (adjust with reason), `GET .../inventory` (history),
-low-stock threshold in settings, low-stock list on the dashboard.
+`low_stock_threshold` in settings, low-stock list on the dashboard.
 **Storefront (small, data-driven):** out-of-stock badge on `ProductCard`/`ProductDetails` from the
-existing `inStock`; disable add-to-bag when `stock_qty - reserved_qty <= 0`.
+derived `inStock`; disable add-to-bag when available ≤ 0.
 
 ## 2. ⭐ Order timeline / status history  *(P18)*
 **What:** keep every status transition, not just the current one.
@@ -61,17 +61,16 @@ timeline (Created → Payment Received → Packed → Shipped → Delivered …)
 ## 4. Product status / drafts  *(P16)*
 **What:** replace Active/Deleted with `draft | published | hidden | archived`.
 **Data model:** `products.status` enum (default `draft`). (See `02` §2.2 update.)
-**Rule:** **storefront reads only `status='published'`** (product service adds the filter — `03` §3
-update). `hidden` = reachable by direct link but not listed; `archived` = soft-deleted (see §15).
-**Admin:** status control on the product form + filter in the list.
+**Rule:** **storefront lists/search only `status='published'`**. `hidden` = reachable by direct link
+but not listed; `archived` = soft-deleted (see §15). Checkout requires `published`.
+**Admin:** status control on the product form + filter in the list. Create defaults to **draft**.
 
 ## 5. Product SEO fields  *(P16)*
 **What:** editable per-product SEO instead of always auto-generated.
 **Data model:** `products.seo_title`, `seo_description`, `og_image`, `canonical_url`, and **`slug`**
 (unique). (See `02` §2.2 update.)
-**Rule:** `generateMetadata` uses the stored values when present, else falls back to the current
-auto-generation. Product routes can move to `/product/[slug]` (keep `[id]` working via redirect) — or
-keep `[id]` and use `slug` only for SEO/canonical. Keep it backward-compatible.
+**Rule:** `generateMetadata` uses the stored values when present, else auto-generation. Keep
+`/product/[id]` routes; `slug` powers canonical/SEO only in P16 (no slug URL migration).
 
 ## 6. ⭐ Product duplication  *(P19)*
 **What:** clone a product, then edit color/price/images.
@@ -131,9 +130,11 @@ promo detail shows usage stats derived from this table.
 
 ## 15. Soft delete / archive  *(P16, cross-cutting)*
 **What:** archive + restore instead of hard delete (products at minimum; ideally categories too).
-**Data model:** products use `status='archived'` (+ `archived_at`); a hard delete stays available only
-when nothing references the row. **API/admin:** `DELETE` archives by default; `POST
-/api/admin/products/[id]/restore` un-archives. Order history keeps referencing archived products safely.
+**Data model:** products use `status='archived'` + `archived_at`. Hard delete only when the product was
+never on an order (`order_items`). **API/admin:** `DELETE` archives by default; second `DELETE` on an
+already-archived product hard-deletes (or `CONFLICT` if referenced). `POST
+/api/admin/products/[id]/restore` → `draft` and clear `archived_at`. Order history keeps referencing
+archived products safely.
 
 ## 16. ⭐ Audit log  *(already specced — confirm + surface)*
 **What:** every admin mutation recorded with actor + before/after; viewable in the dashboard.

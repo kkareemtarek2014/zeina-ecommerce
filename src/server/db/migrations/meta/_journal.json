@@ -15,6 +15,20 @@
       "when": 1783867031943,
       "tag": "0001_busy_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1783868594276,
+      "tag": "0002_even_ikaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1783869174774,
+      "tag": "0003_funny_rocket_racer",
+      "breakpoints": true
     }
   ]
 }

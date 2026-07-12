@@ -7,6 +7,7 @@ export {
 } from './components/AdminShell';
 export { AdminLoginForm } from './components/AdminLoginForm';
 export { ProductForm } from './components/ProductForm';
+export { StockPanel } from './components/StockPanel';
 export { CategoryForm } from './components/CategoryForm';
 export { ImageUploader } from './components/ImageUploader';
 export {
@@ -28,6 +29,7 @@ export {
   useCreateAdminProduct,
   useUpdateAdminProduct,
   useDeleteAdminProduct,
+  useRestoreAdminProduct,
   useCreateAdminCategory,
   useUpdateAdminCategory,
   useDeleteAdminCategory,

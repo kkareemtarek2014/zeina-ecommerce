@@ -64,7 +64,10 @@ Rate limit (P7): ~20 req / 60s / IP on login, register, forgot (in-memory per is
 | GET | `/api/categories` | — |
 | GET | `/api/governorates` | — |
 
-`ProductDTO` includes sell `price` only — never `basePrice`.
+`ProductDTO` includes sell `price` only — never `basePrice`. Lists/search return `published` only;
+`GET /api/products/[id]` allows `published` or `hidden` (draft/archived → 404). Checkout requires
+`published` and available stock (`stock_qty - reserved_qty`); place order reserves; cancel releases;
+delivered converts reservation → sale.
 
 ---
 
@@ -132,9 +135,12 @@ All `/api/admin/**` require session + `role=admin` (`requireAdmin`).
 | Method | Path | Notes |
 | --- | --- | --- |
 | GET | `/api/admin/health` | Smoke |
-| GET | `/api/admin/products` | Paginated `?page&pageSize&q&category&inStock&featured&sort` |
-| POST | `/api/admin/products` | Create · default `status=published` · `AdminProductDTO` (+ `basePrice`) |
-| GET/PUT/DELETE | `/api/admin/products/[id]` | DELETE → `CONFLICT` if in `order_items` |
+| GET | `/api/admin/products` | Paginated `?page&pageSize&q&category&inStock&featured&status&sort` · default excludes `archived` (`status=all` includes) |
+| POST | `/api/admin/products` | Create · default `status=draft` · write may set `status`/SEO/`slug`/`sku` · `AdminProductDTO` (+ `basePrice`) |
+| GET/PUT/DELETE | `/api/admin/products/[id]` | DELETE → archive; second DELETE on archived → hard delete or `CONFLICT` if in `order_items` |
+| POST | `/api/admin/products/[id]/restore` | Restore archived → `draft`, clear `archived_at` |
+| POST | `/api/admin/products/[id]/stock` | Adjust stock `{ delta, reason: restock\|adjustment\|return, note? }` · writes `inventory_movements` |
+| GET | `/api/admin/products/[id]/inventory` | Movement history (newest first) |
 | POST | `/api/admin/products/[id]/images` | `multipart` · `file` · image/* ≤5MB |
 | DELETE | `/api/admin/products/[id]/images` | JSON `{ url }` |
 | GET/POST | `/api/admin/categories` | Full list (incl. `sortOrder`) |
@@ -153,9 +159,9 @@ All `/api/admin/**` require session + `role=admin` (`requireAdmin`).
 | PUT/PATCH/DELETE | `/api/admin/promos/[code]` | PATCH `{ active }`; code immutable on PUT |
 | GET | `/api/admin/bridal-requests` | Paginated `?status&page&pageSize` |
 | GET/PATCH | `/api/admin/bridal-requests/[id]` | PATCH `{ status }` |
-| GET | `/api/admin/settings` | Margin 0.20–0.30; threshold ≥ 0 |
+| GET | `/api/admin/settings` | Margin 0.20–0.30; free-shipping ≥ 0; `lowStockThreshold` ≥ 0 |
 | PUT | `/api/admin/settings` | Partial update |
-| GET | `/api/admin/stats` | Dashboard: revenue, counts, ordersByStatus, recentOrders, latestProducts, salesByDay (14d) |
+| GET | `/api/admin/stats` | Dashboard: revenue, counts, ordersByStatus, recentOrders, latestProducts, salesByDay (14d), `lowStockProducts[]` |
 
 All `/api/admin/**` are rate-limited (~60 req/min/IP). Admin mutations write `audit_log` (viewer = later enhancement).
 

@@ -21,6 +21,8 @@ import {
 } from '@/server/services/pricing.service';
 import { validatePromo } from '@/server/services/promo.service';
 import { getShippingCost } from '@/server/services/shipping.service';
+import { availableQty, reserveStockForOrder } from '@/server/services/inventory.service';
+import { isEffectivelyInStock } from '@/server/lib/stock';
 
 function generateOrderId(): string {
   const stamp = Date.now().toString(36).toUpperCase();
@@ -113,8 +115,11 @@ export async function createOrder(
     if (!product || product.status !== 'published') {
       throw new NotFoundError(`Product ${line.productId} not found`);
     }
-    if (!product.inStock) {
-      throw new ConflictError(`${product.name} is out of stock`);
+    const available = availableQty(product);
+    if (!isEffectivelyInStock(product) || available < line.quantity) {
+      throw new ConflictError(
+        `${product.name} does not have enough stock (available ${available})`,
+      );
     }
     const unitPrice = computeSellPrice(product.basePrice, margin);
     subtotal += unitPrice * line.quantity;
@@ -182,6 +187,17 @@ export async function createOrder(
       isPreorder: i.isPreorder,
     })),
   );
+
+  try {
+    await reserveStockForOrder(
+      db,
+      id,
+      lineItems.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+    );
+  } catch (err) {
+    await ordersRepo.updateOrderStatus(db, id, 'cancelled');
+    throw err;
+  }
 
   const created = await ordersRepo.findOrderById(db, id);
   if (!created) throw new Error('Failed to load created order');

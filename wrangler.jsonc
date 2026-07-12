@@ -23,7 +23,7 @@
 		{
 			"binding": "DB",
 			"database_name": "zaya-db",
-			"database_id": "dafeb5da-f487-48ea-be66-8d8c0c014d00",
+			"database_id": "ad38ae64-407f-4700-bc3e-bfeea78f3586",
 			"migrations_dir": "src/server/db/migrations"
 		}
 	],

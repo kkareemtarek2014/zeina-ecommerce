@@ -11,6 +11,7 @@ export const adminStatsDtoSchema = z.object({
   ordersByStatus: z.record(orderStatusSchema, z.number().int()),
   recentOrders: z.array(adminOrderDtoSchema),
   latestProducts: z.array(adminProductDtoSchema),
+  lowStockProducts: z.array(adminProductDtoSchema),
   salesByDay: z.array(
     z.object({
       date: z.string(),

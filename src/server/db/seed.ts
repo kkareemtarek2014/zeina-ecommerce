@@ -203,6 +203,7 @@ async function main() {
     const settingsRows: { key: string; value: unknown; updatedAt: Date }[] = [
       { key: 'profit_margin', value: PROFIT_MARGIN, updatedAt: now },
       { key: 'free_shipping_threshold', value: FREE_SHIPPING_THRESHOLD, updatedAt: now },
+      { key: 'low_stock_threshold', value: 5, updatedAt: now },
       { key: 'site_name', value: SITE.name, updatedAt: now },
       { key: 'site_tagline', value: SITE.tagline, updatedAt: now },
       { key: 'site_url', value: SITE.url, updatedAt: now },

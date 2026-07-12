@@ -5,7 +5,11 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Select } from '@/shared/components/ui';
-import type { AdminCategoryDTO, AdminProductDTO } from '@/shared/contracts/admin-catalog.contract';
+import type {
+  AdminCategoryDTO,
+  AdminProductDTO,
+  ProductStatus,
+} from '@/shared/contracts/admin-catalog.contract';
 import { ImageUploader } from './ImageUploader';
 import { adminCatalogService } from '../services/admin-catalog.service';
 
@@ -19,6 +23,13 @@ const formSchema = z.object({
   featured: z.boolean(),
   stockQty: z.number().int().min(0),
   tags: z.string().optional(),
+  status: z.enum(['draft', 'published', 'hidden', 'archived']),
+  slug: z.string().optional(),
+  sku: z.string().optional(),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  ogImage: z.string().optional(),
+  canonicalUrl: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,6 +45,13 @@ export interface ProductFormSubmit {
   featured: boolean;
   tags?: string[];
   stockQty: number;
+  status: ProductStatus;
+  slug?: string | null;
+  sku?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  ogImage?: string | null;
+  canonicalUrl?: string | null;
 }
 
 interface ProductFormProps {
@@ -67,6 +85,13 @@ export function ProductForm({
       featured: initial?.featured ?? false,
       stockQty: initial?.stockQty ?? 50,
       tags: initial?.tags?.join(', ') ?? '',
+      status: initial?.status ?? 'draft',
+      slug: initial?.slug ?? '',
+      sku: initial?.sku ?? '',
+      seoTitle: initial?.seoTitle ?? '',
+      seoDescription: initial?.seoDescription ?? '',
+      ogImage: initial?.ogImage ?? '',
+      canonicalUrl: initial?.canonicalUrl ?? '',
     },
   });
 
@@ -92,6 +117,13 @@ export function ProductForm({
           featured: values.featured,
           stockQty: values.stockQty,
           tags,
+          status: values.status,
+          slug: values.slug?.trim() || null,
+          sku: values.sku?.trim() || null,
+          seoTitle: values.seoTitle?.trim() || null,
+          seoDescription: values.seoDescription?.trim() || null,
+          ogImage: values.ogImage?.trim() || null,
+          canonicalUrl: values.canonicalUrl?.trim() || null,
         });
       })}
     >
@@ -107,6 +139,30 @@ export function ProductForm({
           </option>
         ))}
       </Select>
+      <Select
+        label="Status"
+        error={errors.status?.message}
+        {...register('status')}
+      >
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+        <option value="hidden">Hidden (direct link only)</option>
+        <option value="archived">Archived</option>
+      </Select>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Input
+          label="Slug (optional)"
+          error={errors.slug?.message}
+          placeholder="auto from name"
+          {...register('slug')}
+        />
+        <Input
+          label="SKU (optional)"
+          error={errors.sku?.message}
+          placeholder="auto-generated"
+          {...register('sku')}
+        />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Input
           label="Base price (EGP cost)"
@@ -146,16 +202,29 @@ export function ProductForm({
       </div>
       <Input label="Tags (comma-separated)" {...register('tags')} />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Input
-          label="Stock qty"
-          type="number"
-          error={errors.stockQty?.message}
-          {...register('stockQty', { valueAsNumber: true })}
-        />
+        {!initial ? (
+          <Input
+            label="Initial stock qty"
+            type="number"
+            error={errors.stockQty?.message}
+            {...register('stockQty', { valueAsNumber: true })}
+          />
+        ) : (
+          <div className="rounded-(--radius) border border-border bg-surface-raised px-4 py-3 text-sm">
+            <p className="font-medium text-text-secondary">Stock</p>
+            <p className="mt-1 text-text-primary">
+              Available {initial.availableQty ?? initial.stockQty} · On hand{' '}
+              {initial.stockQty} · Reserved {initial.reservedQty ?? 0}
+            </p>
+            <p className="mt-1 text-xs text-text-muted">
+              Use the Inventory panel below to adjust stock.
+            </p>
+          </div>
+        )}
         <div className="flex flex-col gap-3 pt-6">
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" {...register('inStock')} />
-            In stock
+            In stock (admin override)
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" {...register('featured')} />
@@ -163,6 +232,37 @@ export function ProductForm({
           </label>
         </div>
       </div>
+
+      <fieldset className="space-y-3 rounded-(--radius) border border-border p-4">
+        <legend className="px-1 text-sm font-medium text-text-secondary">
+          SEO (optional)
+        </legend>
+        <Input label="SEO title" {...register('seoTitle')} />
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="product-seo-desc"
+            className="text-sm font-medium text-text-secondary"
+          >
+            SEO description
+          </label>
+          <textarea
+            id="product-seo-desc"
+            rows={2}
+            className="rounded-(--radius) border border-border bg-surface-raised px-4 py-3 text-sm"
+            {...register('seoDescription')}
+          />
+        </div>
+        <Input
+          label="OG image URL"
+          placeholder="Defaults to first product image"
+          {...register('ogImage')}
+        />
+        <Input
+          label="Canonical URL"
+          placeholder="/product/[id]"
+          {...register('canonicalUrl')}
+        />
+      </fieldset>
 
       <div>
         <p className="mb-2 text-sm font-medium text-text-secondary">Images</p>

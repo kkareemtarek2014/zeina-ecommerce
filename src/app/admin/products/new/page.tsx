@@ -29,7 +29,7 @@ export default function AdminNewProductPage() {
         New product
       </h1>
       <p className="mt-1 mb-6 text-sm text-text-secondary">
-        Creates as published. Upload images after saving.
+        Creates as draft. Publish when ready. Upload images after saving.
       </p>
 
       {isLoading ? (

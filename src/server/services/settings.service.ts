@@ -49,12 +49,14 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
   const [
     profitMargin,
     freeShippingThreshold,
+    lowStockThreshold,
     siteName,
     siteTagline,
     siteUrl,
   ] = await Promise.all([
     getSettingValue('profit_margin'),
     getSettingValue('free_shipping_threshold'),
+    getSettingValue('low_stock_threshold'),
     getSettingValue('site_name'),
     getSettingValue('site_tagline'),
     getSettingValue('site_url'),
@@ -67,6 +69,8 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
       typeof freeShippingThreshold === 'number'
         ? freeShippingThreshold
         : FREE_SHIPPING_THRESHOLD,
+    lowStockThreshold:
+      typeof lowStockThreshold === 'number' ? lowStockThreshold : 5,
     siteName: typeof siteName === 'string' ? siteName : SITE.name,
     siteTagline: typeof siteTagline === 'string' ? siteTagline : SITE.tagline,
     siteUrl: typeof siteUrl === 'string' ? siteUrl : SITE.url,
@@ -90,6 +94,9 @@ export async function updateAdminSettings(
   }
   if (data.freeShippingThreshold !== undefined) {
     await setSetting('free_shipping_threshold', data.freeShippingThreshold);
+  }
+  if (data.lowStockThreshold !== undefined) {
+    await setSetting('low_stock_threshold', data.lowStockThreshold);
   }
   if (data.siteName !== undefined) {
     await setSetting('site_name', data.siteName);

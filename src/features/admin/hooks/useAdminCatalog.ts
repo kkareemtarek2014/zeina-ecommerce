@@ -72,6 +72,16 @@ export function useDeleteAdminProduct() {
   });
 }
 
+export function useRestoreAdminProduct() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminCatalogService.restoreProduct(id),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'products'] });
+    },
+  });
+}
+
 export function useCreateAdminCategory() {
   const qc = useQueryClient();
   return useMutation({

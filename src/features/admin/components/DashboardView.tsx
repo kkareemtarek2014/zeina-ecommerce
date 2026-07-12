@@ -123,6 +123,55 @@ export function DashboardView() {
               </div>
             </section>
           </div>
+
+          <section className="rounded-(--radius-lg) border border-border bg-surface-raised p-5">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h2 className="font-(family-name:--font-display) text-lg font-semibold text-text-primary">
+                  Low stock
+                </h2>
+                <p className="mt-1 text-xs text-text-muted">
+                  Available qty at or below the settings threshold
+                </p>
+              </div>
+              <Link
+                href="/admin/products"
+                className="text-xs font-medium text-brand-primary hover:underline"
+              >
+                Products
+              </Link>
+            </div>
+            <div className="mt-4">
+              {data.lowStockProducts.length === 0 ? (
+                <p className="text-sm text-text-muted">No low-stock products.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {data.lowStockProducts.map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 py-2.5"
+                    >
+                      <Link
+                        href={`/admin/products/${p.id}/edit`}
+                        className="min-w-0 truncate font-medium text-text-primary hover:text-brand-primary"
+                      >
+                        {p.name}
+                      </Link>
+                      <span
+                        className={
+                          (p.availableQty ?? 0) <= 0
+                            ? 'text-sm text-status-error'
+                            : 'text-sm text-status-warning'
+                        }
+                      >
+                        {p.availableQty ?? p.stockQty} left
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
         </div>
       )}
     </div>

@@ -34,6 +34,8 @@ export const DELETE = withHandler(async (request, context) => {
     action: 'delete',
     entity: 'product',
     entityId: id,
+    meta: { softOrHard: true },
   });
   return result;
 });
+

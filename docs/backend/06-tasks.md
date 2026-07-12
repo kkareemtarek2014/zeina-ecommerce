@@ -295,13 +295,58 @@ are green. Pricing/shipping must read **effective settings** once P11 lands.
 - [x] Admin API rate-limit (60/min/IP).
 - [ ] ⏳ [V] stats match DB; migrate audit_log remote; deploy smoke.
 
+### Phase 16 — Catalog depth
+> **Revision notes (locked, vs `10` §4/§5/§15 + `05` P16 + live schema):**
+> - **Scope:** admin status workflow, SEO columns, soft archive/restore, storefront hidden-by-link.
+>   Out: rich-text editor (column `description_format` only, always `plain`), inventory (P17),
+>   duplication/bulk/CSV (P19), slug-based URLs (keep `/product/[id]`).
+> - **Already present:** `status`, `slug`, `sku`, `stock_qty`, `reserved_qty`.
+> - **Migration:** add `seo_title`, `seo_description`, `og_image`, `canonical_url`,
+>   `description_format` (`plain`|`html`, default `plain`), `archived_at`.
+> - **Status:** create default **`draft`** (form); lists/search = `published` only; **detail** allows
+>   `published`|`hidden`; checkout still requires `published`. Admin list `?status=` (default
+>   excludes `archived` unless filtered / `status=all`).
+> - **Delete:** `DELETE` → archive (`status=archived`, `archived_at=now`). Second DELETE on archived
+>   with no `order_items` → hard delete + R2 cleanup; with refs → `CONFLICT`.
+>   `POST /api/admin/products/[id]/restore` → `draft`, clear `archived_at`.
+> - **SEO:** `generateMetadata` prefers stored SEO fields; else name/description/image/id canonical.
+> **Reviewed 2026-07-12 — complete.** Migration `0002_even_ikaris` (SEO + `description_format` +
+> `archived_at`); admin status/SEO/archive/restore; storefront lists = published, detail =
+> published|hidden; metadata SEO fallbacks. `typecheck`/`lint`/`assert:no-secrets`/`build` green.
+> ⏳ remote migrate + smoke (draft/hidden/archive) on your machine.
+- [x] Migration + contracts (`status`/SEO on admin write + DTO).
+- [x] Admin archive/restore/status APIs; storefront hidden detail + metadata.
+- [x] ProductForm + list filter + archive/restore UI.
+- [ ] ⏳ [V] draft hidden from shop; hidden direct-link OK; archive/restore works.
+
+### Phase 17 — Inventory ⭐
+> **Revision notes (locked, vs `10` §1 + `05` P17 + live schema):**
+> - **Already present:** `stock_qty`, `reserved_qty`, `in_stock` on products.
+> - **Migration:** `inventory_movements` (`id`, `product_id`, `old_qty`, `new_qty`, `delta`,
+>   `reason` ∈ restock|sale|adjustment|return|reservation|release, `order_id?`, `actor_id?`,
+>   `note?`, `created_at`). Settings key `low_stock_threshold` (default 5).
+> - **Available:** `stock_qty - reserved_qty`. Storefront `inStock` = admin flag AND available > 0.
+>   Checkout rejects when available < line qty; increments `reserved_qty` + `reservation` movement.
+> - **Lifecycle:** cancel → `release` (decrement reserved); **delivered** → `sale` (decrement stock +
+>   reserved). Cron unpaid expiry deferred to P22; Paymob payment path deferred to P13.
+> - **Admin:** `POST /api/admin/products/[id]/stock` `{ delta, reason, note? }`;
+>   `GET .../inventory` history; settings `lowStockThreshold`; dashboard `lowStockProducts[]`.
+> - **UI:** stock adjust + history on product edit; threshold on Settings; low-stock on dashboard.
+>   Storefront: existing Sold Out badge / disabled add-to-bag via derived `inStock`.
+> - **Out:** notifications bell (P18), cron release (P22), Temu sync (P24), separate Inventory nav.
+> **Reviewed 2026-07-12 — complete.** Migration `0003_funny_rocket_racer` (`inventory_movements`);
+> reserve on place / release on cancel / sale on delivered; admin stock adjust + history; settings
+> `low_stock_threshold`; dashboard low-stock list; storefront derived `inStock`.
+> `typecheck`/`lint`/`assert:no-secrets`/`build` green. ⏳ remote migrate + smoke on your machine.
+- [x] Migration + inventory contracts/service.
+- [x] Reserve/release/sale wired to orders; admin stock APIs; settings + stats.
+- [x] Product edit stock UI; settings; dashboard low-stock.
+- [ ] ⏳ [V] oversell blocked; cancel releases; deliver sells; adjust logs movement.
+
 ## Phases 16–23 — Production enhancements
-The full, granular enhancement task list (inventory ⭐, order timeline ⭐, bulk ⭐, duplication ⭐, audit
-viewer ⭐, drafts/SEO, CSV, media library, notifications, customer 360, coupon usage, analytics, RBAC,
-cron triggers, homepage builder) lives in **`10-enhancements.md`**. Key schema adds are in `02` §2b
-(`inventory_movements`, `order_status_history`, `notifications`, `media_assets`, `promo_redemptions`,
-`product_views`) plus product columns (`status/slug/sku/stock_qty/reserved_qty/SEO`). Storefront reads
-only `published`, stock-aware products. Cron jobs go in `server/jobs/` (`01`).
+The remaining enhancement task list (order timeline ⭐, bulk ⭐, duplication ⭐, audit
+viewer ⭐, CSV, media library, notifications, customer 360, coupon usage, analytics, RBAC,
+cron, homepage builder) lives in **`10-enhancements.md`**. P16 catalog depth and P17 inventory are above.
 
 ## Phases 24–26 — Sourcing, pricing & merchandising
 The full, granular task list (landed-cost pricing engine, Temu importer, stock sync, bundles,

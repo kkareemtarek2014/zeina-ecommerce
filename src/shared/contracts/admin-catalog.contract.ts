@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+export const productStatusSchema = z.enum([
+  'draft',
+  'published',
+  'hidden',
+  'archived',
+]);
+
+export type ProductStatus = z.infer<typeof productStatusSchema>;
+
 export const adminProductDtoSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -14,10 +23,18 @@ export const adminProductDtoSchema = z.object({
   inStock: z.boolean(),
   featured: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
-  status: z.enum(['draft', 'published', 'hidden', 'archived']),
+  status: productStatusSchema,
   stockQty: z.number().int(),
+  reservedQty: z.number().int().optional(),
+  availableQty: z.number().int().optional(),
   slug: z.string().nullable().optional(),
   sku: z.string().nullable().optional(),
+  seoTitle: z.string().nullable().optional(),
+  seoDescription: z.string().nullable().optional(),
+  ogImage: z.string().nullable().optional(),
+  canonicalUrl: z.string().nullable().optional(),
+  descriptionFormat: z.enum(['plain', 'html']).optional(),
+  archivedAt: z.string().nullable().optional(),
   createdAt: z.string(),
 });
 
@@ -34,6 +51,19 @@ export const adminProductWriteSchema = z.object({
   featured: z.boolean().default(false),
   tags: z.array(z.string()).optional(),
   stockQty: z.number().int().min(0).optional(),
+  status: productStatusSchema.optional(),
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase kebab-case slug')
+    .optional()
+    .nullable(),
+  sku: z.string().trim().min(1).optional().nullable(),
+  seoTitle: z.string().trim().optional().nullable(),
+  seoDescription: z.string().trim().optional().nullable(),
+  ogImage: z.string().trim().optional().nullable(),
+  canonicalUrl: z.string().trim().optional().nullable(),
 });
 
 export type AdminProductWrite = z.infer<typeof adminProductWriteSchema>;

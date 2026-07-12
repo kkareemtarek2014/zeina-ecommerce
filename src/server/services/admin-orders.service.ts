@@ -15,6 +15,10 @@ import {
 import * as ordersRepo from '@/server/repositories/orders.repo';
 import type { OrderItemRow, OrderRow } from '@/server/repositories/orders.repo';
 import { ok } from '@/server/http/envelope';
+import {
+  commitSaleForOrder,
+  releaseStockForOrder,
+} from '@/server/services/inventory.service';
 
 function toAdminOrderDTO(order: OrderRow, items: OrderItemRow[]): AdminOrderDTO {
   const dto: AdminOrderDTO = {
@@ -153,6 +157,13 @@ export async function patchAdminOrderStatus(
 
   const updated = await ordersRepo.updateOrderStatus(db, id, next);
   if (!updated) throw new NotFoundError('Order not found');
+
+  if (next === 'cancelled') {
+    await releaseStockForOrder(db, id, found.items);
+  } else if (next === 'delivered') {
+    await commitSaleForOrder(db, id, found.items);
+  }
+
   return toAdminOrderDTO(updated, found.items);
 }
 

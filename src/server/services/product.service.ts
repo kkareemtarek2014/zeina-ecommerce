@@ -6,6 +6,7 @@ import * as categoriesRepo from '@/server/repositories/categories.repo';
 import * as governoratesRepo from '@/server/repositories/governorates.repo';
 import * as productsRepo from '@/server/repositories/products.repo';
 import type { ProductRow } from '@/server/repositories/products.repo';
+import { isEffectivelyInStock } from '@/server/lib/stock';
 import {
   computeSellPrice,
   getProfitMargin,
@@ -22,7 +23,7 @@ export function toProductDTO(row: ProductRow, margin: number): ProductDTO {
     images: row.images,
     rating: row.rating,
     reviewCount: row.reviewCount,
-    inStock: row.inStock,
+    inStock: isEffectivelyInStock(row),
   };
   if (row.compareAtPrice != null) dto.compareAtPrice = row.compareAtPrice;
   if (row.featured) dto.featured = true;
@@ -78,6 +79,32 @@ export async function getProductOrNull(id: string): Promise<ProductDTO | null> {
   const margin = await getProfitMargin(db);
   const row = await productsRepo.findProductById(db, id);
   return row ? toProductDTO(row, margin) : null;
+}
+
+/** Server-only product + SEO fields for `generateMetadata` (not on public ProductDTO). */
+export type ProductMetadataSource = ProductDTO & {
+  seoTitle: string | null;
+  seoDescription: string | null;
+  ogImage: string | null;
+  canonicalUrl: string | null;
+  slug: string | null;
+};
+
+export async function getProductMetadataSource(
+  id: string,
+): Promise<ProductMetadataSource | null> {
+  const db = await getRequestDb();
+  const margin = await getProfitMargin(db);
+  const row = await productsRepo.findProductById(db, id);
+  if (!row) return null;
+  return {
+    ...toProductDTO(row, margin),
+    seoTitle: row.seoTitle,
+    seoDescription: row.seoDescription,
+    ogImage: row.ogImage,
+    canonicalUrl: row.canonicalUrl,
+    slug: row.slug,
+  };
 }
 
 export async function getRelated(

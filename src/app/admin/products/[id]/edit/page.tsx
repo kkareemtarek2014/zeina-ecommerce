@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   AdminBreadcrumbs,
   ProductForm,
+  StockPanel,
   useAdminCategories,
   useAdminProduct,
   useUpdateAdminProduct,
@@ -45,27 +46,30 @@ export default function AdminEditProductPage({
       ) : isError || !product ? (
         <p className="text-sm text-status-error">Product not found.</p>
       ) : (
-        <ProductForm
-          key={product.id}
-          categories={categories}
-          initial={product}
-          isLoading={updateMutation.isPending}
-          onSubmit={async (values) => {
-            try {
-              await updateMutation.mutateAsync({
-                ...values,
-                images: values.images,
-              });
-              toast('Product saved', 'success');
-              router.push('/admin/products');
-            } catch (err) {
-              toast(
-                err instanceof AppError ? err.message : 'Save failed',
-                'error',
-              );
-            }
-          }}
-        />
+        <>
+          <ProductForm
+            key={product.id}
+            categories={categories}
+            initial={product}
+            isLoading={updateMutation.isPending}
+            onSubmit={async (values) => {
+              try {
+                await updateMutation.mutateAsync({
+                  ...values,
+                  images: values.images,
+                });
+                toast('Product saved', 'success');
+                router.push('/admin/products');
+              } catch (err) {
+                toast(
+                  err instanceof AppError ? err.message : 'Save failed',
+                  'error',
+                );
+              }
+            }}
+          />
+          <StockPanel product={product} />
+        </>
       )}
     </div>
   );

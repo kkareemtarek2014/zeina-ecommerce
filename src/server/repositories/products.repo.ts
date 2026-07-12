@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import type { Db } from '@/server/db/client';
 import { orderItems, products } from '@/server/db/schema';
 
@@ -9,7 +9,8 @@ export type ProductListFilters = {
   featured?: boolean;
   sort?: 'newest' | 'price-asc' | 'price-desc' | 'rating';
   q?: string;
-  status?: 'published' | 'draft' | 'hidden' | 'archived';
+  /** Storefront default is published. Admin may pass a status or `all`. */
+  status?: 'published' | 'draft' | 'hidden' | 'archived' | 'all';
   inStock?: boolean;
 };
 
@@ -18,7 +19,8 @@ export async function findProducts(
   filters: ProductListFilters = {},
 ): Promise<ProductRow[]> {
   const status = filters.status ?? 'published';
-  const conditions = [eq(products.status, status)];
+  const conditions =
+    status === 'all' ? [] : [eq(products.status, status)];
 
   if (filters.category) {
     conditions.push(eq(products.categorySlug, filters.category));
@@ -39,7 +41,7 @@ export async function findProducts(
     );
   }
 
-  const where = and(...conditions);
+  const where = conditions.length ? and(...conditions) : undefined;
 
   switch (filters.sort) {
     case 'newest':
@@ -62,7 +64,12 @@ export async function findProductById(
   const rows = await db
     .select()
     .from(products)
-    .where(and(eq(products.id, id), eq(products.status, 'published')))
+    .where(
+      and(
+        eq(products.id, id),
+        inArray(products.status, ['published', 'hidden']),
+      ),
+    )
     .limit(1);
   return rows[0] ?? null;
 }
@@ -135,7 +142,11 @@ export async function findProductsAdmin(
   const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? 20));
   const conditions = [];
 
-  if (filters.status) conditions.push(eq(products.status, filters.status));
+  if (!filters.status) {
+    conditions.push(ne(products.status, 'archived'));
+  } else if (filters.status !== 'all') {
+    conditions.push(eq(products.status, filters.status));
+  }
   if (filters.category) {
     conditions.push(eq(products.categorySlug, filters.category));
   }
@@ -206,6 +217,36 @@ export async function deleteProduct(db: Db, id: string): Promise<boolean> {
     .where(eq(products.id, id))
     .returning({ id: products.id });
   return result.length > 0;
+}
+
+export async function findProductBySlug(
+  db: Db,
+  slug: string,
+  excludeId?: string,
+): Promise<ProductRow | null> {
+  const conditions = [eq(products.slug, slug)];
+  if (excludeId) conditions.push(ne(products.id, excludeId));
+  const rows = await db
+    .select()
+    .from(products)
+    .where(and(...conditions))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function findProductBySku(
+  db: Db,
+  sku: string,
+  excludeId?: string,
+): Promise<ProductRow | null> {
+  const conditions = [eq(products.sku, sku)];
+  if (excludeId) conditions.push(ne(products.id, excludeId));
+  const rows = await db
+    .select()
+    .from(products)
+    .where(and(...conditions))
+    .limit(1);
+  return rows[0] ?? null;
 }
 
 export async function countOrderItemsForProduct(

@@ -11,6 +11,11 @@ import {
   computeSellPrice,
   getProfitMargin,
 } from '@/server/services/pricing.service';
+import {
+  findLowStockProducts,
+  getLowStockThreshold,
+} from '@/server/services/inventory.service';
+import { availableQty, isEffectivelyInStock } from '@/server/lib/stock';
 import type { ProductRow } from '@/server/repositories/products.repo';
 import type { AdminProductDTO } from '@/shared/contracts/admin-catalog.contract';
 
@@ -27,9 +32,11 @@ function toAdminProduct(row: ProductRow, margin: number): AdminProductDTO {
     images: row.images ?? [],
     rating: row.rating,
     reviewCount: row.reviewCount,
-    inStock: row.inStock,
+    inStock: isEffectivelyInStock(row),
     status: row.status,
     stockQty: row.stockQty,
+    reservedQty: row.reservedQty,
+    availableQty: availableQty(row),
     createdAt: row.createdAt.toISOString(),
   };
   if (row.compareAtPrice != null) dto.compareAtPrice = row.compareAtPrice;
@@ -121,6 +128,9 @@ export async function getAdminStats(): Promise<AdminStatsDTO> {
     .orderBy(desc(products.createdAt))
     .limit(5);
 
+  const threshold = await getLowStockThreshold(db);
+  const lowStockRows = await findLowStockProducts(db, threshold, 8);
+
   return {
     revenueTotal: Number(revenueRow?.value ?? 0),
     ordersCount: ordersCountRow?.value ?? 0,
@@ -129,6 +139,7 @@ export async function getAdminStats(): Promise<AdminStatsDTO> {
     ordersByStatus,
     recentOrders,
     latestProducts: latestProductRows.map((r) => toAdminProduct(r, margin)),
+    lowStockProducts: lowStockRows.map((r) => toAdminProduct(r, margin)),
     salesByDay,
   };
 }

@@ -116,6 +116,7 @@ export const adminBridalStatusSchema = z.object({
 export const adminSettingsDtoSchema = z.object({
   profitMargin: z.number(),
   freeShippingThreshold: z.number().int(),
+  lowStockThreshold: z.number().int(),
   siteName: z.string(),
   siteTagline: z.string(),
   siteUrl: z.string(),
@@ -126,6 +127,7 @@ export type AdminSettingsDTO = z.infer<typeof adminSettingsDtoSchema>;
 export const adminSettingsWriteSchema = z.object({
   profitMargin: z.number().min(0.2).max(0.3).optional(),
   freeShippingThreshold: z.number().int().min(0).optional(),
+  lowStockThreshold: z.number().int().min(0).optional(),
   siteName: z.string().trim().min(1).optional(),
   siteTagline: z.string().trim().min(1).optional(),
   siteUrl: z.string().trim().url().optional(),

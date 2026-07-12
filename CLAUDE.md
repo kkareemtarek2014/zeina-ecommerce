@@ -161,5 +161,9 @@ Full, phased specs live in **`docs/backend/`** — read the index first (`README
 - Wallet flag OFF → page + API 404 (seeded wallet txns ready for when flag flips).
 - Review **create** API exists (auth); no storefront submit UI yet.
 - Seed passwords (`password123`) are for local/remote bootstrap only — rotate before public go-live.
-- **API.md** documents the live storefront contract. Admin Phase 8+ shell lives under `/admin` (`08`).
-- **Roadmap:** Admin CRUD (P9–P12), **Paymob** + **Bosta** (`09`), enhancements (`10`), Temu + landed-cost (`11`), Arabic RTL.
+- **API.md** documents the live storefront + admin contract. Admin Phase 8–12 + P16–**P17 inventory**
+  done; remaining P18–23 in `06-tasks` / `10`.
+- **Roadmap:** P18–23 enhancements (`10`), **Paymob** + **Bosta** (`09`), Temu + landed-cost (`11`), Arabic RTL.
+- **Catalog visibility:** lists/search = `published` only; product detail allows `published`|`hidden`;
+  checkout requires `published` + available stock (reserves on place; cancel releases; delivered sells).
+  Admin create defaults to `draft`; DELETE archives.
