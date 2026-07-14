@@ -2,6 +2,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": "src/cloudflare-worker.ts",
 	"name": "zaya-ecommerce",
+	"minify": true,
 	"compatibility_date": "2026-07-12",
 	"compatibility_flags": [
 		"nodejs_compat",
