@@ -37,9 +37,9 @@ export function Footer() {
             </div>
 
             <div className="mt-2">
-              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-primary">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-primary">
                 Subscribe to our newsletter
-              </h4>
+              </h3>
               <form
                 className="relative flex max-w-md items-center"
                 onSubmit={(e) => e.preventDefault()}
@@ -64,9 +64,9 @@ export function Footer() {
 
           {/* Categories */}
           <div className="lg:col-span-3">
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-primary">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-primary">
               Shop
-            </h4>
+            </h3>
             <ul className="flex flex-col gap-3">
               {CATEGORIES.map((cat) => (
                 <li key={cat.slug}>
@@ -83,9 +83,9 @@ export function Footer() {
 
           {/* Help */}
           <div className="lg:col-span-4">
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-primary">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-primary">
               Help
-            </h4>
+            </h3>
             <ul className="flex flex-col gap-3">
               {HELP_LINKS.map((link) => (
                 <li key={link.href}>

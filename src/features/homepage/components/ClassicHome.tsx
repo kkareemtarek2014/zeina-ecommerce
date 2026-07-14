@@ -46,6 +46,7 @@ export function ClassicHome({ categories }: { categories: Category[] }) {
             <Image
               src="/images/hero.svg"
               alt="Zaya accessories collection"
+              title="Zaya accessories collection"
               width={880}
               height={660}
               priority
@@ -88,6 +89,7 @@ export function ClassicHome({ categories }: { categories: Category[] }) {
                 <Image
                   src={cat.image}
                   alt={cat.name}
+                  title={cat.name}
                   width={300}
                   height={300}
                   sizes="(min-width: 1024px) 16vw, (min-width: 640px) 33vw, 50vw"
@@ -182,21 +184,24 @@ export function SeoStrip() {
         </h2>
         <div className="mt-4 max-w-3xl space-y-4 text-sm leading-relaxed text-text-secondary">
           <p>
-            {SITE.name} is your destination for women’s accessories in Egypt. We
-            curate jewelry, bags, hair accessories, scarves, sunglasses and
-            watches — every piece handpicked for quality and style, so you don’t
-            have to scroll through thousands of options.
+            {SITE.name} is your ultimate destination for women’s accessories in Egypt. We
+            carefully curate premium jewelry, elegant bags, stylish hair accessories, versatile scarves, chic sunglasses, and
+            timeless watches — every single piece is handpicked for exceptional quality and modern style, ensuring you don’t
+            have to scroll through thousands of options to find the perfect addition to your wardrobe.
           </p>
           <p>
-            Shopping is simple: browse, add to your bag, and pay cash on
-            delivery when your order arrives — no card required. We deliver
-            across Egypt, from Cairo and Giza to every governorate, with free
-            shipping on larger orders.
+            Discover our extensive collection designed to elevate your everyday look. From statement necklaces that catch the light to practical yet fashionable tote bags for your daily commute, our selection caters to every taste and occasion. We believe that the right accessory can transform any outfit, giving you the confidence to express your unique personality effortlessly.
           </p>
           <p>
-            Whether you’re treating yourself or searching for the perfect gift,{' '}
-            {SITE.name} makes it effortless to find pieces you’ll love to wear
-            every day.
+            Shopping with us is remarkably simple and secure: browse our collections, add your favorite items to your bag, and choose to pay cash on
+            delivery when your order arrives at your doorstep — no credit card required. We proudly deliver
+            across all of Egypt, offering fast shipping from Cairo and Giza to every single governorate, along with complimentary free
+            shipping on larger orders to make your experience even better.
+          </p>
+          <p>
+            Whether you’re thoughtfully treating yourself to a well-deserved upgrade or searching for the perfect gift for a loved one,{' '}
+            {SITE.name} makes it truly effortless to find exquisite pieces you’ll love to wear
+            every single day. Join thousands of satisfied customers who have made us their go-to online accessory store.
           </p>
         </div>
       </div>

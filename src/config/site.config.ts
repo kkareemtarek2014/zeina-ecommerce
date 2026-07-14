@@ -4,11 +4,11 @@
  */
 export const SITE = {
   name: 'Zaya',
-  tagline: 'Adorn yourself, effortlessly.',
+  tagline: 'Adorn yourself effortlessly with premium accessories.',
   description:
-    'Shop women’s accessories online in Egypt — jewelry, bags, scarves, sunglasses & watches. Cash on delivery, shipping to Cairo, Giza and all governorates.',
+    'Shop women\'s accessories online in Egypt — jewelry, bags, scarves, sunglasses & watches. Cash on delivery & fast shipping.',
   /** Production domain — UPDATE when you buy the real domain. */
-  url: 'https://Zaya-eg.com',
+  url: 'https://zaya-ecommerce.kkareemtarek2.workers.dev/',
   currency: 'EGP',
   locale: 'en-EG',
   keywords: [
