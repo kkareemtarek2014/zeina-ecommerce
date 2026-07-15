@@ -128,6 +128,7 @@ export const ADMIN_ROUTE_PERMISSIONS: ReadonlyArray<{
   { prefix: '/admin/bridal', permission: 'bridal:write' },
   { prefix: '/admin/homepage', permission: 'homepage:write' },
   { prefix: '/admin/activity', permission: 'activity:read' },
+  { prefix: '/admin/cron', permission: 'settings:write' },
   { prefix: '/admin/settings', permission: 'settings:write' },
   { prefix: '/admin', permission: 'dashboard:read' },
 ];

@@ -1,11 +1,18 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
-import { Button, Input } from '@/shared/components/ui';
+import {
+  Button,
+  Input,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/shared/components/ui';
 import type { AdminSettingsDTO } from '@/shared/contracts/admin-config.contract';
 import {
   AnnouncementItemsSchema,
@@ -72,6 +79,68 @@ interface SettingsFormProps {
 function emptyToNull(v: string | undefined): string | null {
   const t = v?.trim() ?? '';
   return t ? t : null;
+}
+
+const SETTINGS_TABS = [
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'brand', label: 'Brand' },
+  { id: 'announcements', label: 'Announcements' },
+  { id: 'contact', label: 'Contact & Social' },
+  { id: 'seo', label: 'SEO & Footer' },
+  { id: 'bridal', label: 'Bridal' },
+  { id: 'cron', label: 'Cron Jobs' },
+  { id: 'operations', label: 'Operations' },
+] as const;
+
+type SettingsTabId = (typeof SETTINGS_TABS)[number]['id'];
+
+/** Field → tab lookup so failed validation jumps to (and flags) the right tab. */
+const TAB_FIELDS: Record<SettingsTabId, readonly string[]> = {
+  pricing: [
+    'profitMargin',
+    'freeShippingThreshold',
+    'lowStockThreshold',
+    'usdEgpRate',
+    'bulkShippingUsd',
+    'customsDutyRate',
+    'vatRate',
+    'handlingFeeEgp',
+    'targetMargin',
+    'priceRoundingEgp',
+  ],
+  brand: ['siteName', 'siteTagline', 'siteUrl', 'logoUrl', 'faviconUrl'],
+  announcements: ['announcementItems'],
+  contact: [
+    'contactEmail',
+    'contactPhone',
+    'whatsappNumber',
+    'socialInstagram',
+    'socialFacebook',
+    'socialTiktok',
+    'shippingEtaLocal',
+    'shippingEtaDropship',
+    'instagramHandle',
+    'instagramPostUrls',
+  ],
+  seo: ['seoDefaultTitle', 'seoDefaultDescription', 'footerText'],
+  bridal: [
+    'bridalPageEnabled',
+    'bridalShowCollections',
+    'bridalShowPersonalization',
+    'bridalShowTiers',
+    'bridalShowFinalCta',
+    'bridalShowHomeSpotlight',
+    'bridalCustomEnabled',
+  ],
+  cron: ['unpaidOrderTimeoutMinutes', 'pendingReminderHours'],
+  operations: ['maintenanceMode'],
+};
+
+function tabForField(field: string): SettingsTabId | null {
+  for (const tab of SETTINGS_TABS) {
+    if (TAB_FIELDS[tab.id].includes(field)) return tab.id;
+  }
+  return null;
 }
 
 function newAnnouncementId(): string {
@@ -241,6 +310,7 @@ export function SettingsForm({
   const [mediaTarget, setMediaTarget] = useState<'logo' | 'favicon' | null>(
     null,
   );
+  const [activeTab, setActiveTab] = useState<SettingsTabId>('pricing');
   const [announcementItems, setAnnouncementItems] = useState<AnnouncementItem[]>(
     () =>
       [...(initial.announcementItems ?? [])].sort(
@@ -305,12 +375,33 @@ export function SettingsForm({
   const fieldError = (key: string) =>
     serverFieldErrors?.[key]?.[0] ?? undefined;
 
+  // After a failed save, jump to the first tab with a server-reported error.
+  useEffect(() => {
+    if (!serverFieldErrors) return;
+    const key = Object.keys(serverFieldErrors).find(
+      (k) => serverFieldErrors[k]?.length,
+    );
+    const tab = key ? tabForField(key) : null;
+    if (tab) setActiveTab(tab);
+  }, [serverFieldErrors]);
+
+  const errorFields = new Set<string>([
+    ...Object.keys(errors),
+    ...Object.keys(serverFieldErrors ?? {}).filter(
+      (k) => serverFieldErrors?.[k]?.length,
+    ),
+  ]);
+  if (announcementError) errorFields.add('announcementItems');
+  const tabHasError = (tab: SettingsTabId) =>
+    TAB_FIELDS[tab].some((f) => errorFields.has(f));
+
   return (
     <>
       <form
-        className="max-w-xl space-y-6"
+        className="max-w-2xl space-y-6"
         noValidate
-        onSubmit={handleSubmit(async (values) => {
+        onSubmit={handleSubmit(
+          async (values) => {
           const normalized = announcementItems.map((item, i) => ({
             ...item,
             text: item.text.trim(),
@@ -322,6 +413,7 @@ export function SettingsForm({
             const first =
               parsed.error.issues[0]?.message ?? 'Invalid announcements';
             setAnnouncementError(first);
+            setActiveTab('announcements');
             return;
           }
           setAnnouncementError(undefined);
@@ -341,8 +433,37 @@ export function SettingsForm({
             footerText: emptyToNull(values.footerText) ?? '',
             announcementItems: parsed.data,
           });
-        })}
+          },
+          (fieldErrors) => {
+            // Client validation failed — jump to the first tab with an error.
+            const first = Object.keys(fieldErrors)[0];
+            const tab = first ? tabForField(first) : null;
+            if (tab) setActiveTab(tab);
+          },
+        )}
       >
+        <Tabs
+          defaultValue="pricing"
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as SettingsTabId)}
+        >
+          <TabsList>
+            {SETTINGS_TABS.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                <span className="inline-flex items-center gap-1.5">
+                  {tab.label}
+                  {tabHasError(tab.id) ? (
+                    <span
+                      className="size-1.5 rounded-full bg-status-error"
+                      aria-label="This tab has validation errors"
+                    />
+                  ) : null}
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="pricing" className="space-y-6">
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
             Pricing & inventory
@@ -444,7 +565,9 @@ export function SettingsForm({
             {...register('priceRoundingEgp')}
           />
         </fieldset>
+          </TabsContent>
 
+          <TabsContent value="brand" className="space-y-6">
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
             Brand
@@ -517,7 +640,9 @@ export function SettingsForm({
             />
           ) : null}
         </fieldset>
+          </TabsContent>
 
+          <TabsContent value="announcements" className="space-y-6">
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
             Announcement bar
@@ -528,7 +653,9 @@ export function SettingsForm({
             error={announcementError ?? fieldError('announcementItems')}
           />
         </fieldset>
+          </TabsContent>
 
+          <TabsContent value="contact" className="space-y-6">
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
             Contact & social
@@ -611,7 +738,9 @@ export function SettingsForm({
             />
           </div>
         </fieldset>
+          </TabsContent>
 
+          <TabsContent value="seo" className="space-y-6">
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
             SEO & footer
@@ -650,10 +779,12 @@ export function SettingsForm({
             />
           </div>
         </fieldset>
+          </TabsContent>
 
+          <TabsContent value="cron" className="space-y-6">
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
-            Automation (cron)
+            Cron Jobs & Scheduled Tasks
           </legend>
           <Input
             label="Unpaid order timeout (minutes)"
@@ -680,7 +811,9 @@ export function SettingsForm({
             than this.
           </p>
         </fieldset>
+          </TabsContent>
 
+          <TabsContent value="operations" className="space-y-6">
         <label className="flex items-start gap-3 rounded-lg border border-border bg-brand-blush/20 px-4 py-3 text-sm">
           <input
             type="checkbox"
@@ -697,7 +830,9 @@ export function SettingsForm({
             </span>
           </span>
         </label>
+          </TabsContent>
 
+          <TabsContent value="bridal" className="space-y-6">
         <fieldset className="space-y-3 rounded-lg border border-border bg-brand-blush/10 p-4">
           <legend className="px-1 text-sm font-semibold text-text-primary">
             Bridal page
@@ -777,10 +912,17 @@ export function SettingsForm({
             ))}
           </div>
         </fieldset>
+          </TabsContent>
+        </Tabs>
 
-        <Button type="submit" isLoading={isLoading}>
-          Save settings
-        </Button>
+        <div className="flex items-center gap-3 border-t border-border pt-4">
+          <Button type="submit" isLoading={isLoading}>
+            Save settings
+          </Button>
+          <p className="text-xs text-text-muted">
+            Saving applies changes from every tab.
+          </p>
+        </div>
       </form>
 
       <MediaPicker

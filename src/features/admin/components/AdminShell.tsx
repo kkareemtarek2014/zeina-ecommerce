@@ -21,6 +21,8 @@ import {
   LayoutTemplate,
   Download,
   Layers,
+  Clock,
+  Globe,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { cn } from '@/shared/utils/cn';
@@ -125,6 +127,12 @@ const NAV: ReadonlyArray<{
     label: 'Activity',
     icon: Activity,
     permission: 'activity:read',
+  },
+  {
+    href: '/admin/cron',
+    label: 'Cron jobs',
+    icon: Clock,
+    permission: 'settings:write',
   },
   {
     href: '/admin/settings',
@@ -253,6 +261,16 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
       >
         <Menu className="size-5" />
       </button>
+      <Link
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-primary hover:text-brand-primary"
+      >
+        <Globe className="size-3.5" />
+        <span className="hidden sm:inline">View Website</span>
+        <span className="sm:hidden">Website</span>
+      </Link>
       <div className="flex-1" />
       {user && hasPermission(user.role, 'notifications:read') ? (
         <NotificationBell />

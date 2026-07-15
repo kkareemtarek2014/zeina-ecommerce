@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import {
   AdminBreadcrumbs,
-  CronJobsPanel,
   IntegrationsStatusPanel,
   SettingsForm,
   useAdminSettings,
@@ -119,7 +118,6 @@ export default function AdminSettingsPage() {
               }}
             />
             <IntegrationsStatusPanel />
-            <CronJobsPanel lastRuns={data.cronLastRuns} />
           </>
         )}
       </div>
