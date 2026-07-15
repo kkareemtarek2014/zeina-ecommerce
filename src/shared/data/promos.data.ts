@@ -17,6 +17,11 @@ export const PROMOS_DB: PromoCode[] = [
     value: 50, // 50 EGP off
     minOrderValue: 500,
   },
+  {
+    code: 'ZAYFRIEND10',
+    type: 'percentage',
+    value: 0.1, // Shared referral — give friends 10% off
+  },
 ];
 
 export function validatePromoCode(code: string, subtotal: number): { valid: boolean; error?: string; discount?: number } {

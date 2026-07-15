@@ -99,6 +99,13 @@
       "when": 1783984858233,
       "tag": "0013_last_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1784130000000,
+      "tag": "0014_sprint3_waitlist_alerts",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ import { useStorefrontConfig } from '@/features/admin';
 import { Button, Drawer, QuantityStepper } from '@/shared/components/ui';
 import { useHydrated } from '@/shared/hooks/useHydrated';
 import { CartRecommendations } from './CartRecommendations';
+import { FreeShippingProgress } from './FreeShippingProgress';
 import {
   selectCartCount,
   selectCartSubtotal,
@@ -38,6 +39,7 @@ export function CartDrawer() {
   
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponOpen, setCouponOpen] = useState(false);
   const { data: storefrontConfig } = useStorefrontConfig();
   const freeShippingThreshold =
     storefrontConfig?.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD;
@@ -129,20 +131,18 @@ export function CartDrawer() {
             </div>
 
             <div className="mt-4">
-              <CartRecommendations onNavigate={closeDrawer} />
+              <CartRecommendations
+                remainingForFree={remainingForFree}
+                onNavigate={closeDrawer}
+              />
             </div>
 
             <div className="sticky bottom-0 -mx-5 mt-4 border-t border-border bg-surface-raised px-5 pb-2 pt-4">
-              {remainingForFree > 0 ? (
-                <p className="mb-3 rounded-(--radius) bg-brand-blush px-3 py-2 text-xs text-brand-secondary">
-                  Add {formatEGP(remainingForFree)} more for{' '}
-                  <strong>free shipping</strong>.
-                </p>
-              ) : (
-                <p className="mb-3 rounded-(--radius) bg-status-success/10 px-3 py-2 text-xs text-status-success">
-                  You’ve unlocked <strong>free shipping</strong>!
-                </p>
-              )}
+              <FreeShippingProgress
+                className="mb-3"
+                remainingForFree={remainingForFree}
+                threshold={freeShippingThreshold}
+              />
 
               <div className="mb-4">
                 {couponCode ? (
@@ -150,22 +150,23 @@ export function CartDrawer() {
                     <span className="font-medium text-brand-primary">Code: {couponCode}</span>
                     <button type="button" onClick={() => { removeCoupon(); setCouponError(null); }} className="text-brand-secondary underline text-xs">Remove</button>
                   </div>
-                ) : (
+                ) : couponOpen ? (
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-2">
-                      <input 
-                        type="text" 
-                        placeholder="Coupon Code (e.g. WELCOME10)" 
+                      <input
+                        type="text"
+                        placeholder="Coupon Code (e.g. WELCOME10)"
                         value={couponInput}
                         onChange={(e) => { setCouponInput(e.target.value); setCouponError(null); }}
                         className="flex-1 rounded-(--radius) border border-border px-3 py-1.5 text-sm outline-none focus:border-brand-primary"
+                        aria-label="Coupon code"
                       />
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={async () => { 
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
                           if (!couponInput) return;
-                          const res = await applyCoupon(couponInput); 
+                          const res = await applyCoupon(couponInput);
                           if (res.success) {
                             setCouponInput('');
                             setCouponError(null);
@@ -177,8 +178,27 @@ export function CartDrawer() {
                         Apply
                       </Button>
                     </div>
-                    {couponError && <p className="text-xs text-status-error ml-1">{couponError}</p>}
+                    {couponError && <p className="ml-1 text-xs text-status-error">{couponError}</p>}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCouponOpen(false);
+                        setCouponError(null);
+                        setCouponInput('');
+                      }}
+                      className="self-start text-xs text-text-muted underline"
+                    >
+                      Cancel
+                    </button>
                   </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setCouponOpen(true)}
+                    className="text-xs font-medium text-text-secondary underline underline-offset-2 hover:text-brand-primary"
+                  >
+                    Have a code?
+                  </button>
                 )}
               </div>
 

@@ -27,6 +27,7 @@ import {
   pricingInputFromRow,
 } from '@/server/services/pricing.service';
 import { listPublishedProductsByIds } from '@/server/services/product.service';
+import * as productsRepo from '@/server/repositories/products.repo';
 import type { ProductDTO } from '@/shared/contracts/product.contract';
 
 export type CartPriceLine = {
@@ -340,27 +341,95 @@ export async function listStorefrontBundleHintsForProduct(
     type: BundleRow['type'];
     config: Record<string, unknown>;
     productIds: string[];
+    products: Array<{
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+    }>;
+    savingsEgp: number | null;
   }>
 > {
   if (!isFeatureEnabled('bundles')) return [];
   const db = await getRequestDb();
   const linked = await bundlesRepo.findProductBundles(db, productId);
   const now = new Date();
-  return linked
-    .filter(({ bundle }) => {
-      if (!bundle.active) return false;
-      if (bundle.startsAt && bundle.startsAt > now) return false;
-      if (bundle.endsAt && bundle.endsAt < now) return false;
-      return true;
-    })
-    .slice(0, 3)
-    .map(({ bundle, items }) => ({
+  const active = linked.filter(({ bundle }) => {
+    if (!bundle.active) return false;
+    if (bundle.startsAt && bundle.startsAt > now) return false;
+    if (bundle.endsAt && bundle.endsAt < now) return false;
+    return true;
+  }).slice(0, 3);
+
+  if (active.length === 0) return [];
+
+  const pricing = await getPricingSettings(db);
+  const out: Array<{
+    id: string;
+    name: string;
+    type: BundleRow['type'];
+    config: Record<string, unknown>;
+    productIds: string[];
+    products: Array<{
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+    }>;
+    savingsEgp: number | null;
+  }> = [];
+
+  for (const { bundle, items } of active) {
+    const productIds = items.map((i) => i.productId);
+    const productPreviews: Array<{
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+    }> = [];
+    let separateTotal = 0;
+
+    for (const item of items) {
+      const row = await productsRepo.findProductById(db, item.productId);
+      if (!row) continue;
+      const price = computeSellPrice(pricingInputFromRow(row), pricing);
+      separateTotal += price * item.qty;
+      productPreviews.push({
+        id: row.id,
+        name: row.name,
+        image: row.images[0] ?? '',
+        price,
+      });
+    }
+
+    let savingsEgp: number | null = null;
+    if (bundle.type === 'fixed_price' || bundle.type === 'set') {
+      const fixed = Number(bundle.config?.price);
+      if (Number.isFinite(fixed) && fixed >= 0) {
+        savingsEgp = Math.max(0, separateTotal - Math.round(fixed));
+      }
+    } else if (bundle.type === 'bxgy') {
+      const getQty = Number(bundle.config?.getQty);
+      const prices = productPreviews.map((p) => p.price).sort((a, b) => a - b);
+      if (Number.isFinite(getQty) && getQty > 0 && prices.length > 0) {
+        savingsEgp = prices
+          .slice(0, Math.min(getQty, prices.length))
+          .reduce((s, p) => s + p, 0);
+      }
+    }
+
+    out.push({
       id: bundle.id,
       name: bundle.name,
       type: bundle.type,
       config: bundle.config ?? {},
-      productIds: items.map((i) => i.productId),
-    }));
+      productIds,
+      products: productPreviews,
+      savingsEgp: savingsEgp && savingsEgp > 0 ? savingsEgp : null,
+    });
+  }
+
+  return out;
 }
 
 /**

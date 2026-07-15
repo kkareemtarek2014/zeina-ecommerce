@@ -429,6 +429,7 @@ export async function getStorefrontConfig(): Promise<StorefrontConfigDTO> {
     maintenanceMode: asBool(maintenanceRaw, false),
     onlinePayments: await getOnlinePaymentsAvailability(),
     bridalPage: await isBridalPageEnabled(),
+    whatsappNumber: asString(await getSettingValue('whatsapp_number')),
   };
 }
 

@@ -55,7 +55,7 @@ export const FEATURES: Record<FeatureKey, FeatureConfig> = {
   bundles: {
     key: 'bundles',
     label: 'Bundles & upselling',
-    enabled: false,
+    enabled: true,
     routes: ['/bundles'],
   },
   preorders: {

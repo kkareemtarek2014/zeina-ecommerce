@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Check, ShieldCheck, Star, Truck } from 'lucide-react';
 import { useProduct } from '@/features/shop';
@@ -17,12 +17,18 @@ import {
   WishlistButton,
 } from '@/shared/components/ui';
 import { ProductGallery } from './ProductGallery';
+import { StickyBuyBar } from './StickyBuyBar';
+import { NotifyMeForm } from './NotifyMeForm';
+import { PdpWhatsAppCta } from './PdpWhatsAppCta';
 import { useRecentlyViewedStore } from '../store/recently-viewed.store';
 import { ProductReviews } from './ProductReviews';
 import { RelatedProducts } from './RelatedProducts';
 import { NewArrivals } from './NewArrivals';
 import { RecentlyViewed } from './RecentlyViewed';
 import { ProductBundleHints } from './ProductBundleHints';
+import { WishlistAlertControls } from '@/features/account';
+import { useFavoritesStore } from '@/shared/store/favorites.store';
+import { useHydrated } from '@/shared/hooks/useHydrated';
 
 export function ProductDetails({ id }: { id: string }) {
   const { data: product, isLoading } = useProduct(id);
@@ -33,6 +39,11 @@ export function ProductDetails({ id }: { id: string }) {
     storefrontConfig?.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD;
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [showStickyBuy, setShowStickyBuy] = useState(false);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const hydrated = useHydrated();
+  const favoriteIds = useFavoritesStore((s) => s.ids);
+  const isFavorited = hydrated && favoriteIds.includes(id);
 
   useEffect(() => {
     if (product) {
@@ -45,6 +56,22 @@ export function ProductDetails({ id }: { id: string }) {
       method: 'POST',
     }).catch(() => undefined);
   }, [id]);
+
+  useEffect(() => {
+    const el = addButtonRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        setShowStickyBuy(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: '0px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [product?.id]);
 
   if (isLoading) {
     return <ProductDetailSkeleton />;
@@ -74,7 +101,7 @@ export function ProductDetails({ id }: { id: string }) {
   };
 
   return (
-    <div className="flex flex-col gap-16">
+    <div className="flex flex-col gap-16 pb-24 md:pb-0">
       <div className="grid gap-10 lg:grid-cols-2">
         <ProductGallery images={product.images} name={product.name} />
 
@@ -89,7 +116,7 @@ export function ProductDetails({ id }: { id: string }) {
             ) : null}
           </div>
 
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold leading-tight lg:text-4xl">
+          <h1 className="font-display text-3xl font-semibold leading-tight lg:text-4xl">
             {product.name}
           </h1>
 
@@ -137,31 +164,56 @@ export function ProductDetails({ id }: { id: string }) {
           ) : null}
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <QuantityStepper value={quantity} onChange={setQuantity} />
-            <Button
-              size="lg"
-              onClick={handleAdd}
-              disabled={!canAdd}
-              className="flex-1 sm:min-w-56 sm:flex-none"
-            >
-              {added ? (
-                <>
-                  <Check className="size-5" /> Added to bag
-                </>
-              ) : product.preorderAvailable && !product.inStock ? (
-                'Pre-order'
-              ) : product.inStock ? (
-                'Add to bag'
-              ) : (
-                'Sold out'
-              )}
-            </Button>
+            {canAdd ? (
+              <>
+                <QuantityStepper value={quantity} onChange={setQuantity} />
+                <Button
+                  ref={addButtonRef}
+                  size="lg"
+                  onClick={handleAdd}
+                  disabled={!canAdd}
+                  className="flex-1 sm:min-w-56 sm:flex-none"
+                >
+                  {added ? (
+                    <>
+                      <Check className="size-5" /> Added to bag
+                    </>
+                  ) : product.preorderAvailable && !product.inStock ? (
+                    'Pre-order'
+                  ) : (
+                    'Add to bag'
+                  )}
+                </Button>
+              </>
+            ) : (
+              <Button
+                ref={addButtonRef}
+                size="lg"
+                disabled
+                className="flex-1 sm:min-w-56 sm:flex-none"
+              >
+                Sold out
+              </Button>
+            )}
             <WishlistButton
               productId={product.id}
               productName={product.name}
               className="size-11 border border-border-strong shadow-none hover:border-brand-primary"
             />
           </div>
+
+          {!product.inStock && !product.preorderAvailable ? (
+            <NotifyMeForm productId={product.id} />
+          ) : null}
+
+          <WishlistAlertControls
+            productId={product.id}
+            favorited={Boolean(isFavorited)}
+          />
+
+          {product.lowStock ? (
+            <Badge tone="warning">Only a few left</Badge>
+          ) : null}
 
           {product.preorderAvailable && !product.inStock ? (
             <p className="text-xs text-text-muted">
@@ -175,7 +227,7 @@ export function ProductDetails({ id }: { id: string }) {
 
           <ProductBundleHints productId={product.id} />
 
-          <ul className="mt-4 space-y-3 rounded-(--radius-lg) bg-brand-blush/60 p-5 text-sm text-text-secondary">
+          <ul className="mt-4 space-y-3 rounded-lg bg-brand-blush/60 p-5 text-sm text-text-secondary">
             <li className="flex items-center gap-3">
               <Truck className="size-4 shrink-0 text-brand-primary" />
               Free shipping on orders over {formatEGP(freeShippingThreshold)}.
@@ -189,6 +241,11 @@ export function ProductDetails({ id }: { id: string }) {
               Quality checked before it ships to you.
             </li>
           </ul>
+
+          <PdpWhatsAppCta
+            productName={product.name}
+            category={product.category}
+          />
         </div>
       </div>
 
@@ -196,6 +253,17 @@ export function ProductDetails({ id }: { id: string }) {
       <RelatedProducts currentId={product.id} category={product.category} />
       <NewArrivals />
       <RecentlyViewed currentId={product.id} />
+
+      <StickyBuyBar
+        visible={showStickyBuy}
+        price={price}
+        compareAtPrice={product.compareAtPrice}
+        canAdd={canAdd}
+        added={added}
+        preorderAvailable={Boolean(product.preorderAvailable)}
+        inStock={product.inStock}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }

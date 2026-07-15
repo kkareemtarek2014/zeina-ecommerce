@@ -11,6 +11,11 @@ export const productDtoSchema = z.object({
   rating: z.number(),
   reviewCount: z.number().int(),
   inStock: z.boolean(),
+  /**
+   * Server-derived: available qty ≤ settings lowStockThreshold while still in stock.
+   * Never expose raw qty on the storefront.
+   */
+  lowStock: z.boolean().optional(),
   featured: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   descriptionFormat: z.enum(['plain', 'html']).optional(),

@@ -1,9 +1,11 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { isFeatureEnabled } from '@/config/features.config';
 import { api } from '@/shared/lib/api-client';
+import { BundleSavingsBadge } from './BundleSavingsBadge';
 
 type BundleHint = {
   id: string;
@@ -11,6 +13,13 @@ type BundleHint = {
   type: string;
   config: Record<string, unknown>;
   productIds: string[];
+  products: Array<{
+    id: string;
+    name: string;
+    image: string;
+    price: number;
+  }>;
+  savingsEgp: number | null;
 };
 
 export function ProductBundleHints({ productId }: { productId: string }) {
@@ -27,32 +36,51 @@ export function ProductBundleHints({ productId }: { productId: string }) {
   if (!enabled || hints.length === 0) return null;
 
   return (
-    <div className="rounded-(--radius) border border-border bg-surface px-4 py-3 text-sm">
-      <p className="font-medium text-text-primary">Frequently bought together</p>
-      <ul className="mt-2 space-y-1 text-text-secondary">
-        {hints.map((h) => (
-          <li key={h.id}>
-            {h.name}
+    <div className="space-y-3">
+      {hints.map((h) => (
+        <div
+          key={h.id}
+          className="rounded-(--radius-lg) border border-border bg-brand-blush/40 px-4 py-3 text-sm"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-medium text-text-primary">{h.name}</p>
+            {h.savingsEgp ? (
+              <BundleSavingsBadge amountEgp={h.savingsEgp} />
+            ) : null}
+          </div>
+          <p className="mt-1 text-xs text-text-muted">
             {h.type === 'bxgy'
-              ? ` — buy ${String(h.config.buyQty)} get ${String(h.config.getQty)}`
-              : ''}
-            {h.productIds
-              .filter((id) => id !== productId)
-              .slice(0, 2)
-              .map((id) => (
-                <span key={id}>
-                  {' · '}
+              ? `Buy ${String(h.config.buyQty)} get ${String(h.config.getQty)}`
+              : 'Bundle set — savings apply at checkout'}
+          </p>
+          {h.products.length > 0 ? (
+            <ul className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              {h.products.map((p) => (
+                <li key={p.id} className="shrink-0">
                   <Link
-                    href={`/product/${id}`}
-                    className="text-brand-primary underline-offset-2 hover:underline"
+                    href={`/product/${p.id}`}
+                    className="block overflow-hidden rounded-(--radius) border border-border bg-surface-raised"
                   >
-                    View pair
+                    <Image
+                      src={p.image || '/images/cat-jewelry.svg'}
+                      alt={p.name}
+                      width={64}
+                      height={64}
+                      className="size-16 object-cover"
+                    />
                   </Link>
-                </span>
+                </li>
               ))}
-          </li>
-        ))}
-      </ul>
+            </ul>
+          ) : null}
+          <Link
+            href="/bundles"
+            className="mt-2 inline-block text-xs font-medium text-brand-primary underline-offset-2 hover:underline"
+          >
+            View all bundle deals
+          </Link>
+        </div>
+      ))}
     </div>
   );
 }

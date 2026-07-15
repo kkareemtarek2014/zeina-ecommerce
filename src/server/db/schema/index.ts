@@ -26,3 +26,5 @@ export { bundles, bundleItems } from './bundles';
 export { payments } from './payments';
 export { shipments } from './shipments';
 export { webhookEvents } from './webhook-events';
+export { waitlistSubscriptions } from './waitlist-subscriptions';
+export { wishlistAlerts } from './wishlist-alerts';

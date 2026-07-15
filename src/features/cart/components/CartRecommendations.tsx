@@ -1,31 +1,40 @@
 'use client';
 
+import { formatEGP } from '@/shared/utils/price';
 import { useCartRecommendations } from '../hooks/useCartRecommendations';
 import { CartRecommendationCard } from './CartRecommendationCard';
 
 interface CartRecommendationsProps {
-  /** Section heading. */
+  /** Override section heading. When omitted, uses gap-aware or “Complete the look”. */
   title?: string;
+  /** EGP remaining to free shipping — drives gap-closing sort + title. */
+  remainingForFree?: number;
   /** Called when a recommendation link is followed (e.g. close the drawer). */
   onNavigate?: () => void;
 }
 
 /**
- * "You may also like" horizontal slider for the cart. CSS scroll-snap only —
- * no carousel library (per project animation rules). Renders nothing when
- * there are no eligible products.
+ * Horizontal cart suggestions. CSS scroll-snap only — no carousel library.
+ * Default framing: “Complete the look”; gap-aware when close to free shipping.
  */
 export function CartRecommendations({
-  title = 'You may also like',
+  title,
+  remainingForFree,
   onNavigate,
 }: CartRecommendationsProps) {
-  const { products } = useCartRecommendations();
+  const { products, gapAware } = useCartRecommendations(8, remainingForFree);
 
   if (products.length === 0) return null;
 
+  const heading =
+    title ??
+    (gapAware && remainingForFree != null
+      ? `Add ${formatEGP(remainingForFree)} for free shipping — complete with:`
+      : 'Complete the look');
+
   return (
     <section className="border-t border-border pt-4">
-      <h3 className="mb-3 text-sm font-semibold text-text-primary">{title}</h3>
+      <h3 className="mb-3 text-sm font-semibold text-text-primary">{heading}</h3>
       <div className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-1">
         {products.map((product) => (
           <CartRecommendationCard

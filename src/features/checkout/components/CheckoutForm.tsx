@@ -151,6 +151,7 @@ export function CheckoutForm() {
               placeholder="01012345678"
               inputMode="numeric"
               autoComplete="tel"
+              hint="Egyptian mobile starting 01…"
               error={errors.phone?.message}
               {...register('phone')}
             />

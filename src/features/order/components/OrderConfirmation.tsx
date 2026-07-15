@@ -13,6 +13,7 @@ import { api } from '@/shared/lib/api-client';
 import type { PaymentStatusDTO } from '@/shared/contracts/payment.contract';
 import type { PaymobIntentionResult } from '@/shared/contracts/payment.contract';
 import { OrderItemsList } from './OrderItemsList';
+import { ReferralCard } from './ReferralCard';
 import { useOrder } from '../hooks/useOrders';
 
 
@@ -221,6 +222,8 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
           </div>
         ) : null}
       </div>
+
+      {onlinePaid && !onlinePending && !onlineFailed ? <ReferralCard /> : null}
 
       <div className="mt-8 text-center">
         <Link href="/shop">

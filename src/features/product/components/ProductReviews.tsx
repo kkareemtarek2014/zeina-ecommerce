@@ -37,11 +37,11 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   if (error || !data) {
     return (
       <section className="mt-12 border-t border-border pt-8">
-        <h2 className="font-(family-name:--font-display) text-2xl font-semibold text-brand-primary">
+        <h2 className="font-display text-2xl font-semibold text-brand-primary">
           Customer Reviews
         </h2>
         <p className="mt-4 text-sm text-text-secondary">
-          No reviews yet for this product.
+          Be the first to review after your order.
         </p>
       </section>
     );
@@ -52,13 +52,13 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
 
   return (
     <section className="mt-12 border-t border-border pt-8">
-      <h2 className="font-(family-name:--font-display) text-2xl font-semibold text-brand-primary">
+      <h2 className="font-display text-2xl font-semibold text-brand-primary">
         Customer Reviews
       </h2>
 
       {summary.count === 0 ? (
         <p className="mt-4 text-sm text-text-secondary">
-          No reviews yet for this product.
+          Be the first to review after your order.
         </p>
       ) : (
         <div className="mt-6 grid gap-8 lg:grid-cols-12">
@@ -114,7 +114,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           </div>
 
           <div className="lg:col-span-8 pr-2">
-            <div className="custom-scrollbar max-h-[300px] space-y-4 overflow-y-auto pr-4">
+            <div className="custom-scrollbar max-h-75 space-y-4 overflow-y-auto pr-4">
               {items.map((review) => (
                 <div
                   key={review.id}

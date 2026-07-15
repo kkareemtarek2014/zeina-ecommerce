@@ -14,6 +14,8 @@ import {
   useCartStore,
 } from '../store/cart.store';
 import { CartItemRow } from './CartItemRow';
+import { CartRecommendations } from './CartRecommendations';
+import { FreeShippingProgress } from './FreeShippingProgress';
 import { OrderNote } from './OrderNote';
 import { CartBundleCallout } from './CartBundleCallout';
 
@@ -77,7 +79,8 @@ export function CartView() {
             <CartItemRow key={item.productId} item={item} />
           ))}
         </div>
-        <div className="pt-4 border-t border-border">
+        <CartRecommendations remainingForFree={remainingForFree} />
+        <div className="border-t border-border pt-4">
           <OrderNote />
         </div>
       </div>
@@ -108,16 +111,12 @@ export function CartView() {
           </div>
         </dl>
 
-        {remainingForFree > 0 ? (
-          <p className="mt-4 rounded-(--radius) bg-brand-blush px-4 py-3 text-xs text-brand-secondary">
-            Add {formatEGP(remainingForFree)} more to get{' '}
-            <strong>free shipping</strong>.
-          </p>
-        ) : (
-          <p className="mt-4 rounded-(--radius) bg-status-success/10 px-4 py-3 text-xs text-status-success">
-            You’ve unlocked <strong>free shipping</strong>!
-          </p>
-        )}
+        <FreeShippingProgress
+          className="mt-4"
+          remainingForFree={remainingForFree}
+          threshold={freeShippingThreshold}
+          size="md"
+        />
 
         <CartBundleCallout items={items} />
 

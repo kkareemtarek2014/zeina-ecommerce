@@ -17,7 +17,7 @@ export function useReviews(productId: string) {
   });
 }
 
-/** Auth-only create — no storefront UI yet (Phase 6 scope). */
+/** Auth-only create — used by account “Rate your order” UI. */
 export function useCreateReview(productId: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -25,6 +25,19 @@ export function useCreateReview(productId: string) {
       reviewsService.create({ ...input, productId }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: reviewKeys.byProduct(productId) });
+    },
+  });
+}
+
+/** Submit a review with productId in the payload (multi-item orders). */
+export function useSubmitReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateReviewInput) => reviewsService.create(input),
+    onSuccess: (_data, input) => {
+      void qc.invalidateQueries({
+        queryKey: reviewKeys.byProduct(input.productId),
+      });
     },
   });
 }

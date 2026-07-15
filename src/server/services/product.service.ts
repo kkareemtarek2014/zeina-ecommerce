@@ -7,7 +7,7 @@ import * as categoriesRepo from '@/server/repositories/categories.repo';
 import * as governoratesRepo from '@/server/repositories/governorates.repo';
 import * as productsRepo from '@/server/repositories/products.repo';
 import type { ProductRow } from '@/server/repositories/products.repo';
-import { isEffectivelyInStock } from '@/server/lib/stock';
+import { availableQty, isEffectivelyInStock } from '@/server/lib/stock';
 import {
   computeSellPrice,
   getPricingSettings,
@@ -19,11 +19,18 @@ import {
   DEFAULT_SHIPPING_ETA_LOCAL,
   resolveShippingEta,
 } from '@/server/services/merchandising.service';
+import { getLowStockThreshold } from '@/server/services/inventory.service';
 import type { Db } from '@/server/db/client';
 
 type EtaLabels = { local: string; dropship: string };
 
-/** Maps a DB row → public ProductDTO. Never exposes basePrice / USD / landed. */
+type CatalogContext = {
+  pricing: PricingSettings;
+  etaLabels: EtaLabels;
+  lowStockThreshold: number;
+};
+
+/** Maps a DB row → public ProductDTO. Never exposes basePrice / USD / landed / qty. */
 export function toProductDTO(
   row: ProductRow,
   pricing: PricingSettings,
@@ -31,8 +38,10 @@ export function toProductDTO(
     local: DEFAULT_SHIPPING_ETA_LOCAL,
     dropship: DEFAULT_SHIPPING_ETA_DROPSHIP,
   },
+  lowStockThreshold = 5,
 ): ProductDTO {
   const inStock = isEffectivelyInStock(row);
+  const qty = availableQty(row);
   const preordersOn = isFeatureEnabled('preorders');
   const preorderAvailable =
     preordersOn && row.preorderEnabled && !inStock;
@@ -48,6 +57,9 @@ export function toProductDTO(
     reviewCount: row.reviewCount,
     inStock,
   };
+  if (inStock && qty > 0 && qty <= lowStockThreshold) {
+    dto.lowStock = true;
+  }
   if (row.compareAtPrice != null) dto.compareAtPrice = row.compareAtPrice;
   if (row.featured) dto.featured = true;
   if (row.tags?.length) dto.tags = row.tags;
@@ -69,6 +81,15 @@ export function toProductDTO(
   return dto;
 }
 
+function mapProduct(row: ProductRow, ctx: CatalogContext): ProductDTO {
+  return toProductDTO(
+    row,
+    ctx.pricing,
+    ctx.etaLabels,
+    ctx.lowStockThreshold,
+  );
+}
+
 async function loadEtaLabels(db: Db): Promise<EtaLabels> {
   const local = await resolveShippingEta(db, {
     fulfilmentType: 'local_stock',
@@ -79,6 +100,15 @@ async function loadEtaLabels(db: Db): Promise<EtaLabels> {
     inStock: true,
   });
   return { local, dropship };
+}
+
+async function loadCatalogContext(db: Db): Promise<CatalogContext> {
+  const [pricing, etaLabels, lowStockThreshold] = await Promise.all([
+    getPricingSettings(db),
+    loadEtaLabels(db),
+    getLowStockThreshold(db),
+  ]);
+  return { pricing, etaLabels, lowStockThreshold };
 }
 
 function toCategoryDTO(row: categoriesRepo.CategoryRow): CategoryDTO {
@@ -101,15 +131,14 @@ export async function listProducts(
   input: ListProductsInput = {},
 ): Promise<ProductDTO[]> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const rows = await productsRepo.findProducts(db, {
     category: input.category,
     featured: input.featured,
     sort: input.sort,
     q: input.q,
   });
-  let dtos = rows.map((r) => toProductDTO(r, pricing, etaLabels));
+  let dtos = rows.map((r) => mapProduct(r, ctx));
 
   if (input.q?.trim() && !input.sort) {
     dtos = dtos.slice(0, 8);
@@ -119,19 +148,17 @@ export async function listProducts(
 
 export async function getProduct(id: string): Promise<ProductDTO> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const row = await productsRepo.findProductById(db, id);
   if (!row) throw new NotFoundError('Product not found');
-  return toProductDTO(row, pricing, etaLabels);
+  return mapProduct(row, ctx);
 }
 
 export async function getProductOrNull(id: string): Promise<ProductDTO | null> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const row = await productsRepo.findProductById(db, id);
-  return row ? toProductDTO(row, pricing, etaLabels) : null;
+  return row ? mapProduct(row, ctx) : null;
 }
 
 /**
@@ -145,13 +172,12 @@ export async function listPublishedProductsByIds(
   const unique = [...new Set(ids)].slice(0, limit);
   if (!unique.length) return [];
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const out: ProductDTO[] = [];
   for (const id of unique) {
     const row = await productsRepo.findProductById(db, id);
     if (!row || row.status !== 'published') continue;
-    out.push(toProductDTO(row, pricing, etaLabels));
+    out.push(mapProduct(row, ctx));
   }
   return out;
 }
@@ -169,12 +195,11 @@ export async function getProductMetadataSource(
   id: string,
 ): Promise<ProductMetadataSource | null> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const row = await productsRepo.findProductById(db, id);
   if (!row) return null;
   return {
-    ...toProductDTO(row, pricing, etaLabels),
+    ...mapProduct(row, ctx),
     seoTitle: row.seoTitle,
     seoDescription: row.seoDescription,
     ogImage: row.ogImage,
@@ -188,8 +213,7 @@ export async function getRelated(
   limit = 4,
 ): Promise<ProductDTO[]> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const row = await productsRepo.findProductById(db, id);
   if (!row) throw new NotFoundError('Product not found');
   const related = await productsRepo.findRelatedProducts(
@@ -198,23 +222,21 @@ export async function getRelated(
     row.categorySlug,
     limit,
   );
-  return related.map((r) => toProductDTO(r, pricing, etaLabels));
+  return related.map((r) => mapProduct(r, ctx));
 }
 
 export async function getNewArrivals(limit = 8): Promise<ProductDTO[]> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const rows = await productsRepo.findNewArrivals(db, limit);
-  return rows.map((r) => toProductDTO(r, pricing, etaLabels));
+  return rows.map((r) => mapProduct(r, ctx));
 }
 
 export async function searchProducts(query: string): Promise<ProductDTO[]> {
   const db = await getRequestDb();
-  const pricing = await getPricingSettings(db);
-  const etaLabels = await loadEtaLabels(db);
+  const ctx = await loadCatalogContext(db);
   const rows = await productsRepo.searchProducts(db, query, 8);
-  return rows.map((r) => toProductDTO(r, pricing, etaLabels));
+  return rows.map((r) => mapProduct(r, ctx));
 }
 
 export async function listCategories(): Promise<CategoryDTO[]> {

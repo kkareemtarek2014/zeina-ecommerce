@@ -234,6 +234,8 @@ export const storefrontConfigSchema = z.object({
   onlinePayments: z.boolean().optional(),
   /** Bridal landing page visible (admin toggle). */
   bridalPage: z.boolean().optional(),
+  /** Digits or E.164-ish WhatsApp for PDP concierge (null when unset). */
+  whatsappNumber: z.string().nullable().optional(),
 });
 
 export type StorefrontConfigDTO = z.infer<typeof storefrontConfigSchema>;
