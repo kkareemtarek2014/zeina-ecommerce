@@ -142,27 +142,6 @@ export function ClassicHome({
         </div>
       </section>
 
-      {/* Trust band */}
-      <section className="border-y border-border bg-surface-raised">
-        <div className="mx-auto grid max-w-container gap-6 px-4 py-6 sm:grid-cols-3 lg:px-8">
-          <TrustItem
-            icon={<Truck className="size-5" />}
-            title="Egypt-wide delivery"
-            text="From 50 EGP in Cairo & Giza"
-          />
-          <TrustItem
-            icon={<Banknote className="size-5" />}
-            title="Cash on delivery"
-            text="Pay when it arrives"
-          />
-          <TrustItem
-            icon={<ShieldCheck className="size-5" />}
-            title="Curated quality"
-            text="Every piece handpicked"
-          />
-        </div>
-      </section>
-
       {/* Categories */}
       <section className="mx-auto max-w-container px-4 py-16 lg:px-8">
         <SectionHeading eyebrow="Browse" title="Shop by Category" href="/shop" />
@@ -190,6 +169,27 @@ export function ClassicHome({
               </p>
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Trust band */}
+      <section className="border-y border-border bg-surface-raised">
+        <div className="mx-auto grid max-w-container gap-6 px-4 py-6 sm:grid-cols-3 lg:px-8">
+          <TrustItem
+            icon={<Truck className="size-5" />}
+            title="Egypt-wide delivery"
+            text="From 50 EGP in Cairo & Giza"
+          />
+          <TrustItem
+            icon={<Banknote className="size-5" />}
+            title="Cash on delivery"
+            text="Pay when it arrives"
+          />
+          <TrustItem
+            icon={<ShieldCheck className="size-5" />}
+            title="Curated quality"
+            text="Every piece handpicked"
+          />
         </div>
       </section>
 

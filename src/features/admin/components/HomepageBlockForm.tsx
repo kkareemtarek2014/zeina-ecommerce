@@ -17,6 +17,7 @@ import {
 
 const TYPE_LABELS: Record<HomepageBlockType, string> = {
   hero: 'Hero',
+  categories: 'Categories grid',
   featured: 'Featured products',
   new_arrivals: 'New arrivals',
   collection: 'Collection',
@@ -42,6 +43,8 @@ function defaultConfig(type: HomepageBlockType): Record<string, unknown> {
         secondaryCtaLabel: HERO_DEFAULT_SECONDARY.label,
         secondaryCtaHref: HERO_DEFAULT_SECONDARY.href,
       };
+    case 'categories':
+      return { title: 'Shop by Category', eyebrow: 'Browse' };
     case 'featured':
       return { title: 'Featured Pieces', productIds: [] };
     case 'new_arrivals':
@@ -177,17 +180,27 @@ export function HomepageBlockForm({
         ))}
       </Select>
 
-      {(type === 'hero' ||
-        type === 'featured' ||
-        type === 'new_arrivals' ||
-        type === 'collection' ||
-        type === 'promo') && (
-        <Input
-          label="Title"
-          value={str(config, 'title')}
-          onChange={(e) => patch('title', e.target.value)}
-          required={type === 'hero' || type === 'promo'}
-        />
+      <Input
+        label="Title"
+        value={str(config, 'title')}
+        onChange={(e) => patch('title', e.target.value)}
+        required={type === 'hero' || type === 'promo'}
+      />
+
+      {type === 'categories' && (
+        <>
+          <Input
+            label="Eyebrow (small label above the title)"
+            value={str(config, 'eyebrow')}
+            onChange={(e) => patch('eyebrow', e.target.value)}
+            placeholder="Browse"
+          />
+          <p className="text-xs text-text-muted">
+            Renders the circular category tiles (all categories, in their
+            catalog order). Place it right after the Hero block for the
+            classic layout.
+          </p>
+        </>
       )}
 
       {type === 'hero' && (

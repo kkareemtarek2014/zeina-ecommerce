@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const HOMEPAGE_BLOCK_TYPES = [
   'hero',
+  'categories',
   'featured',
   'new_arrivals',
   'collection',
@@ -18,6 +19,11 @@ export const heroBlockConfigSchema = z.object({
   ctaHref: z.string().trim().max(300).optional(),
   secondaryCtaLabel: z.string().trim().max(80).optional(),
   secondaryCtaHref: z.string().trim().max(300).optional(),
+});
+
+export const categoriesBlockConfigSchema = z.object({
+  title: z.string().trim().max(120).optional(),
+  eyebrow: z.string().trim().max(60).optional(),
 });
 
 export const featuredBlockConfigSchema = z.object({
@@ -48,6 +54,8 @@ export function configSchemaForType(type: HomepageBlockType) {
   switch (type) {
     case 'hero':
       return heroBlockConfigSchema;
+    case 'categories':
+      return categoriesBlockConfigSchema;
     case 'featured':
       return featuredBlockConfigSchema;
     case 'new_arrivals':
@@ -60,6 +68,9 @@ export function configSchemaForType(type: HomepageBlockType) {
 }
 
 export type HeroBlockConfig = z.infer<typeof heroBlockConfigSchema>;
+export type CategoriesBlockConfig = z.infer<
+  typeof categoriesBlockConfigSchema
+>;
 export type FeaturedBlockConfig = z.infer<typeof featuredBlockConfigSchema>;
 export type NewArrivalsBlockConfig = z.infer<
   typeof newArrivalsBlockConfigSchema
@@ -69,6 +80,7 @@ export type PromoBlockConfig = z.infer<typeof promoBlockConfigSchema>;
 
 export type HomepageBlockConfig =
   | HeroBlockConfig
+  | CategoriesBlockConfig
   | FeaturedBlockConfig
   | NewArrivalsBlockConfig
   | CollectionBlockConfig

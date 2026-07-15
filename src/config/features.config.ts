@@ -43,7 +43,8 @@ export const FEATURES: Record<FeatureKey, FeatureConfig> = {
   homepage_builder: {
     key: 'homepage_builder',
     label: 'Homepage Builder',
-    enabled: true,
+    // OFF for now — storefront renders ClassicHome; /admin/homepage 404s.
+    enabled: false,
     routes: ['/admin/homepage'],
   },
   dynamic_pricing: {

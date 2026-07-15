@@ -6,6 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import {
   ProductGrid,
+  useCategories,
   useFeaturedProducts,
   useNewArrivals,
   useProducts,
@@ -89,6 +90,51 @@ function HeroBlock({ config }: { config: Record<string, unknown> }) {
             className="size-full object-cover"
           />
         </div>
+      </div>
+    </section>
+  );
+}
+
+function CategoriesBlock({ config }: { config: Record<string, unknown> }) {
+  const title =
+    typeof config.title === 'string' && config.title
+      ? config.title
+      : 'Shop by Category';
+  const eyebrow =
+    typeof config.eyebrow === 'string' && config.eyebrow
+      ? config.eyebrow
+      : 'Browse';
+  const { data: categories, isLoading } = useCategories();
+
+  if (!isLoading && (categories?.length ?? 0) === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-container px-4 py-12 lg:px-8">
+      <SectionHeading eyebrow={eyebrow} title={title} href="/shop" />
+      <div className="mt-8 grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-7">
+        {(categories ?? []).map((cat, i) => (
+          <Link
+            key={cat.slug}
+            href={`/shop/${cat.slug}`}
+            className="group animate-fade-up stagger flex flex-col items-center gap-3"
+            style={{ '--stagger-i': i } as React.CSSProperties}
+          >
+            <div className="aspect-square w-full overflow-hidden rounded-full border-2 border-transparent bg-brand-blush shadow-sm transition-all group-hover:border-brand-primary/40 group-hover:shadow-lg group-hover:shadow-brand-primary/15">
+              <Image
+                src={cat.image}
+                alt={cat.name}
+                title={cat.name}
+                width={300}
+                height={300}
+                sizes="(min-width: 1024px) 14vw, (min-width: 640px) 25vw, 33vw"
+                className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            </div>
+            <p className="text-center text-sm font-medium transition-colors group-hover:text-brand-primary">
+              {cat.name}
+            </p>
+          </Link>
+        ))}
       </div>
     </section>
   );
@@ -239,6 +285,8 @@ function HomeBlock({ block }: { block: HomepageBlockDTO }) {
   switch (block.type) {
     case 'hero':
       return <HeroBlock config={block.config} />;
+    case 'categories':
+      return <CategoriesBlock config={block.config} />;
     case 'featured':
       return <FeaturedBlock config={block.config} />;
     case 'new_arrivals':
