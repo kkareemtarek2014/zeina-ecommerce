@@ -1,7 +1,9 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
+// Keep in sync with HOMEPAGE_BLOCK_TYPES in shared/contracts/homepage.contract.ts.
 export const HOMEPAGE_BLOCK_TYPES = [
   'hero',
+  'categories',
   'featured',
   'new_arrivals',
   'collection',
