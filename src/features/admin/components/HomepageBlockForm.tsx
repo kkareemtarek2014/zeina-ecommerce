@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { Button, Input, Select } from '@/shared/components/ui';
 import { MediaPicker } from './MediaPicker';
 import {
+  HERO_DEFAULT_PRIMARY,
+  HERO_DEFAULT_SECONDARY,
+  BUNDLES_PATH,
+} from '@/shared/lib/feature-links';
+import {
   HOMEPAGE_BLOCK_TYPES,
   type HomepageBlockDTO,
   type HomepageBlockType,
@@ -32,10 +37,10 @@ function defaultConfig(type: HomepageBlockType): Record<string, unknown> {
         title: 'Adorn every day',
         subtitle: 'Curated accessories for the modern Egyptian woman.',
         image: '/images/hero.svg',
-        ctaLabel: 'Shop now',
-        ctaHref: '/shop',
-        secondaryCtaLabel: 'Explore jewelry',
-        secondaryCtaHref: '/shop/jewelry',
+        ctaLabel: HERO_DEFAULT_PRIMARY.label,
+        ctaHref: HERO_DEFAULT_PRIMARY.href,
+        secondaryCtaLabel: HERO_DEFAULT_SECONDARY.label,
+        secondaryCtaHref: HERO_DEFAULT_SECONDARY.href,
       };
     case 'featured':
       return { title: 'Featured Pieces', productIds: [] };
@@ -71,6 +76,32 @@ function productIdsText(config: Record<string, unknown>): string {
   const v = config.productIds;
   if (!Array.isArray(v)) return '';
   return v.filter((x): x is string => typeof x === 'string').join(', ');
+}
+
+/** Shared image URL + MediaPicker affordance for hero / promo blocks. */
+function ImageUrlField({
+  value,
+  onChange,
+  onPick,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onPick: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-end gap-2">
+      <div className="min-w-0 flex-1">
+        <Input
+          label="Image URL"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+      <Button type="button" variant="secondary" onClick={onPick}>
+        Media
+      </Button>
+    </div>
+  );
 }
 
 export function HomepageBlockForm({
@@ -166,22 +197,11 @@ export function HomepageBlockForm({
             value={str(config, 'subtitle')}
             onChange={(e) => patch('subtitle', e.target.value)}
           />
-          <div className="flex flex-wrap items-end gap-2">
-            <div className="min-w-0 flex-1">
-              <Input
-                label="Image URL"
-                value={str(config, 'image')}
-                onChange={(e) => patch('image', e.target.value)}
-              />
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setPickerField('image')}
-            >
-              Media
-            </Button>
-          </div>
+          <ImageUrlField
+            value={str(config, 'image')}
+            onChange={(v) => patch('image', v)}
+            onPick={() => setPickerField('image')}
+          />
           <div className="grid gap-3 sm:grid-cols-2">
             <Input
               label="Primary CTA label"
@@ -192,6 +212,7 @@ export function HomepageBlockForm({
               label="Primary CTA href"
               value={str(config, 'ctaHref')}
               onChange={(e) => patch('ctaHref', e.target.value)}
+              placeholder={HERO_DEFAULT_PRIMARY.href}
             />
             <Input
               label="Secondary CTA label"
@@ -202,8 +223,15 @@ export function HomepageBlockForm({
               label="Secondary CTA href"
               value={str(config, 'secondaryCtaHref')}
               onChange={(e) => patch('secondaryCtaHref', e.target.value)}
+              placeholder={HERO_DEFAULT_SECONDARY.href}
             />
           </div>
+          <p className="text-xs text-text-muted">
+            Defaults deep-link to shop sorts: New In →{' '}
+            <code className="text-[0.7rem]">{HERO_DEFAULT_PRIMARY.href}</code>, Best
+            Sellers →{' '}
+            <code className="text-[0.7rem]">{HERO_DEFAULT_SECONDARY.href}</code>.
+          </p>
         </>
       )}
 
@@ -254,22 +282,11 @@ export function HomepageBlockForm({
             value={str(config, 'body')}
             onChange={(e) => patch('body', e.target.value)}
           />
-          <div className="flex flex-wrap items-end gap-2">
-            <div className="min-w-0 flex-1">
-              <Input
-                label="Image URL"
-                value={str(config, 'image')}
-                onChange={(e) => patch('image', e.target.value)}
-              />
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setPickerField('image')}
-            >
-              Media
-            </Button>
-          </div>
+          <ImageUrlField
+            value={str(config, 'image')}
+            onChange={(v) => patch('image', v)}
+            onPick={() => setPickerField('image')}
+          />
           <div className="grid gap-3 sm:grid-cols-2">
             <Input
               label="CTA label"
@@ -280,8 +297,15 @@ export function HomepageBlockForm({
               label="CTA href"
               value={str(config, 'ctaHref')}
               onChange={(e) => patch('ctaHref', e.target.value)}
+              placeholder="/shop"
             />
           </div>
+          <p className="text-xs text-text-muted">
+            Bundles promo: set CTA href to{' '}
+            <code className="text-[0.7rem]">{BUNDLES_PATH}</code> when the{' '}
+            <code className="text-[0.7rem]">bundles</code> flag is ON. The
+            storefront hides that CTA while the flag is off.
+          </p>
         </>
       )}
 

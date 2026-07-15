@@ -14,6 +14,9 @@ import {
 import { RecentlyViewed } from '@/features/product/components/RecentlyViewed';
 import type { HomepageBlockDTO } from '@/shared/contracts/homepage.contract';
 import type { Product } from '@/shared/types/product.types';
+import {
+  resolveVisibleHref,
+} from '@/shared/lib/feature-links';
 import { SectionHeading, SeoStrip } from './ClassicHome';
 import { SocialProofSection } from './SocialProofSection';
 
@@ -27,16 +30,18 @@ function HeroBlock({ config }: { config: Record<string, unknown> }) {
       : '/images/hero.svg';
   const ctaLabel =
     typeof config.ctaLabel === 'string' ? config.ctaLabel : undefined;
-  const ctaHref =
-    typeof config.ctaHref === 'string' ? config.ctaHref : undefined;
+  const ctaHref = resolveVisibleHref(
+    typeof config.ctaHref === 'string' ? config.ctaHref : undefined,
+  );
   const secondaryCtaLabel =
     typeof config.secondaryCtaLabel === 'string'
       ? config.secondaryCtaLabel
       : undefined;
-  const secondaryCtaHref =
+  const secondaryCtaHref = resolveVisibleHref(
     typeof config.secondaryCtaHref === 'string'
       ? config.secondaryCtaHref
-      : undefined;
+      : undefined,
+  );
 
   return (
     <section className="bg-linear-to-br from-brand-blush via-surface to-surface">
@@ -191,8 +196,9 @@ function PromoBlock({ config }: { config: Record<string, unknown> }) {
       : undefined;
   const ctaLabel =
     typeof config.ctaLabel === 'string' ? config.ctaLabel : undefined;
-  const ctaHref =
-    typeof config.ctaHref === 'string' ? config.ctaHref : undefined;
+  const ctaHref = resolveVisibleHref(
+    typeof config.ctaHref === 'string' ? config.ctaHref : undefined,
+  );
 
   return (
     <section className="border-y border-border bg-brand-blush/40">

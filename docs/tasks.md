@@ -236,21 +236,21 @@ the storefront weekly and pushes purchase intent **without a deploy**.
 do not rebuild commerce logic in CMS.
 
 ### 2a — Shop-the-vibe + hero ops
-- [ ] Where the existing hero/collection/promo editors support image selection, wire the
+- [x] Where the existing hero/collection/promo editors support image selection, wire the
   existing MediaPicker to return and save the current **URL**. Keep block schemas URL-based;
   do not add `mediaAssetId`, new block types, or a migration.
-- [ ] Keep two hero CTAs (`Shop New In` / `Best Sellers`) editable in block config.
-- [ ] Admin checklist doc: "Monday drop ritual" — swap hero + vibe tiles in <10 min.
+- [x] Keep two hero CTAs (`Shop New In` / `Best Sellers`) editable in block config.
+- [x] Admin checklist doc: "Monday drop ritual" — swap hero + vibe tiles in <10 min.
 
 ### 2b — Existing social proof only
-- [ ] Confirm the existing social-proof component can render the configured Instagram handle
+- [x] Confirm the existing social-proof component can render the configured Instagram handle
   and simple outbound post links without a new cover-image or grid data model.
-- [ ] If it can, gate that existing output with `social_proof` on the homepage. If it cannot,
+- [x] If it can, gate that existing output with `social_proof` on the homepage. If it cannot,
   defer Instagram proof rather than building a new UGC block, cover field, or PDP strip.
 
 ### 2c — Verify existing bundles and pre-orders
-- [ ] Use an existing promo block to link to the bundles surface when `bundles` is ON.
-- [ ] Turn on `bundles`/`preorders` only in a safe environment and confirm existing product
+- [x] Use an existing promo block to link to the bundles surface when `bundles` is ON.
+- [x] Turn on `bundles`/`preorders` only in a safe environment and confirm existing product
   card/PDP badges, stock rules, and ETA data are correct. Fix a proven defect only; do not
   rebuild badges or put sell prices/stock rules into CMS configuration.
 
@@ -258,10 +258,10 @@ do not rebuild commerce logic in CMS.
 new analytics instrumentation in this task.**
 
 **Verify:**
-- [ ] Marketing swaps an existing hero/collection image via MediaPicker without deploy.
-- [ ] Existing social proof is either correctly gated or explicitly deferred.
-- [ ] Bundle link is shown only when `bundles` is ON.
-- [ ] Existing sold-out/pre-order UI matches real product state after flags are enabled.
+- [x] Marketing swaps an existing hero/collection image via MediaPicker without deploy.
+- [x] Existing social proof is either correctly gated or explicitly deferred.
+- [x] Bundle link is shown only when `bundles` is ON.
+- [x] Existing sold-out/pre-order UI matches real product state after flags are enabled.
 
 ---
 

@@ -26,6 +26,8 @@ import {
   getPricingSettings,
   pricingInputFromRow,
 } from '@/server/services/pricing.service';
+import { listPublishedProductsByIds } from '@/server/services/product.service';
+import type { ProductDTO } from '@/shared/contracts/product.contract';
 
 export type CartPriceLine = {
   productId: string;
@@ -359,4 +361,18 @@ export async function listStorefrontBundleHintsForProduct(
       config: bundle.config ?? {},
       productIds: items.map((i) => i.productId),
     }));
+}
+
+/**
+ * Products featured by any currently active bundle (storefront `/bundles`).
+ * Reuses catalog DTO mapping — no CMS prices/stock.
+ */
+export async function listStorefrontBundleProducts(
+  limit = 24,
+): Promise<ProductDTO[]> {
+  if (!isFeatureEnabled('bundles')) return [];
+  const db = await getRequestDb();
+  const active = await bundlesRepo.listActiveBundles(db);
+  const ids = active.flatMap(({ items }) => items.map((i) => i.productId));
+  return listPublishedProductsByIds(ids, limit);
 }

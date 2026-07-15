@@ -134,6 +134,28 @@ export async function getProductOrNull(id: string): Promise<ProductDTO | null> {
   return row ? toProductDTO(row, pricing, etaLabels) : null;
 }
 
+/**
+ * Public catalog cards for an ordered list of IDs (published only).
+ * Shared by the bundles marketing surface and any future ID-based grids.
+ */
+export async function listPublishedProductsByIds(
+  ids: string[],
+  limit = 24,
+): Promise<ProductDTO[]> {
+  const unique = [...new Set(ids)].slice(0, limit);
+  if (!unique.length) return [];
+  const db = await getRequestDb();
+  const pricing = await getPricingSettings(db);
+  const etaLabels = await loadEtaLabels(db);
+  const out: ProductDTO[] = [];
+  for (const id of unique) {
+    const row = await productsRepo.findProductById(db, id);
+    if (!row || row.status !== 'published') continue;
+    out.push(toProductDTO(row, pricing, etaLabels));
+  }
+  return out;
+}
+
 /** Server-only product + SEO fields for `generateMetadata` (not on public ProductDTO). */
 export type ProductMetadataSource = ProductDTO & {
   seoTitle: string | null;

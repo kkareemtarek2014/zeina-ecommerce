@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { SITE } from '@/config/site.config';
 import { CATEGORIES } from '@/shared/data/categories.data';
 import { ShopView } from '@/features/shop/components/ShopView';
+import { ShopPageSkeleton } from '@/shared/components/ui';
 import {
   getCategoryOrNull,
   listCategories,
@@ -57,5 +59,9 @@ export default async function CategoryPage({ params }: Props) {
   match ??= CATEGORIES.find((c) => c.slug === category) ?? null;
   if (!match) notFound();
 
-  return <ShopView category={category} />;
+  return (
+    <Suspense fallback={<ShopPageSkeleton />}>
+      <ShopView category={category} />
+    </Suspense>
+  );
 }

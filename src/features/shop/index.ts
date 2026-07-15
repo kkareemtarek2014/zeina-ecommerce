@@ -8,6 +8,7 @@ export {
   sortProducts,
   SORT_OPTIONS,
   DEFAULT_SORT,
+  parseSortKey,
   type SortKey,
 } from './utils/sortProducts';
 export {

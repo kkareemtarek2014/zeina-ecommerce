@@ -1,23 +1,40 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Sparkles, Search } from 'lucide-react';
 import { CATEGORIES } from '@/shared/data/categories.data';
 import { useProducts } from '../hooks/useProducts';
-import { sortProducts, DEFAULT_SORT, type SortKey } from '../utils/sortProducts';
+import {
+  sortProducts,
+  DEFAULT_SORT,
+  parseSortKey,
+  type SortKey,
+} from '../utils/sortProducts';
 import { CategoryPills } from './CategoryPills';
 import { ProductGrid } from './ProductGrid';
 import { ProductSort } from './ProductSort';
 
 export function ShopView({ category }: { category?: string }) {
   const { data, isLoading } = useProducts(category);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
+  const sortBy = parseSortKey(searchParams.get('sort'));
 
   const categoryName = category
     ? (CATEGORIES.find((c) => c.slug === category)?.name ?? 'Shop')
     : 'All Products';
+
+  function setSortBy(next: SortKey) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === DEFAULT_SORT) params.delete('sort');
+    else params.set('sort', next);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   const visibleProducts = useMemo(() => {
     if (!data) return [];

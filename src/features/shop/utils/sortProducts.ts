@@ -17,6 +17,14 @@ export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 export const DEFAULT_SORT: SortKey = 'featured';
 
+const SORT_KEYS = new Set<string>(SORT_OPTIONS.map((o) => o.value));
+
+/** Parse `?sort=` from the URL; unknown values fall back to featured. */
+export function parseSortKey(raw: string | null | undefined): SortKey {
+  if (raw && SORT_KEYS.has(raw)) return raw as SortKey;
+  return DEFAULT_SORT;
+}
+
 const isBestSeller = (p: Product) => (p.tags?.includes('best seller') ? 1 : 0);
 
 /**

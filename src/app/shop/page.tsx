@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { SITE } from '@/config/site.config';
 import { ShopView } from '@/features/shop/components/ShopView';
+import { ShopPageSkeleton } from '@/shared/components/ui';
 
 export const metadata: Metadata = {
   title: 'Shop Women’s Accessories',
@@ -9,5 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default function ShopPage() {
-  return <ShopView />;
+  return (
+    <Suspense fallback={<ShopPageSkeleton />}>
+      <ShopView />
+    </Suspense>
+  );
 }

@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import type { Db } from '@/server/db/client';
 import { settings } from '@/server/db/schema';
 import { isFeatureEnabled } from '@/config/features.config';
+import { isHttpsUrl } from '@/shared/lib/contact-links';
 
 export const DEFAULT_SHIPPING_ETA_LOCAL = '1–2 days';
 export const DEFAULT_SHIPPING_ETA_DROPSHIP = '2–3 weeks';
@@ -85,7 +86,7 @@ export async function getSocialProof(db: Db): Promise<SocialProofDTO | null> {
   const postsVal = postsRaw[0]?.value;
   if (Array.isArray(postsVal)) {
     postUrls = postsVal.filter(
-      (u): u is string => typeof u === 'string' && /^https?:\/\//.test(u),
+      (u): u is string => typeof u === 'string' && isHttpsUrl(u),
     );
   }
 
