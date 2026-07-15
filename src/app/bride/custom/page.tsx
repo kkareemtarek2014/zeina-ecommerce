@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE } from '@/config/site.config';
-import { BridalRequestForm } from '@/features/bridal-custom';
+import { BridalComingSoon, BridalRequestForm } from '@/features/bridal-custom';
+import { getBridalPageConfig } from '@/server/services/settings.service';
 
 const description =
   'Want a custom bridal accessory in Egypt? Send us a photo or video of your dream piece — veil, hair vine or jewelry — and our team replies within 2 days with options and prices.';
@@ -16,7 +17,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BridalCustomPage() {
+// Admin toggles must apply at request time.
+export const dynamic = 'force-dynamic';
+
+export default async function BridalCustomPage() {
+  let visible = true;
+  try {
+    const config = await getBridalPageConfig();
+    visible = config.enabled && config.customRequests;
+  } catch {
+    // Build/preview without DB bindings — default to visible.
+  }
+
+  if (!visible) {
+    return <BridalComingSoon />;
+  }
+
   return (
     <div className="mx-auto max-w-container px-4 py-12 lg:px-8">
       <div className="mx-auto mb-10 max-w-lg text-center">

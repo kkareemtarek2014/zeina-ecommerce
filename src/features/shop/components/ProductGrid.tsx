@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from 'react';
 import type { Product } from '@/shared/types/product.types';
+import { ProductGridSkeleton } from '@/shared/components/ui';
 import { ProductCard } from './ProductCard';
 
 export function ProductGrid({
@@ -12,16 +13,7 @@ export function ProductGrid({
   isLoading?: boolean;
 }) {
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-3/4 animate-pulse rounded-(--radius-lg) bg-brand-blush"
-          />
-        ))}
-      </div>
-    );
+    return <ProductGridSkeleton />;
   }
 
   if (!products || products.length === 0) {

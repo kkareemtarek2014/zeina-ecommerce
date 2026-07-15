@@ -2,6 +2,7 @@ import { isFeatureEnabled } from '@/config/features.config';
 import { CATEGORIES } from '@/shared/data/categories.data';
 import { ClassicHome, HomeFromBlocks } from '@/features/homepage';
 import { listCategories } from '@/server/services/product.service';
+import { getBridalPageConfig } from '@/server/services/settings.service';
 import { listActiveHomepageBlocks } from '@/server/services/admin-homepage.service';
 import type { HomepageBlockDTO } from '@/shared/contracts/homepage.contract';
 import type { Category } from '@/shared/types/product.types';
@@ -27,5 +28,21 @@ export default async function HomePage() {
     return <HomeFromBlocks blocks={blocks} />;
   }
 
-  return <ClassicHome categories={categories} />;
+  let bridalPage = true;
+  let bridalSpotlight = true;
+  try {
+    const bridal = await getBridalPageConfig();
+    bridalPage = bridal.enabled;
+    bridalSpotlight = bridal.enabled && bridal.homeSpotlight;
+  } catch {
+    // Build/preview without bindings — default to visible.
+  }
+
+  return (
+    <ClassicHome
+      categories={categories}
+      bridalPage={bridalPage}
+      bridalSpotlight={bridalSpotlight}
+    />
+  );
 }

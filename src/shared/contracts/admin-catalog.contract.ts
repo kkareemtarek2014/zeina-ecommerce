@@ -160,19 +160,11 @@ export const adminCategoryWriteSchema = z.object({
 
 export type AdminCategoryWrite = z.infer<typeof adminCategoryWriteSchema>;
 
-export const paginatedSchema = <T extends z.ZodType>(item: T) =>
-  z.object({
-    items: z.array(item),
-    page: z.number().int(),
-    pageSize: z.number().int(),
-    total: z.number().int(),
-    totalPages: z.number().int(),
-  });
+export {
+  createPaginatedResponseSchema,
+  paginatedSchema,
+  type Paginated,
+  type PaginationQuery,
+  PaginationQuerySchema,
+} from './common.contract';
 
-export type Paginated<T> = {
-  items: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-};

@@ -7,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return (
-    <>
-      <h1 className="text-2xl font-serif text-text-primary text-center mb-6">Welcome Back</h1>
-      <LoginForm />
-    </>
-  );
+  return <LoginForm />;
 }

@@ -16,6 +16,7 @@ export type FeatureKey =
   | 'bundles'
   | 'preorders'
   | 'social_proof'
+  | 'social_auth'
   | 'online_payments'
   | 'bosta_shipping';
 
@@ -63,6 +64,11 @@ export const FEATURES: Record<FeatureKey, FeatureConfig> = {
   social_proof: {
     key: 'social_proof',
     label: 'Social proof (Instagram)',
+    enabled: false,
+  },
+  social_auth: {
+    key: 'social_auth',
+    label: 'Social login (Google/Facebook)',
     enabled: false,
   },
   online_payments: {

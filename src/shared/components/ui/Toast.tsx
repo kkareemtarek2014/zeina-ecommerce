@@ -54,7 +54,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={item.id}
             className={cn(
-              'pointer-events-auto animate-fade-up flex items-start gap-3 rounded-(--radius-lg) border px-4 py-3 text-sm shadow-md',
+              'pointer-events-auto animate-fade-up flex items-start gap-3 rounded-lg border px-4 py-3 text-sm shadow-md',
+
               item.tone === 'success' &&
                 'border-status-success/30 bg-surface-raised text-status-success',
               item.tone === 'error' &&

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Check } from 'lucide-react';
-import { Button, Input } from '@/shared/components/ui';
+import { FormSkeleton, Button, Input } from '@/shared/components/ui';
 import { AppError } from '@/shared/contracts/errors';
 import { useProfile, useUpdateProfile } from '../hooks/useAccount';
 
@@ -38,9 +38,7 @@ export function ProfileForm() {
   });
 
   if (isLoading || !profile) {
-    return (
-      <p className="text-sm text-text-secondary">Loading profile…</p>
-    );
+    return <FormSkeleton fields={3} />;
   }
 
   const onSubmit = async (values: ProfileFormValues) => {

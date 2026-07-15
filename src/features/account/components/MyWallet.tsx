@@ -2,6 +2,7 @@
 
 import { Wallet, ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { formatEGP } from '@/shared/utils/price';
+import { AccountListSkeleton } from '@/shared/components/ui';
 import { AppError } from '@/shared/contracts/errors';
 import { useWallet } from '../hooks/useAccount';
 
@@ -9,7 +10,7 @@ export function MyWallet() {
   const { data, isLoading, error } = useWallet();
 
   if (isLoading) {
-    return <p className="text-sm text-text-secondary">Loading wallet…</p>;
+    return <AccountListSkeleton rows={5} />;
   }
 
   if (error) {

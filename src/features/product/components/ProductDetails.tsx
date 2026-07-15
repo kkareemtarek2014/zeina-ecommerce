@@ -12,6 +12,7 @@ import { useStorefrontConfig } from '@/features/admin';
 import {
   Badge,
   Button,
+  ProductDetailSkeleton,
   QuantityStepper,
   WishlistButton,
 } from '@/shared/components/ui';
@@ -46,16 +47,7 @@ export function ProductDetails({ id }: { id: string }) {
   }, [id]);
 
   if (isLoading) {
-    return (
-      <div className="grid gap-10 lg:grid-cols-2">
-        <div className="aspect-square animate-pulse rounded-(--radius-lg) bg-brand-blush" />
-        <div className="space-y-4 pt-4">
-          <div className="h-8 w-3/4 animate-pulse rounded bg-brand-blush" />
-          <div className="h-6 w-1/3 animate-pulse rounded bg-brand-blush" />
-          <div className="h-24 animate-pulse rounded bg-brand-blush" />
-        </div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {

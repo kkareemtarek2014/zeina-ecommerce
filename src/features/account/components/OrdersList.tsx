@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Package } from 'lucide-react';
 import { formatEGP } from '@/shared/utils/price';
-import { Badge, Button, Loader } from '@/shared/components/ui';
+import { AccountListSkeleton, Badge, Button } from '@/shared/components/ui';
 import { useHydrated } from '@/shared/hooks/useHydrated';
 import { useMyOrders } from '@/features/order/hooks/useOrders';
 
@@ -12,7 +12,7 @@ export function OrdersList() {
   const { data: orders = [], isLoading, isError } = useMyOrders();
 
   if (!mounted || isLoading) {
-    return <Loader fullscreen={false} className="p-12" />;
+    return <AccountListSkeleton />;
   }
 
   if (isError) {
@@ -41,7 +41,7 @@ export function OrdersList() {
         <li key={order.id}>
           <Link
             href={`/order/${order.id}`}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-(--radius-lg) border border-border bg-surface-raised p-4 transition-colors hover:border-brand-primary/40"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface-raised p-4 transition-colors hover:border-brand-primary/40"
           >
             <div>
               <p className="text-sm font-semibold">{order.id}</p>

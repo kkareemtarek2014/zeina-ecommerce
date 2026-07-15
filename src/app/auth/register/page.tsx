@@ -7,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return (
-    <>
-      <h1 className="text-2xl font-serif text-text-primary text-center mb-6">Create Account</h1>
-      <RegisterForm />
-    </>
-  );
+  return <RegisterForm />;
 }

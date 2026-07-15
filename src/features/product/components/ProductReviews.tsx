@@ -1,6 +1,7 @@
 'use client';
 
 import { Star, ThumbsUp } from 'lucide-react';
+import { ReviewsSkeleton } from '@/shared/components/ui';
 import { useReviews } from '../hooks/useReviews';
 
 function formatRelativeDate(iso: string): string {
@@ -30,14 +31,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   const { data, isLoading, error } = useReviews(productId);
 
   if (isLoading) {
-    return (
-      <section className="mt-12 border-t border-border pt-8">
-        <h2 className="font-(family-name:--font-display) text-2xl font-semibold text-brand-primary">
-          Customer Reviews
-        </h2>
-        <p className="mt-4 text-sm text-text-secondary">Loading reviews…</p>
-      </section>
-    );
+    return <ReviewsSkeleton />;
   }
 
   if (error || !data) {

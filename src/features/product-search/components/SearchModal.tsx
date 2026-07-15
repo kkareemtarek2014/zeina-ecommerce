@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Clock3, SearchX, Search as SearchIcon, X } from 'lucide-react';
 import { formatEGP } from '@/shared/utils/price';
+import { SearchResultsSkeleton } from '@/shared/components/ui';
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey';
 import { useScrollLock } from '@/shared/hooks/useScrollLock';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
@@ -108,7 +109,9 @@ export function SearchModal({ onClose }: SearchModalProps) {
               </p>
             )}
 
-            {value.trim().length > 0 && results.length > 0 && (
+            {value.trim().length > 0 && isLoading && <SearchResultsSkeleton />}
+
+            {value.trim().length > 0 && !isLoading && results.length > 0 && (
               <ul>
                 {results.map((product) => (
                   <li key={product.id}>

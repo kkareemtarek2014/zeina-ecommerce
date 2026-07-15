@@ -77,6 +77,13 @@ export default function AdminSettingsPage() {
                     seoDefaultDescription: n(values.seoDefaultDescription),
                     footerText: n(values.footerText),
                     maintenanceMode: values.maintenanceMode,
+                    bridalPageEnabled: values.bridalPageEnabled,
+                    bridalShowCollections: values.bridalShowCollections,
+                    bridalShowPersonalization: values.bridalShowPersonalization,
+                    bridalShowTiers: values.bridalShowTiers,
+                    bridalShowFinalCta: values.bridalShowFinalCta,
+                    bridalShowHomeSpotlight: values.bridalShowHomeSpotlight,
+                    bridalCustomEnabled: values.bridalCustomEnabled,
                     unpaidOrderTimeoutMinutes: values.unpaidOrderTimeoutMinutes,
                     pendingReminderHours: values.pendingReminderHours,
                   });

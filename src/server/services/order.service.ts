@@ -14,7 +14,8 @@ import {
   ValidationError,
 } from '@/server/http/errors';
 import * as ordersRepo from '@/server/repositories/orders.repo';
-import type { OrderItemRow, OrderRow } from '@/server/repositories/orders.repo';
+import type { OrderRow } from '@/server/repositories/orders.repo';
+
 import * as governoratesRepo from '@/server/repositories/governorates.repo';
 import {
   computeSellPrice,
@@ -40,7 +41,7 @@ import {
   trackingUrlFor,
 } from '@/server/services/bosta.service';
 import * as shipmentsRepo from '@/server/repositories/shipments.repo';
-import type { OrderTimelineEntry } from '@/shared/contracts/order.contract';
+
 
 function generateOrderId(): string {
   const stamp = Date.now().toString(36).toUpperCase();
@@ -48,45 +49,8 @@ function generateOrderId(): string {
   return `ZN-${stamp}-${random}`;
 }
 
-function toOrderDTO(
-  order: OrderRow,
-  items: OrderItemRow[],
-  timeline?: OrderTimelineEntry[],
-  tracking?: OrderDTO['tracking'],
-): OrderDTO {
-  const dto: OrderDTO = {
-    id: order.id,
-    createdAt: order.createdAt.toISOString(),
-    status: order.status,
-    items: items.map((i) => ({
-      productId: i.productId,
-      name: i.name,
-      image: i.image,
-      unitPrice: i.unitPrice,
-      quantity: i.quantity,
-      ...(i.isPreorder ? { isPreorder: true } : {}),
-    })),
-    address: {
-      fullName: order.fullName,
-      phone: order.phone,
-      governorate: order.governorateId,
-      city: order.city,
-      street: order.street,
-      ...(order.addressNotes ? { notes: order.addressNotes } : {}),
-    },
-    paymentMethod: order.paymentMethod,
-    paymentStatus: order.paymentStatus,
-    subtotal: order.subtotal,
-    discount: order.discount,
-    shipping: order.shipping,
-    total: order.total,
-  };
-  if (order.promoCode) dto.promoCode = order.promoCode;
-  if (order.note) dto.note = order.note;
-  if (timeline?.length) dto.timeline = timeline;
-  if (tracking) dto.tracking = tracking;
-  return dto;
-}
+import { toOrderDTO } from '@/server/mappers/order.mapper';
+
 
 async function trackingForOrder(
   db: Awaited<ReturnType<typeof getRequestDb>>,

@@ -17,8 +17,9 @@ export const shipmentDtoSchema = z.object({
 
 export type ShipmentDTO = z.infer<typeof shipmentDtoSchema>;
 
-export const adminShipmentListQuerySchema = z.object({
+import { PaginationQuerySchema } from './common.contract';
+
+export const adminShipmentListQuerySchema = PaginationQuerySchema.extend({
   q: z.string().optional(),
-  page: z.coerce.number().int().positive().optional(),
-  pageSize: z.coerce.number().int().positive().max(100).optional(),
 });
+

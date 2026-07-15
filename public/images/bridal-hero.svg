@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 660">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#fdf8f3"/><stop offset="0.55" stop-color="#f4e6df"/><stop offset="1" stop-color="#e8cfc4"/>
+</linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#d9b76a"/><stop offset="1" stop-color="#c9a24b"/>
+</linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.4" r="0.6">
+<stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="880" height="660" fill="url(#bg)"/>
+<ellipse cx="440" cy="280" rx="320" ry="240" fill="url(#glow)"/>
+<g fill="none" stroke="url(#gold)" stroke-width="2.5" opacity="0.85">
+<path d="M340 300 q100 -140 200 0" />
+<path d="M355 300 q85 -110 170 0" />
+</g>
+<g fill="#ffffff" opacity="0.95">
+<circle cx="440" cy="196" r="10"/>
+<circle cx="392" cy="222" r="7"/>
+<circle cx="488" cy="222" r="7"/>
+<circle cx="360" cy="258" r="5"/>
+<circle cx="520" cy="258" r="5"/>
+</g>
+<g fill="url(#gold)">
+<circle cx="440" cy="196" r="5"/>
+<circle cx="392" cy="222" r="3.5"/>
+<circle cx="488" cy="222" r="3.5"/>
+</g>
+<path d="M330 300 h220" stroke="url(#gold)" stroke-width="3" opacity="0.9"/>
+<g opacity="0.5" fill="#ffffff">
+<circle cx="140" cy="120" r="3"/><circle cx="200" cy="500" r="4"/><circle cx="720" cy="140" r="4"/>
+<circle cx="760" cy="480" r="3"/><circle cx="90" cy="330" r="2.5"/><circle cx="800" cy="300" r="2.5"/>
+</g>
+<text x="440" y="420" font-family="Georgia, serif" font-size="44" fill="#8c3d52" text-anchor="middle" font-style="italic">The Bridal Edit</text>
+<text x="440" y="462" font-family="Georgia, serif" font-size="17" fill="#b4536a" text-anchor="middle" letter-spacing="6">ZAYA · زينة</text>
+</svg>

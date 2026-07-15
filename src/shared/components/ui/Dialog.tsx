@@ -61,7 +61,8 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          'animate-fade-up w-full max-w-md rounded-(--radius-lg) border border-border bg-surface-raised p-5 shadow-lg',
+          'animate-fade-up w-full max-w-md rounded-lg border border-border bg-surface-raised p-5 shadow-lg',
+
           className,
         )}
       >

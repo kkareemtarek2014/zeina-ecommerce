@@ -41,6 +41,13 @@ const formSchema = z.object({
   seoDefaultDescription: z.string().trim().optional().or(z.literal('')),
   footerText: z.string().trim().optional().or(z.literal('')),
   maintenanceMode: z.boolean(),
+  bridalPageEnabled: z.boolean(),
+  bridalShowCollections: z.boolean(),
+  bridalShowPersonalization: z.boolean(),
+  bridalShowTiers: z.boolean(),
+  bridalShowFinalCta: z.boolean(),
+  bridalShowHomeSpotlight: z.boolean(),
+  bridalCustomEnabled: z.boolean(),
   unpaidOrderTimeoutMinutes: z.coerce.number().int().min(5).max(10080),
   pendingReminderHours: z.coerce.number().int().min(1).max(720),
 });
@@ -100,6 +107,13 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
       seoDefaultDescription: initial.seoDefaultDescription ?? '',
       footerText: initial.footerText ?? '',
       maintenanceMode: initial.maintenanceMode,
+      bridalPageEnabled: initial.bridalPageEnabled,
+      bridalShowCollections: initial.bridalShowCollections,
+      bridalShowPersonalization: initial.bridalShowPersonalization,
+      bridalShowTiers: initial.bridalShowTiers,
+      bridalShowFinalCta: initial.bridalShowFinalCta,
+      bridalShowHomeSpotlight: initial.bridalShowHomeSpotlight,
+      bridalCustomEnabled: initial.bridalCustomEnabled,
       unpaidOrderTimeoutMinutes: initial.unpaidOrderTimeoutMinutes,
       pendingReminderHours: initial.pendingReminderHours,
     },
@@ -466,6 +480,86 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
             </span>
           </span>
         </label>
+
+        <fieldset className="space-y-3 rounded-(--radius-lg) border border-border bg-brand-blush/10 p-4">
+          <legend className="px-1 text-sm font-semibold text-text-primary">
+            Bridal page
+          </legend>
+
+          <label className="flex items-start gap-3 rounded-(--radius) border border-brand-accent/30 bg-surface-raised px-4 py-3 text-sm">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-4 accent-brand-primary"
+              {...register('bridalPageEnabled')}
+            />
+            <span>
+              <span className="font-medium text-text-primary">
+                Bridal landing page (master)
+              </span>
+              <span className="mt-0.5 block text-text-secondary">
+                Show the /bride page and its links in the storefront. When
+                off, visitors see a &ldquo;coming soon&rdquo; page and every
+                section below is hidden too.
+              </span>
+            </span>
+          </label>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(
+              [
+                {
+                  field: 'bridalShowCollections',
+                  label: 'Collections grid',
+                  hint: 'Tiaras, veils, jewelry & gift box cards',
+                },
+                {
+                  field: 'bridalShowPersonalization',
+                  label: 'Personalization section',
+                  hint: 'Engraving / names / custom steps',
+                },
+                {
+                  field: 'bridalShowTiers',
+                  label: 'Price tiers',
+                  hint: 'The 250–1,500+ EGP pricing cards',
+                },
+                {
+                  field: 'bridalShowFinalCta',
+                  label: 'Final CTA banner',
+                  hint: 'Bottom “Let’s make it sparkle” band',
+                },
+                {
+                  field: 'bridalShowHomeSpotlight',
+                  label: 'Homepage spotlight',
+                  hint: 'Bridal section on the home page',
+                },
+                {
+                  field: 'bridalCustomEnabled',
+                  label: 'Custom requests',
+                  hint: '/bride/custom page + all custom CTAs',
+                },
+              ] as const
+            ).map((item) => (
+              <label
+                key={item.field}
+                className="flex items-start gap-3 rounded-(--radius) border border-border bg-surface-raised px-4 py-3 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-4 accent-brand-primary"
+                  {...register(item.field)}
+                />
+                <span>
+                  <span className="font-medium text-text-primary">
+                    {item.label}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-text-secondary">
+                    {item.hint}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         <Button type="submit" isLoading={isLoading}>
           Save settings

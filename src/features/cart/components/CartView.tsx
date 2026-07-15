@@ -5,7 +5,7 @@ import { ShoppingBag } from 'lucide-react';
 import { formatEGP } from '@/shared/utils/price';
 import { FREE_SHIPPING_THRESHOLD } from '@/config/site.config';
 import { useStorefrontConfig } from '@/features/admin';
-import { Button } from '@/shared/components/ui';
+import { Button, Skeleton } from '@/shared/components/ui';
 import { useHydrated } from '@/shared/hooks/useHydrated';
 import {
   selectCartSubtotal,
@@ -28,7 +28,31 @@ export function CartView() {
   const freeShippingThreshold =
     storefrontConfig?.freeShippingThreshold ?? FREE_SHIPPING_THRESHOLD;
 
-  if (!mounted) return null;
+  if (!mounted) {
+    // Page shell already has the H1 — show body skeleton only.
+    return (
+      <div className="grid gap-10 lg:grid-cols-[1fr_360px]" aria-busy="true">
+        <div className="space-y-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="flex gap-4 border-b border-border py-4">
+              <Skeleton className="size-24 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/4" />
+                <Skeleton className="h-9 w-28" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <aside className="h-fit space-y-4 rounded-lg border border-border bg-surface-raised p-6">
+          <Skeleton className="h-6 w-36" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="mt-2 h-12 w-full" />
+        </aside>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

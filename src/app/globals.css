@@ -93,9 +93,48 @@ body {
   animation: pop 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Slow vertical bob — floating badges/decor (homepage hero). */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@utility animate-float {
+  animation: float-y 5s ease-in-out infinite;
+}
+
 /* Staggered children — set --stagger-i via inline style. */
 @utility stagger {
   animation-delay: calc(var(--stagger-i, 0) * 60ms);
+}
+
+/* ─── Skeleton shimmer ────────────────────────────────────
+   Soft brand blush sweep for loading placeholders.
+   Disabled under prefers-reduced-motion (static blush only). */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@utility skeleton-shimmer {
+  background-color: var(--color-brand-blush);
+  background-image: linear-gradient(
+    90deg,
+    var(--color-brand-blush) 0%,
+    color-mix(in srgb, var(--color-brand-blush) 55%, white) 45%,
+    var(--color-brand-blush) 90%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -106,5 +145,10 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .skeleton-shimmer {
+    background-image: none !important;
+    animation: none !important;
   }
 }

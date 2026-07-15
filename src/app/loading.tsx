@@ -1,5 +1,5 @@
-import { Loader } from '@/shared/components/ui';
+import { HomePageSkeleton } from '@/shared/components/ui';
 
 export default function Loading() {
-  return <Loader />;
+  return <HomePageSkeleton />;
 }

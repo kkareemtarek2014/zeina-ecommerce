@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { MapPin, Plus, Trash2 } from 'lucide-react';
-import { Button, Input, Select } from '@/shared/components/ui';
+import { AccountListSkeleton, Button, Input, Select } from '@/shared/components/ui';
 import { AppError } from '@/shared/contracts/errors';
 import { GOVERNORATES, getGovernorate } from '@/shared/data/governorates.data';
 import {
@@ -63,7 +63,7 @@ export function AddressBook() {
   };
 
   if (isLoading) {
-    return <p className="text-sm text-text-secondary">Loading addresses…</p>;
+    return <AccountListSkeleton rows={3} />;
   }
 
   return (
@@ -82,7 +82,7 @@ export function AddressBook() {
           {addresses.map((address) => (
             <li
               key={address.id}
-              className="flex items-start justify-between gap-3 rounded-(--radius-lg) border border-border bg-surface-raised p-4"
+              className="flex items-start justify-between gap-3 rounded-lg border border-border bg-surface-raised p-4"
             >
               <div className="text-sm">
                 <p className="font-semibold">{address.label}</p>
@@ -109,7 +109,7 @@ export function AddressBook() {
       {showForm ? (
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="max-w-md space-y-4 rounded-(--radius-lg) border border-border bg-surface-raised p-5"
+          className="max-w-md space-y-4 rounded-lg border border-border bg-surface-raised p-5"
           noValidate
         >
           {formError && (

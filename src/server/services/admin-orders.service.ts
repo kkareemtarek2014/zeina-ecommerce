@@ -13,7 +13,8 @@ import {
   ValidationError,
 } from '@/server/http/errors';
 import * as ordersRepo from '@/server/repositories/orders.repo';
-import type { OrderItemRow, OrderRow } from '@/server/repositories/orders.repo';
+import type { OrderRow } from '@/server/repositories/orders.repo';
+
 import { ok } from '@/server/http/envelope';
 import {
   commitSaleForOrder,
@@ -23,46 +24,11 @@ import {
   getOrderTimeline,
   recordOrderStatusChange,
 } from '@/server/services/order-timeline.service';
-import type { OrderTimelineEntry } from '@/shared/contracts/order.contract';
 
-function toAdminOrderDTO(
-  order: OrderRow,
-  items: OrderItemRow[],
-  timeline?: OrderTimelineEntry[],
-): AdminOrderDTO {
-  const dto: AdminOrderDTO = {
-    id: order.id,
-    createdAt: order.createdAt.toISOString(),
-    status: order.status,
-    userId: order.userId,
-    items: items.map((i) => ({
-      productId: i.productId,
-      name: i.name,
-      image: i.image,
-      unitPrice: i.unitPrice,
-      quantity: i.quantity,
-      ...(i.isPreorder ? { isPreorder: true } : {}),
-    })),
-    address: {
-      fullName: order.fullName,
-      phone: order.phone,
-      governorate: order.governorateId,
-      city: order.city,
-      street: order.street,
-      ...(order.addressNotes ? { notes: order.addressNotes } : {}),
-    },
-    paymentMethod: order.paymentMethod,
-    paymentStatus: order.paymentStatus,
-    subtotal: order.subtotal,
-    discount: order.discount,
-    shipping: order.shipping,
-    total: order.total,
-  };
-  if (order.promoCode) dto.promoCode = order.promoCode;
-  if (order.note) dto.note = order.note;
-  if (timeline?.length) dto.timeline = timeline;
-  return dto;
-}
+
+import { parsePaginationFromUrl, buildPaginatedResult } from '@/server/utils/pagination';
+import { toAdminOrderDTO } from '@/server/mappers/order.mapper';
+
 
 async function hydrateOrders(
   db: Awaited<ReturnType<typeof getRequestDb>>,
@@ -78,8 +44,7 @@ async function hydrateOrders(
 
 export async function listAdminOrders(url: URL) {
   const db = await getRequestDb();
-  const page = Number(url.searchParams.get('page') ?? '1') || 1;
-  const pageSize = Number(url.searchParams.get('pageSize') ?? '20') || 20;
+  const { page, pageSize } = parsePaginationFromUrl(url);
   const q = url.searchParams.get('q') ?? undefined;
   const statusRaw = url.searchParams.get('status');
   const governorate = url.searchParams.get('governorate') ?? undefined;
@@ -128,15 +93,15 @@ export async function listAdminOrders(url: URL) {
   );
 
   const items = await hydrateOrders(db, rows);
-  const data: Paginated<AdminOrderDTO> = {
+  const data: Paginated<AdminOrderDTO> = buildPaginatedResult({
     items,
+    total,
     page: p,
     pageSize: ps,
-    total,
-    totalPages: Math.max(1, Math.ceil(total / ps)),
-  };
+  });
   return ok(data);
 }
+
 
 export async function getAdminOrder(id: string): Promise<AdminOrderDTO> {
   const db = await getRequestDb();

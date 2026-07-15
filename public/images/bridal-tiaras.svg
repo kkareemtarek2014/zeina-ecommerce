@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f6ead9"/><stop offset="1" stop-color="#d9b76a"/>
+</linearGradient></defs>
+<rect width="600" height="600" fill="url(#g)"/>
+<circle cx="300" cy="290" r="150" fill="#ffffff" opacity="0.18"/>
+<path d="M220 340 q80 -120 160 0" fill="none" stroke="#ffffff" stroke-width="8"/><circle cx="300" cy="230" r="14" fill="#ffffff"/><circle cx="252" cy="270" r="9" fill="#ffffff"/><circle cx="348" cy="270" r="9" fill="#ffffff"/><path d="M210 340 h180" stroke="#ffffff" stroke-width="8"/>
+<text x="300" y="505" font-family="Georgia, serif" font-size="34" fill="#ffffff" text-anchor="middle" opacity="0.95">Tiaras & Crowns</text>
+</svg>

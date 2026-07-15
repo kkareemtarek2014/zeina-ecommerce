@@ -11,7 +11,7 @@ import {
   GOVERNORATES,
 } from '@/shared/data/governorates.data';
 import { useStorefrontConfig } from '@/features/admin';
-import { Button, Input, Select } from '@/shared/components/ui';
+import { Button, CheckoutBodySkeleton, Input, Select } from '@/shared/components/ui';
 import { useHydrated } from '@/shared/hooks/useHydrated';
 import { AppError } from '@/shared/contracts/errors';
 import {
@@ -68,7 +68,9 @@ export function CheckoutForm() {
       ? Math.max(0, subtotal - discount)
       : Math.max(0, subtotal - discount) + shipping;
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return <CheckoutBodySkeleton />;
+  }
 
   if (items.length === 0) {
     return (

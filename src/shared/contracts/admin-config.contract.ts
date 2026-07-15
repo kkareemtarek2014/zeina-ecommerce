@@ -160,6 +160,16 @@ export const adminSettingsDtoSchema = z.object({
   seoDefaultDescription: z.string().nullable(),
   footerText: z.string().nullable(),
   maintenanceMode: z.boolean(),
+  /** Show/hide the /bride landing page (dashboard toggle). Hidden → coming soon. */
+  bridalPageEnabled: z.boolean(),
+  /** Per-section bridal toggles (all default ON). */
+  bridalShowCollections: z.boolean(),
+  bridalShowPersonalization: z.boolean(),
+  bridalShowTiers: z.boolean(),
+  bridalShowFinalCta: z.boolean(),
+  bridalShowHomeSpotlight: z.boolean(),
+  /** Custom-request funnel: /bride/custom + all "custom piece" CTAs. */
+  bridalCustomEnabled: z.boolean(),
   /** Kill switch for Temu import + stock sync (dashboard toggle). */
   temuScraperEnabled: z.boolean(),
   unpaidOrderTimeoutMinutes: z.number().int(),
@@ -199,6 +209,13 @@ export const adminSettingsWriteSchema = z.object({
   seoDefaultDescription: z.string().trim().nullable().optional(),
   footerText: z.string().trim().nullable().optional(),
   maintenanceMode: z.boolean().optional(),
+  bridalPageEnabled: z.boolean().optional(),
+  bridalShowCollections: z.boolean().optional(),
+  bridalShowPersonalization: z.boolean().optional(),
+  bridalShowTiers: z.boolean().optional(),
+  bridalShowFinalCta: z.boolean().optional(),
+  bridalShowHomeSpotlight: z.boolean().optional(),
+  bridalCustomEnabled: z.boolean().optional(),
   temuScraperEnabled: z.boolean().optional(),
   unpaidOrderTimeoutMinutes: z.number().int().min(5).max(7 * 24 * 60).optional(),
   pendingReminderHours: z.number().int().min(1).max(30 * 24).optional(),
@@ -212,6 +229,8 @@ export const storefrontConfigSchema = z.object({
   maintenanceMode: z.boolean(),
   /** Paymob card/wallet available (flag + secrets). */
   onlinePayments: z.boolean().optional(),
+  /** Bridal landing page visible (admin toggle). */
+  bridalPage: z.boolean().optional(),
 });
 
 export type StorefrontConfigDTO = z.infer<typeof storefrontConfigSchema>;

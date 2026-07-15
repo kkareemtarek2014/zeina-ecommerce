@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#f9f0ee"/><stop offset="1" stop-color="#cfa0ac"/>
+</linearGradient></defs>
+<rect width="600" height="600" fill="url(#g)"/>
+<circle cx="300" cy="290" r="150" fill="#ffffff" opacity="0.18"/>
+<path d="M300 180 q-120 120 -70 260 q70 -40 70 -40 q0 0 70 40 q50 -140 -70 -260z" fill="#ffffff" opacity="0.55"/><circle cx="300" cy="180" r="16" fill="#ffffff"/>
+<text x="300" y="505" font-family="Georgia, serif" font-size="34" fill="#ffffff" text-anchor="middle" opacity="0.95">Veils & Hair</text>
+</svg>

@@ -4,18 +4,25 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, User, X } from 'lucide-react';
-import { SITE } from '@/config/site.config';
+import { SITE, FREE_SHIPPING_THRESHOLD } from '@/config/site.config';
 import { cn } from '@/shared/utils/cn';
 import { useFeature } from '@/shared/contexts/FeatureContext';
 import { CartDrawer } from '@/features/cart';
 import { SearchButton } from '@/features/product-search';
+import { useStorefrontConfig } from '@/features/admin';
 import type { FeatureKey } from '@/config/features.config';
 
-const NAV_LINKS: { href: string; label: string; feature?: FeatureKey }[] = [
+const NAV_LINKS: {
+  href: string;
+  label: string;
+  feature?: FeatureKey;
+  bridal?: boolean;
+}[] = [
   { href: '/', label: 'Home' },
   { href: '/shop', label: 'Shop', feature: 'shop' },
   { href: '/shop/jewelry', label: 'Jewelry', feature: 'shop' },
   { href: '/shop/bags', label: 'Bags', feature: 'shop' },
+  { href: '/bride', label: 'Bride', bridal: true },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -25,13 +32,29 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const isShopEnabled = useFeature('shop');
   const isSearchEnabled = useFeature('product-search');
+  const { data: storefrontConfig } = useStorefrontConfig();
+  // Visible by default; hidden only when the admin toggle is explicitly off.
+  const isBridalVisible = storefrontConfig?.bridalPage !== false;
 
-  const navLinks = NAV_LINKS.filter(
-    (link) => !link.feature || isShopEnabled,
-  );
+  const navLinks = NAV_LINKS.filter((link) => {
+    if (link.feature && !isShopEnabled) return false;
+    if (link.bridal && !isBridalVisible) return false;
+    return true;
+  });
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
+      {/* Announcement bar */}
+      <div className="bg-brand-primary text-text-inverse">
+        <div className="mx-auto flex max-w-container items-center justify-center gap-6 overflow-x-auto px-4 py-2 text-xs font-medium tracking-wide whitespace-nowrap lg:px-8">
+          <span>✨ New drop every week</span>
+          <span aria-hidden className="opacity-40">·</span>
+          <span>Free shipping over {FREE_SHIPPING_THRESHOLD.toLocaleString()} EGP</span>
+          <span aria-hidden className="hidden opacity-40 sm:inline">·</span>
+          <span className="hidden sm:inline">Cash on delivery, Egypt-wide</span>
+        </div>
+      </div>
+
       <div className="mx-auto flex h-16 max-w-container items-center justify-between gap-4 px-4 lg:px-8">
         <Link
           href="/"

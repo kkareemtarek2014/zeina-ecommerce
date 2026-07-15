@@ -1,18 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+
 import { CircleCheck, CircleAlert, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { formatEGP } from '@/shared/utils/price';
 import { getGovernorate } from '@/shared/data/governorates.data';
-import { Button, Loader } from '@/shared/components/ui';
+import { Button, OrderBodySkeleton } from '@/shared/components/ui';
 import { useHydrated } from '@/shared/hooks/useHydrated';
 import { api } from '@/shared/lib/api-client';
 import type { PaymentStatusDTO } from '@/shared/contracts/payment.contract';
 import type { PaymobIntentionResult } from '@/shared/contracts/payment.contract';
+import { OrderItemsList } from './OrderItemsList';
 import { useOrder } from '../hooks/useOrders';
+
+
 
 function usePaymentPoll(orderId: string, enabled: boolean) {
   return useQuery({
@@ -73,7 +76,7 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
   };
 
   if (!mounted || isLoading) {
-    return <Loader fullscreen={false} className="p-12" />;
+    return <OrderBodySkeleton />;
   }
 
   if (isError || !order) {
@@ -151,31 +154,8 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
       <div className="mt-8 rounded-lg border border-border bg-surface-raised p-6">
         <h2 className="font-display text-lg font-semibold">Order Summary</h2>
 
-        <ul className="mt-4 space-y-4 border-b border-border pb-5">
-          {order.items.map((item) => (
-            <li key={item.productId} className="flex items-center gap-4">
-              <div className="relative size-14 shrink-0 overflow-hidden rounded-(--radius) bg-brand-blush">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={112}
-                  height={112}
-                  className="size-full object-cover"
-                />
-              </div>
-              <div className="flex-1 text-sm">
-                <p className="line-clamp-1 font-medium">{item.name}</p>
-                <p className="text-text-muted">
-                  Qty {item.quantity}
-                  {item.isPreorder ? ' · Pre-order' : ''}
-                </p>
-              </div>
-              <span className="text-sm font-medium">
-                {formatEGP(item.unitPrice * item.quantity)}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <OrderItemsList items={order.items} />
+
 
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">

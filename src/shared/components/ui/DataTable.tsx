@@ -27,7 +27,7 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-(--radius-lg) border border-dashed border-border px-4 py-10 text-center text-sm text-text-secondary">
+      <p className="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-text-secondary">
         {emptyMessage}
       </p>
     );
@@ -36,7 +36,7 @@ export function DataTable<T>({
   return (
     <div
       className={cn(
-        'overflow-x-auto rounded-(--radius-lg) border border-border bg-surface-raised',
+        'overflow-x-auto rounded-lg border border-border bg-surface-raised',
         className,
       )}
     >
