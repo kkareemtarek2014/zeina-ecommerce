@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { Button, Input } from '@/shared/components/ui';
 import type { AdminSettingsDTO } from '@/shared/contracts/admin-config.contract';
+import {
+  AnnouncementItemsSchema,
+  type AnnouncementItem,
+} from '@/shared/contracts/storefront-branding.contract';
 import { MediaPicker } from './MediaPicker';
 
 const formSchema = z.object({
@@ -52,12 +57,16 @@ const formSchema = z.object({
   pendingReminderHours: z.coerce.number().int().min(1).max(720),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type SettingsFormValues = z.infer<typeof formSchema> & {
+  announcementItems: AnnouncementItem[];
+};
 
 interface SettingsFormProps {
   initial: AdminSettingsDTO;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: SettingsFormValues) => Promise<void>;
   isLoading?: boolean;
+  /** Server field errors (Zod flatten) shown after a failed save. */
+  serverFieldErrors?: Record<string, string[] | undefined>;
 }
 
 function emptyToNull(v: string | undefined): string | null {
@@ -65,18 +74,189 @@ function emptyToNull(v: string | undefined): string | null {
   return t ? t : null;
 }
 
-export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps) {
+function newAnnouncementId(): string {
+  return `ann-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function AnnouncementRowsEditor({
+  items,
+  onChange,
+  error,
+}: {
+  items: AnnouncementItem[];
+  onChange: (next: AnnouncementItem[]) => void;
+  error?: string;
+}) {
+  const baseId = useId();
+
+  const update = (index: number, patch: Partial<AnnouncementItem>) => {
+    onChange(items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  };
+
+  const move = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= items.length) return;
+    const next = [...items];
+    const [row] = next.splice(index, 1);
+    if (!row) return;
+    next.splice(target, 0, row);
+    onChange(next.map((item, i) => ({ ...item, sortOrder: i })));
+  };
+
+  const activeCount = items.filter((i) => i.active).length;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-text-muted">
+          Up to 5 active. Links: internal path (`/shop`) or https URL.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            onChange([
+              ...items,
+              {
+                id: newAnnouncementId(),
+                text: '',
+                active: activeCount < 5,
+                sortOrder: items.length,
+              },
+            ])
+          }
+        >
+          <Plus className="size-4" />
+          Add
+        </Button>
+      </div>
+
+      {items.length === 0 ? (
+        <p className="rounded-(--radius) border border-dashed border-border px-3 py-4 text-sm text-text-muted">
+          No announcements yet. Active items rotate in the storefront header.
+        </p>
+      ) : null}
+
+      <ul className="space-y-3">
+        {items.map((item, index) => (
+          <li
+            key={item.id}
+            className="space-y-2 rounded-(--radius-lg) border border-border bg-surface-raised p-3"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-2 text-sm text-text-secondary">
+                <input
+                  type="checkbox"
+                  className="size-4 accent-brand-primary"
+                  checked={item.active}
+                  onChange={(e) => update(index, { active: e.target.checked })}
+                />
+                Active
+              </label>
+              <div className="ml-auto flex items-center gap-1">
+                <button
+                  type="button"
+                  aria-label="Move up"
+                  className="rounded-(--radius) p-1.5 text-text-muted hover:bg-brand-blush hover:text-text-primary disabled:opacity-40"
+                  disabled={index === 0}
+                  onClick={() => move(index, -1)}
+                >
+                  <ArrowUp className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Move down"
+                  className="rounded-(--radius) p-1.5 text-text-muted hover:bg-brand-blush hover:text-text-primary disabled:opacity-40"
+                  disabled={index === items.length - 1}
+                  onClick={() => move(index, 1)}
+                >
+                  <ArrowDown className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Remove announcement"
+                  className="rounded-(--radius) p-1.5 text-status-error hover:bg-brand-blush"
+                  onClick={() =>
+                    onChange(
+                      items
+                        .filter((_, i) => i !== index)
+                        .map((row, i) => ({ ...row, sortOrder: i })),
+                    )
+                  }
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </div>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label
+                  htmlFor={`${baseId}-text-${item.id}`}
+                  className="text-sm font-medium text-text-secondary"
+                >
+                  Text (max 80)
+                </label>
+                <input
+                  id={`${baseId}-text-${item.id}`}
+                  value={item.text}
+                  maxLength={80}
+                  onChange={(e) => update(index, { text: e.target.value })}
+                  className="rounded-(--radius) border border-border bg-surface px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label
+                  htmlFor={`${baseId}-href-${item.id}`}
+                  className="text-sm font-medium text-text-secondary"
+                >
+                  Link (optional)
+                </label>
+                <input
+                  id={`${baseId}-href-${item.id}`}
+                  value={item.href ?? ''}
+                  placeholder="/shop or https://…"
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    update(index, { href: v ? v : undefined });
+                  }}
+                  className="rounded-(--radius) border border-border bg-surface px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {error ? <p className="text-sm text-status-error">{error}</p> : null}
+    </div>
+  );
+}
+
+export function SettingsForm({
+  initial,
+  onSubmit,
+  isLoading,
+  serverFieldErrors,
+}: SettingsFormProps) {
   const [mediaTarget, setMediaTarget] = useState<'logo' | 'favicon' | null>(
     null,
   );
+  const [announcementItems, setAnnouncementItems] = useState<AnnouncementItem[]>(
+    () =>
+      [...(initial.announcementItems ?? [])].sort(
+        (a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id),
+      ),
+  );
+  const [announcementError, setAnnouncementError] = useState<string | undefined>();
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema) as Resolver<FormValues>,
+  } = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema) as Resolver<z.infer<typeof formSchema>>,
     defaultValues: {
       profitMargin: initial.profitMargin,
       freeShippingThreshold: initial.freeShippingThreshold,
@@ -122,12 +302,29 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
   const logoUrl = watch('logoUrl');
   const faviconUrl = watch('faviconUrl');
 
+  const fieldError = (key: string) =>
+    serverFieldErrors?.[key]?.[0] ?? undefined;
+
   return (
     <>
       <form
         className="max-w-xl space-y-6"
         noValidate
         onSubmit={handleSubmit(async (values) => {
+          const normalized = announcementItems.map((item, i) => ({
+            ...item,
+            text: item.text.trim(),
+            href: item.href?.trim() || undefined,
+            sortOrder: i,
+          }));
+          const parsed = AnnouncementItemsSchema.safeParse(normalized);
+          if (!parsed.success) {
+            const first =
+              parsed.error.issues[0]?.message ?? 'Invalid announcements';
+            setAnnouncementError(first);
+            return;
+          }
+          setAnnouncementError(undefined);
           await onSubmit({
             ...values,
             logoUrl: emptyToNull(values.logoUrl) ?? '',
@@ -142,6 +339,7 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
             seoDefaultDescription:
               emptyToNull(values.seoDefaultDescription) ?? '',
             footerText: emptyToNull(values.footerText) ?? '',
+            announcementItems: parsed.data,
           });
         })}
       >
@@ -322,39 +520,58 @@ export function SettingsForm({ initial, onSubmit, isLoading }: SettingsFormProps
 
         <fieldset className="space-y-4">
           <legend className="text-sm font-medium text-text-primary">
+            Announcement bar
+          </legend>
+          <AnnouncementRowsEditor
+            items={announcementItems}
+            onChange={setAnnouncementItems}
+            error={announcementError ?? fieldError('announcementItems')}
+          />
+        </fieldset>
+
+        <fieldset className="space-y-4">
+          <legend className="text-sm font-medium text-text-primary">
             Contact & social
           </legend>
           <Input
             label="Contact email"
             type="email"
-            error={errors.contactEmail?.message}
+            error={errors.contactEmail?.message ?? fieldError('contactEmail')}
             {...register('contactEmail')}
           />
           <Input
             label="Contact phone"
-            error={errors.contactPhone?.message}
+            error={errors.contactPhone?.message ?? fieldError('contactPhone')}
             {...register('contactPhone')}
           />
           <Input
             label="WhatsApp number"
             placeholder="2010xxxxxxxx"
-            error={errors.whatsappNumber?.message}
+            error={
+              errors.whatsappNumber?.message ?? fieldError('whatsappNumber')
+            }
             {...register('whatsappNumber')}
           />
           <Input
             label="Instagram"
-            placeholder="@zaya or URL"
-            error={errors.socialInstagram?.message}
+            placeholder="https://instagram.com/…"
+            error={
+              errors.socialInstagram?.message ?? fieldError('socialInstagram')
+            }
             {...register('socialInstagram')}
           />
           <Input
             label="Facebook"
-            error={errors.socialFacebook?.message}
+            placeholder="https://facebook.com/…"
+            error={
+              errors.socialFacebook?.message ?? fieldError('socialFacebook')
+            }
             {...register('socialFacebook')}
           />
           <Input
             label="TikTok"
-            error={errors.socialTiktok?.message}
+            placeholder="https://tiktok.com/…"
+            error={errors.socialTiktok?.message ?? fieldError('socialTiktok')}
             {...register('socialTiktok')}
           />
         </fieldset>

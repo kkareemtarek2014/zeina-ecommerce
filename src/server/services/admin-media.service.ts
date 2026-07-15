@@ -3,6 +3,7 @@ import type {
   AdminMediaDTO,
   Paginated,
 } from '@/shared/contracts/admin-catalog.contract';
+import { adminMediaAltUpdateSchema } from '@/shared/contracts/admin-catalog.contract';
 import { getRequestDb } from '@/server/db/request';
 import {
   ConflictError,
@@ -12,7 +13,7 @@ import {
 import * as mediaRepo from '@/server/repositories/media.repo';
 import {
   deleteUploadObject,
-  putCatalogImage,
+  uploadProcessedCatalogImage,
 } from '@/server/services/upload.service';
 
 function toDto(row: mediaRepo.MediaAssetRow): AdminMediaDTO {
@@ -22,6 +23,8 @@ function toDto(row: mediaRepo.MediaAssetRow): AdminMediaDTO {
     filename: row.filename,
     mime: row.mime,
     size: row.size,
+    width: row.width,
+    height: row.height,
     uploadedBy: row.uploadedBy,
     createdAt: row.createdAt.toISOString(),
   };
@@ -51,23 +54,40 @@ export async function uploadAdminMedia(
   folder?: string,
 ): Promise<AdminMediaDTO> {
   if (!file) throw new ValidationError('file is required');
-  const uploaded = await putCatalogImage(folder?.trim() || 'library', file);
+  const folderKey = folder?.trim() || 'library';
+  const uploaded = await uploadProcessedCatalogImage(folderKey, file, 'library');
   const db = await getRequestDb();
   const id = `med_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
   const row = await mediaRepo.insertMedia(db, {
     id,
     r2Key: uploaded.key,
     url: uploaded.url,
-    filename: file.name || 'upload',
-    mime: file.type || 'application/octet-stream',
-    size: file.size,
-    width: null,
-    height: null,
+    filename: uploaded.filename,
+    mime: uploaded.mime,
+    size: uploaded.size,
+    width: uploaded.width,
+    height: uploaded.height,
     alt: null,
-    folder: folder?.trim() || 'library',
+    folder: folderKey,
     uploadedBy,
     createdAt: new Date(),
   });
+  return toDto(row);
+}
+
+export async function updateAdminMediaAlt(
+  id: string,
+  raw: unknown,
+): Promise<AdminMediaDTO> {
+  const parsed = adminMediaAltUpdateSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new ValidationError('Validation failed', parsed.error.flatten());
+  }
+  const db = await getRequestDb();
+  const existing = await mediaRepo.findMediaById(db, id);
+  if (!existing) throw new NotFoundError('Media not found');
+  const row = await mediaRepo.updateMediaAlt(db, id, parsed.data.alt);
+  if (!row) throw new NotFoundError('Media not found');
   return toDto(row);
 }
 

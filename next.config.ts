@@ -12,7 +12,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   images: {
-    // Product placeholders are local SVGs until the real catalog API is wired.
+    // V1: storefront + admin use R2 URLs; WebP is produced at upload time.
+    // Do not introduce a custom loader while Workers serve unoptimized assets.
+    unoptimized: true,
+    // Product placeholders are local SVGs until replaced by real catalog photos.
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },

@@ -3,18 +3,21 @@
 import { useState, useEffect } from 'react';
 
 interface WhatsAppButtonProps {
-  phoneNumber?: string;
+  /** Digits-only WhatsApp id (no hardcoded default — hide FAB when unset). */
+  phoneNumber: string;
   defaultMessage?: string;
 }
 
 export function WhatsAppButton({
-  phoneNumber = '201090313619',
-  defaultMessage = 'Hello Zeena! I have a question about your accessories.',
+  phoneNumber,
+  defaultMessage = 'Hello! I have a question about your accessories.',
 }: WhatsAppButtonProps) {
   const [showGreeting, setShowGreeting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    if (!phoneNumber) return;
+
     const frame = requestAnimationFrame(() => {
       setIsMounted(true);
     });
@@ -34,9 +37,9 @@ export function WhatsAppButton({
       clearTimeout(greetingTimer);
       clearTimeout(hideTimer);
     };
-  }, []);
+  }, [phoneNumber]);
 
-  if (!isMounted) return null;
+  if (!phoneNumber || !isMounted) return null;
 
   const encodedMessage = encodeURIComponent(defaultMessage);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
@@ -69,7 +72,7 @@ export function WhatsAppButton({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span className="font-semibold text-[11px] text-[#c9a24b] uppercase tracking-wider">
-              Zeena Personal Stylist
+              Personal Stylist
             </span>
           </div>
           

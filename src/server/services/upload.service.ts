@@ -4,6 +4,11 @@ import {
   PayloadTooLargeError,
   ValidationError,
 } from '@/server/http/errors';
+import {
+  processUpload,
+  type ImageProcessProfile,
+  type ProcessedImage,
+} from '@/server/lib/image/process-upload';
 
 const MAX_BRIDAL_BYTES = 25 * 1024 * 1024;
 const MAX_CATALOG_BYTES = 5 * 1024 * 1024;
@@ -62,6 +67,54 @@ export async function putCatalogImage(
     httpMetadata: { contentType: file.type },
   });
   return { key, url: `/api/media/${key}` };
+}
+
+export type ProcessedUploadResult = {
+  key: string;
+  url: string;
+  size: number;
+  width: number | null;
+  height: number | null;
+  mime: ProcessedImage['mime'];
+  filename: string;
+};
+
+/**
+ * Write already-processed image bytes to R2.
+ * Call only after `processUpload` succeeds — never store unvalidated raw stills here.
+ */
+export async function putProcessedImage(
+  keyPrefix: string,
+  processed: ProcessedImage,
+): Promise<ProcessedUploadResult> {
+  const env = await getCloudflareEnv();
+  const id = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+  const key = `${keyPrefix}/${id}.${processed.extension}`;
+  await env.UPLOADS.put(key, processed.bytes, {
+    httpMetadata: { contentType: processed.mime },
+  });
+  return {
+    key,
+    url: `/api/media/${key}`,
+    size: processed.bytes.byteLength,
+    width: processed.width,
+    height: processed.height,
+    mime: processed.mime,
+    filename: processed.filename,
+  };
+}
+
+/**
+ * Shared catalog/library path: process (WebP pipeline / SVG passthrough) then store.
+ * Used by admin media, product images, and category images — do not fork per caller.
+ */
+export async function uploadProcessedCatalogImage(
+  keyPrefix: string,
+  file: File,
+  profile: ImageProcessProfile,
+): Promise<ProcessedUploadResult> {
+  const processed = await processUpload(file, profile);
+  return putProcessedImage(keyPrefix, processed);
 }
 
 export async function deleteUploadObject(key: string): Promise<void> {

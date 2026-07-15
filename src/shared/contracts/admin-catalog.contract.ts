@@ -128,6 +128,8 @@ export const adminMediaDtoSchema = z.object({
   filename: z.string(),
   mime: z.string(),
   size: z.number().int(),
+  width: z.number().int().nullable().optional(),
+  height: z.number().int().nullable().optional(),
   alt: z.string().nullable().optional(),
   folder: z.string().nullable().optional(),
   uploadedBy: z.string(),
@@ -135,6 +137,15 @@ export const adminMediaDtoSchema = z.object({
 });
 
 export type AdminMediaDTO = z.infer<typeof adminMediaDtoSchema>;
+
+export const adminMediaAltUpdateSchema = z.object({
+  alt: z.preprocess(
+    (value) => (typeof value === 'string' && !value.trim() ? null : value),
+    z.string().trim().max(200, 'Alt text must be at most 200 characters').nullable(),
+  ),
+});
+
+export type AdminMediaAltUpdate = z.infer<typeof adminMediaAltUpdateSchema>;
 
 export const adminCategoryDtoSchema = z.object({
   slug: z.string(),

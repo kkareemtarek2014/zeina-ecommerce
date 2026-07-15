@@ -139,6 +139,31 @@ function navActive(pathname: string, href: string, exact?: boolean): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/** CMS-facing admin routes (storefront-visible content editors). */
+const CMS_ROUTE_PREFIXES = [
+  '/admin/settings',
+  '/admin/homepage',
+  '/admin/media',
+] as const;
+
+function isCmsAdminRoute(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return CMS_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+function CmsModeBadge() {
+  return (
+    <div
+      className="pointer-events-none fixed bottom-4 right-4 z-40 rounded-md border border-amber-700/40 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-900 shadow-sm"
+      aria-hidden
+    >
+      CMS · Content Editor
+    </div>
+  );
+}
+
 export function AdminSidebar({
   open,
   onClose,
@@ -305,6 +330,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <AdminTopbar onMenuClick={() => setOpen(true)} />
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>
+      {isCmsAdminRoute(pathname) ? <CmsModeBadge /> : null}
     </div>
   );
 }

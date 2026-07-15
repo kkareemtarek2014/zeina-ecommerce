@@ -211,6 +211,33 @@ async function main() {
       { key: 'site_name', value: SITE.name, updatedAt: now },
       { key: 'site_tagline', value: SITE.tagline, updatedAt: now },
       { key: 'site_url', value: SITE.url, updatedAt: now },
+      {
+        key: 'announcement_items',
+        value: [
+          {
+            id: 'new-drop',
+            text: 'New drop every week',
+            href: '/shop',
+            active: true,
+            sortOrder: 0,
+          },
+          {
+            id: 'free-shipping',
+            text: `Free shipping over ${FREE_SHIPPING_THRESHOLD.toLocaleString('en-EG')} EGP`,
+            href: '/shop',
+            active: true,
+            sortOrder: 1,
+          },
+          {
+            id: 'cod',
+            text: 'Cash on delivery, Egypt-wide',
+            href: '/checkout',
+            active: true,
+            sortOrder: 2,
+          },
+        ],
+        updatedAt: now,
+      },
     ];
     await db.insert(settings).values(settingsRows).onConflictDoNothing();
 

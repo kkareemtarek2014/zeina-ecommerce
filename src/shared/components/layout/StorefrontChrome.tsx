@@ -5,9 +5,17 @@ import { usePathname } from 'next/navigation';
 import { Header } from '@/shared/components/layout/Header';
 import { Footer } from '@/shared/components/layout/Footer';
 import { WhatsAppButton } from '@/shared/components/ui';
+import type { SiteBrandingDTO } from '@/shared/contracts/storefront-branding.contract';
+import { normalizeWhatsAppDigits } from '@/shared/lib/contact-links';
 
 /** Hide storefront chrome on /admin/** (admin has its own shell). */
-export function StorefrontChrome({ children }: { children: ReactNode }) {
+export function StorefrontChrome({
+  children,
+  branding,
+}: {
+  children: ReactNode;
+  branding: SiteBrandingDTO;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') ?? false;
 
@@ -15,12 +23,14 @@ export function StorefrontChrome({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
+  const whatsappDigits = normalizeWhatsAppDigits(branding.whatsappNumber);
+
   return (
     <>
-      <Header />
+      <Header branding={branding} />
       <main className="flex-1">{children}</main>
-      <Footer />
-      <WhatsAppButton />
+      <Footer branding={branding} />
+      {whatsappDigits ? <WhatsAppButton phoneNumber={whatsappDigits} /> : null}
     </>
   );
 }

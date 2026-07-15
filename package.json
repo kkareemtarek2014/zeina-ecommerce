@@ -18,7 +18,9 @@
     "db:migrate:remote": "wrangler d1 migrations apply zaya-db --remote",
     "db:seed": "tsx src/server/db/seed.ts",
     "db:seed:remote": "bash scripts/seed-remote.sh",
-    "assert:no-secrets": "node scripts/assert-no-secrets.mjs"
+    "assert:no-secrets": "node scripts/assert-no-secrets.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -47,6 +49,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5",
+    "vitest": "^4.1.10",
     "wrangler": "^4.110.0"
   }
 }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { governorateSchema } from '@/shared/contracts/product.contract';
 import type { Paginated } from '@/shared/contracts/admin-catalog.contract';
+import { AnnouncementItemsSchema } from '@/shared/contracts/storefront-branding.contract';
 
 export { type Paginated };
 export { governorateSchema };
@@ -159,6 +160,7 @@ export const adminSettingsDtoSchema = z.object({
   seoDefaultTitle: z.string().nullable(),
   seoDefaultDescription: z.string().nullable(),
   footerText: z.string().nullable(),
+  announcementItems: AnnouncementItemsSchema,
   maintenanceMode: z.boolean(),
   /** Show/hide the /bride landing page (dashboard toggle). Hidden → coming soon. */
   bridalPageEnabled: z.boolean(),
@@ -208,6 +210,7 @@ export const adminSettingsWriteSchema = z.object({
   seoDefaultTitle: z.string().trim().nullable().optional(),
   seoDefaultDescription: z.string().trim().nullable().optional(),
   footerText: z.string().trim().nullable().optional(),
+  announcementItems: AnnouncementItemsSchema.optional(),
   maintenanceMode: z.boolean().optional(),
   bridalPageEnabled: z.boolean().optional(),
   bridalShowCollections: z.boolean().optional(),

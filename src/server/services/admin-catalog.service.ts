@@ -29,7 +29,7 @@ import {
 import {
   deleteUploadObject,
   mediaUrlToKey,
-  putCatalogImage,
+  uploadProcessedCatalogImage,
 } from '@/server/services/upload.service';
 import {
   availableQty,
@@ -794,7 +794,11 @@ export async function addProductImages(
 
   const urls = [...(existing.images ?? [])];
   for (const file of files) {
-    const uploaded = await putCatalogImage(`products/${id}`, file);
+    const uploaded = await uploadProcessedCatalogImage(
+      `products/${id}`,
+      file,
+      'product',
+    );
     urls.push(uploaded.url);
   }
   const row = await productsRepo.updateProduct(db, id, { images: urls });
@@ -898,12 +902,16 @@ export async function setCategoryImage(
   const existing = await categoriesRepo.findCategoryBySlug(db, slug);
   if (!existing) throw new NotFoundError('Category not found');
 
-  const uploaded = await putCatalogImage(`categories/${slug}`, file);
-  const oldKey = mediaUrlToKey(existing.image);
-  if (oldKey) await deleteUploadObject(oldKey).catch(() => undefined);
-
+  const uploaded = await uploadProcessedCatalogImage(
+    `categories/${slug}`,
+    file,
+    'product',
+  );
   const row = await categoriesRepo.updateCategory(db, slug, {
     image: uploaded.url,
   });
+  const oldKey = mediaUrlToKey(existing.image);
+  if (oldKey) await deleteUploadObject(oldKey).catch(() => undefined);
+
   return toAdminCategory(row);
 }

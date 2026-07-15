@@ -1,10 +1,16 @@
 import 'server-only';
+import { cache } from 'react';
 import {
   adminSettingsWriteSchema,
   type AdminSettingsDTO,
   type AdminSettingsWrite,
   type StorefrontConfigDTO,
 } from '@/shared/contracts/admin-config.contract';
+import {
+  AnnouncementItemsSchema,
+  type AnnouncementItem,
+  type SiteBrandingDTO,
+} from '@/shared/contracts/storefront-branding.contract';
 import {
   FREE_SHIPPING_THRESHOLD,
   PROFIT_MARGIN,
@@ -13,7 +19,7 @@ import {
 import { isFeatureEnabled } from '@/config/features.config';
 import { getRequestDb } from '@/server/db/request';
 import { ValidationError } from '@/server/http/errors';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, inArray } from 'drizzle-orm';
 import { settings, shippingZones } from '@/server/db/schema';
 import {
   DEFAULT_BULK_SHIPPING_USD,
@@ -30,6 +36,7 @@ import {
   DEFAULT_SHIPPING_ETA_LOCAL,
 } from '@/server/services/merchandising.service';
 import { getOnlinePaymentsAvailability } from '@/server/services/paymob.service';
+import { resolveSiteUrl } from '@/shared/lib/contact-links';
 
 async function getSettingValue(
   key: string,
@@ -41,6 +48,25 @@ async function getSettingValue(
     .where(eq(settings.key, key))
     .limit(1);
   return rows[0]?.value;
+}
+
+/** One D1 round-trip for many keys — prefer over repeated getSettingValue. */
+async function getSettingsMap(
+  keys: readonly string[],
+): Promise<Record<string, unknown | undefined>> {
+  if (keys.length === 0) return {};
+  const db = await getRequestDb();
+  const rows = await db
+    .select()
+    .from(settings)
+    .where(inArray(settings.key, [...keys]));
+  const map: Record<string, unknown | undefined> = Object.fromEntries(
+    keys.map((k) => [k, undefined]),
+  );
+  for (const row of rows) {
+    map[row.key] = row.value;
+  }
+  return map;
 }
 
 async function setSetting(key: string, value: unknown): Promise<void> {
@@ -73,6 +99,97 @@ function asNumber(v: unknown, fallback: number): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
 }
 
+/**
+ * Normalize announcement_items from Drizzle JSON-mode settings.
+ * Invalid / empty → [] (Header hides the strip). Active items only, sorted.
+ */
+export function normalizeAnnouncementItems(value: unknown): AnnouncementItem[] {
+  const parsed = AnnouncementItemsSchema.safeParse(value);
+  if (!parsed.success) return [];
+  return [...parsed.data]
+    .filter((item) => item.active)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id));
+}
+
+function parseAnnouncementItemsForAdmin(value: unknown): AnnouncementItem[] {
+  const parsed = AnnouncementItemsSchema.safeParse(value);
+  if (!parsed.success) return [];
+  return [...parsed.data].sort(
+    (a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id),
+  );
+}
+
+const BRANDING_SETTING_KEYS = [
+  'site_name',
+  'site_tagline',
+  'logo_url',
+  'favicon_url',
+  'contact_email',
+  'contact_phone',
+  'whatsapp_number',
+  'social_instagram',
+  'social_facebook',
+  'social_tiktok',
+  'footer_text',
+  'seo_default_title',
+  'seo_default_description',
+  'site_url',
+  'announcement_items',
+] as const;
+
+function defaultSiteBranding(): SiteBrandingDTO {
+  return {
+    siteName: SITE.name,
+    siteTagline: SITE.tagline,
+    siteUrl: resolveSiteUrl(SITE.url, SITE.url),
+    logoUrl: null,
+    faviconUrl: null,
+    contactEmail: null,
+    contactPhone: null,
+    whatsappNumber: null,
+    socialInstagram: null,
+    socialFacebook: null,
+    socialTiktok: null,
+    footerText: null,
+    seoDefaultTitle: null,
+    seoDefaultDescription: null,
+    announcements: [],
+  };
+}
+
+/**
+ * Storefront branding from D1 settings.
+ * V1 cache model: no persistent cache — one batch read per request, memoized
+ * with React cache() so RootLayout + generateMetadata share the same result.
+ * Falls back to SITE defaults if D1 is unavailable (e.g. parallel prerender lock).
+ */
+export const getSiteBranding = cache(
+  async (): Promise<SiteBrandingDTO> => {
+    try {
+      const map = await getSettingsMap(BRANDING_SETTING_KEYS);
+      return {
+        siteName: asString(map.site_name) ?? SITE.name,
+        siteTagline: asString(map.site_tagline) ?? SITE.tagline,
+        siteUrl: resolveSiteUrl(asString(map.site_url), SITE.url),
+        logoUrl: asString(map.logo_url),
+        faviconUrl: asString(map.favicon_url),
+        contactEmail: asString(map.contact_email),
+        contactPhone: asString(map.contact_phone),
+        whatsappNumber: asString(map.whatsapp_number),
+        socialInstagram: asString(map.social_instagram),
+        socialFacebook: asString(map.social_facebook),
+        socialTiktok: asString(map.social_tiktok),
+        footerText: asString(map.footer_text),
+        seoDefaultTitle: asString(map.seo_default_title),
+        seoDefaultDescription: asString(map.seo_default_description),
+        announcements: normalizeAnnouncementItems(map.announcement_items),
+      };
+    } catch {
+      return defaultSiteBranding();
+    }
+  },
+);
+
 export async function getAdminSettings(): Promise<AdminSettingsDTO> {
   const keys = [
     'profit_margin',
@@ -103,6 +220,7 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
     'seo_default_title',
     'seo_default_description',
     'footer_text',
+    'announcement_items',
     'maintenance_mode',
     'bridal_page_enabled',
     'bridal_show_collections',
@@ -117,10 +235,7 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
     'cron_last_runs',
   ] as const;
 
-  const values = await Promise.all(keys.map((k) => getSettingValue(k)));
-  const map = Object.fromEntries(
-    keys.map((k, i) => [k, values[i]]),
-  ) as Record<(typeof keys)[number], unknown | undefined>;
+  const map = await getSettingsMap(keys);
 
   const cronLastRuns =
     map.cron_last_runs &&
@@ -186,6 +301,7 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
     seoDefaultTitle: asString(map.seo_default_title),
     seoDefaultDescription: asString(map.seo_default_description),
     footerText: asString(map.footer_text),
+    announcementItems: parseAnnouncementItemsForAdmin(map.announcement_items),
     maintenanceMode: asBool(map.maintenance_mode, false),
     // Default ON — bridal landing page is visible until an admin hides it
     bridalPageEnabled: asBool(map.bridal_page_enabled, true),
@@ -240,6 +356,7 @@ const WRITE_KEYS: { field: keyof AdminSettingsWrite; key: string }[] = [
   { field: 'seoDefaultTitle', key: 'seo_default_title' },
   { field: 'seoDefaultDescription', key: 'seo_default_description' },
   { field: 'footerText', key: 'footer_text' },
+  { field: 'announcementItems', key: 'announcement_items' },
   { field: 'maintenanceMode', key: 'maintenance_mode' },
   { field: 'bridalPageEnabled', key: 'bridal_page_enabled' },
   { field: 'bridalShowCollections', key: 'bridal_show_collections' },
@@ -335,31 +452,23 @@ export type BridalPageConfig = {
 
 /** All bridal storefront toggles in one read (admin-editable, default ON). */
 export async function getBridalPageConfig(): Promise<BridalPageConfig> {
-  const [
-    enabled,
-    collections,
-    personalization,
-    tiers,
-    finalCta,
-    homeSpotlight,
-    customRequests,
-  ] = await Promise.all([
-    getSettingValue('bridal_page_enabled'),
-    getSettingValue('bridal_show_collections'),
-    getSettingValue('bridal_show_personalization'),
-    getSettingValue('bridal_show_tiers'),
-    getSettingValue('bridal_show_final_cta'),
-    getSettingValue('bridal_show_home_spotlight'),
-    getSettingValue('bridal_custom_enabled'),
+  const map = await getSettingsMap([
+    'bridal_page_enabled',
+    'bridal_show_collections',
+    'bridal_show_personalization',
+    'bridal_show_tiers',
+    'bridal_show_final_cta',
+    'bridal_show_home_spotlight',
+    'bridal_custom_enabled',
   ]);
   return {
-    enabled: asBool(enabled, true),
-    collections: asBool(collections, true),
-    personalization: asBool(personalization, true),
-    tiers: asBool(tiers, true),
-    finalCta: asBool(finalCta, true),
-    homeSpotlight: asBool(homeSpotlight, true),
-    customRequests: asBool(customRequests, true),
+    enabled: asBool(map.bridal_page_enabled, true),
+    collections: asBool(map.bridal_show_collections, true),
+    personalization: asBool(map.bridal_show_personalization, true),
+    tiers: asBool(map.bridal_show_tiers, true),
+    finalCta: asBool(map.bridal_show_final_cta, true),
+    homeSpotlight: asBool(map.bridal_show_home_spotlight, true),
+    customRequests: asBool(map.bridal_custom_enabled, true),
   };
 }
 

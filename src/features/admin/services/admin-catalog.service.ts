@@ -134,6 +134,10 @@ export const adminCatalogService = {
     return api.del(`/api/admin/media/${encodeURIComponent(id)}`);
   },
 
+  updateMediaAlt(id: string, alt: string | null): Promise<AdminMediaDTO> {
+    return api.put(`/api/admin/media/${encodeURIComponent(id)}`, { alt });
+  },
+
   uploadProductImages(id: string, files: File[]): Promise<AdminProductDTO> {
     const fd = new FormData();
     for (const f of files) fd.append('file', f);

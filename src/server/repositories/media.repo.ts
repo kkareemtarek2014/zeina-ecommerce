@@ -65,6 +65,19 @@ export async function deleteMedia(db: Db, id: string): Promise<boolean> {
   return result.length > 0;
 }
 
+export async function updateMediaAlt(
+  db: Db,
+  id: string,
+  alt: string | null,
+): Promise<MediaAssetRow | null> {
+  const result = await db
+    .update(mediaAssets)
+    .set({ alt })
+    .where(eq(mediaAssets.id, id))
+    .returning();
+  return result[0] ?? null;
+}
+
 /** True if any product image JSON or category image references this URL. */
 export async function isMediaUrlReferenced(
   db: Db,

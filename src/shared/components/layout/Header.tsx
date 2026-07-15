@@ -1,16 +1,18 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { User } from 'lucide-react';
-import { SITE, FREE_SHIPPING_THRESHOLD } from '@/config/site.config';
 import { cn } from '@/shared/utils/cn';
 import { useFeature } from '@/shared/contexts/FeatureContext';
 import { CartDrawer } from '@/features/cart';
 import { SearchButton } from '@/features/product-search';
 import { useStorefrontConfig } from '@/features/admin';
 import type { FeatureKey } from '@/config/features.config';
+import type { SiteBrandingDTO } from '@/shared/contracts/storefront-branding.contract';
+import { AnnouncementBar } from './AnnouncementBar';
 import { CollectionsMegaMenu } from './CollectionsMegaMenu';
 import { MobileNavDrawer } from './MobileNavDrawer';
 
@@ -27,7 +29,11 @@ const NAV_LINKS: {
   { href: '/contact', label: 'Contact' },
 ];
 
-export function Header() {
+interface HeaderProps {
+  branding: SiteBrandingDTO;
+}
+
+export function Header({ branding }: HeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const isShopEnabled = useFeature('shop');
@@ -48,29 +54,26 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
-      {/* Announcement bar */}
-      <div className="bg-brand-primary text-text-inverse">
-        <div className="mx-auto flex max-w-container items-center justify-center gap-6 overflow-x-auto px-4 py-2 text-xs font-medium tracking-wide whitespace-nowrap lg:px-8">
-          <span>✨ New drop every week</span>
-          <span aria-hidden className="opacity-40">
-            ·
-          </span>
-          <span>
-            Free shipping over {FREE_SHIPPING_THRESHOLD.toLocaleString()} EGP
-          </span>
-          <span aria-hidden className="hidden opacity-40 sm:inline">
-            ·
-          </span>
-          <span className="hidden sm:inline">Cash on delivery, Egypt-wide</span>
-        </div>
-      </div>
+      <AnnouncementBar items={branding.announcements} />
 
       <div className="mx-auto flex h-16 max-w-container items-center justify-between gap-4 px-4 lg:px-8">
         <Link
           href="/"
           className="font-display text-3xl font-bold tracking-wide text-brand-primary italic"
         >
-          {SITE.name}
+          {branding.logoUrl ? (
+            // next/image with unoptimized:true (project lock)
+            <Image
+              src={branding.logoUrl}
+              alt={branding.siteName}
+              width={140}
+              height={40}
+              className="h-10 w-auto object-contain"
+              unoptimized
+            />
+          ) : (
+            branding.siteName
+          )}
         </Link>
 
         <nav
@@ -128,6 +131,7 @@ export function Header() {
 
           <MobileNavDrawer
             links={navLinks}
+            siteName={branding.siteName}
             isOpen={menuOpen}
             onOpenChange={handleMenuOpenChange}
           />

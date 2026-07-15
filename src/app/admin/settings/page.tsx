@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   AdminBreadcrumbs,
   CronJobsPanel,
@@ -11,10 +12,22 @@ import {
 import { useToast } from '@/shared/components/ui';
 import { AppError } from '@/shared/contracts/errors';
 
+function fieldErrorsFromDetails(
+  details: unknown,
+): Record<string, string[] | undefined> | undefined {
+  if (!details || typeof details !== 'object') return undefined;
+  const fieldErrors = (details as { fieldErrors?: unknown }).fieldErrors;
+  if (!fieldErrors || typeof fieldErrors !== 'object') return undefined;
+  return fieldErrors as Record<string, string[] | undefined>;
+}
+
 export default function AdminSettingsPage() {
   const { toast } = useToast();
   const { data, isLoading, isError } = useAdminSettings();
   const updateMutation = useUpdateAdminSettings();
+  const [serverFieldErrors, setServerFieldErrors] = useState<
+    Record<string, string[] | undefined> | undefined
+  >();
 
   return (
     <div>
@@ -38,8 +51,10 @@ export default function AdminSettingsPage() {
             <SettingsForm
               initial={data}
               isLoading={updateMutation.isPending}
+              serverFieldErrors={serverFieldErrors}
               onSubmit={async (values) => {
                 try {
+                  setServerFieldErrors(undefined);
                   const n = (v: string | undefined) => {
                     const t = v?.trim() ?? '';
                     return t ? t : null;
@@ -76,6 +91,7 @@ export default function AdminSettingsPage() {
                     seoDefaultTitle: n(values.seoDefaultTitle),
                     seoDefaultDescription: n(values.seoDefaultDescription),
                     footerText: n(values.footerText),
+                    announcementItems: values.announcementItems,
                     maintenanceMode: values.maintenanceMode,
                     bridalPageEnabled: values.bridalPageEnabled,
                     bridalShowCollections: values.bridalShowCollections,
@@ -89,10 +105,16 @@ export default function AdminSettingsPage() {
                   });
                   toast('Settings saved', 'success');
                 } catch (err) {
-                  toast(
-                    err instanceof AppError ? err.message : 'Save failed',
-                    'error',
-                  );
+                  if (err instanceof AppError) {
+                    const fields = fieldErrorsFromDetails(err.details);
+                    setServerFieldErrors(fields);
+                    const firstFieldMsg = fields
+                      ? Object.values(fields).flat().find(Boolean)
+                      : undefined;
+                    toast(firstFieldMsg ?? err.message, 'error');
+                    return;
+                  }
+                  toast('Save failed', 'error');
                 }
               }}
             />

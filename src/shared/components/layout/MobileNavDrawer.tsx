@@ -10,7 +10,6 @@ import {
   Sparkles,
   User,
 } from 'lucide-react';
-import { SITE } from '@/config/site.config';
 import { CATEGORIES } from '@/shared/data/categories.data';
 import { Drawer } from '@/shared/components/ui';
 import { cn } from '@/shared/utils/cn';
@@ -28,12 +27,14 @@ export interface MobileNavLink {
 
 interface MobileNavDrawerProps {
   links: MobileNavLink[];
+  siteName: string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function MobileNavDrawer({
   links,
+  siteName,
   isOpen,
   onOpenChange,
 }: MobileNavDrawerProps) {
@@ -44,7 +45,9 @@ export function MobileNavDrawer({
   const wasDrawerOpenRef = useRef(false);
   const onOpenChangeRef = useRef(onOpenChange);
 
-  onOpenChangeRef.current = onOpenChange;
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  }, [onOpenChange]);
 
   useEffect(() => {
     onOpenChangeRef.current(false);
@@ -75,7 +78,7 @@ export function MobileNavDrawer({
       <Drawer
         isOpen={isOpen}
         onClose={close}
-        title={SITE.name}
+        title={siteName}
         side="left"
       >
         <div id="mobile-nav-drawer" className="flex h-full flex-col">

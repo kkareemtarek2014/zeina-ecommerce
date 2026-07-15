@@ -9,10 +9,12 @@ import {
 } from '@/features/admin';
 import type { AdminMediaDTO } from '@/shared/contracts/admin-catalog.contract';
 import {
+  Badge,
   Button,
   ConfirmDialog,
   DataTable,
   type DataTableColumn,
+  Input,
   Pagination,
   SearchInput,
   useToast,
@@ -20,6 +22,11 @@ import {
 import { AppError } from '@/shared/contracts/errors';
 
 const PAGE_SIZE = 24;
+
+function dimensionsLabel(row: AdminMediaDTO): string | null {
+  if (row.width == null || row.height == null) return null;
+  return `${row.width}×${row.height}`;
+}
 
 export default function AdminMediaPage() {
   const { toast } = useToast();
@@ -31,6 +38,8 @@ export default function AdminMediaPage() {
   const [deleteTarget, setDeleteTarget] = useState<AdminMediaDTO | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [altDrafts, setAltDrafts] = useState<Record<string, string>>({});
+  const [savingAltId, setSavingAltId] = useState<string | null>(null);
 
   const params = useMemo(
     () => ({ page, pageSize: PAGE_SIZE, q: q || undefined }),
@@ -48,11 +57,13 @@ export default function AdminMediaPage() {
       header: '',
       className: 'w-16',
       cell: (row) => (
-        <div className="size-12 overflow-hidden rounded-(--radius) bg-brand-blush/40">
+        <div className="relative size-12 overflow-hidden rounded-(--radius) bg-brand-blush/40">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={row.url}
             alt={row.alt ?? row.filename}
+            width={row.width ?? undefined}
+            height={row.height ?? undefined}
             className="size-full object-cover"
           />
         </div>
@@ -71,12 +82,72 @@ export default function AdminMediaPage() {
     {
       key: 'meta',
       header: 'Meta',
-      cell: (row) => (
-        <span className="text-xs text-text-muted">
-          {row.mime} · {Math.round(row.size / 1024)} KB
-          {row.folder ? ` · ${row.folder}` : ''}
-        </span>
-      ),
+      cell: (row) => {
+        const dims = dimensionsLabel(row);
+        return (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge tone="muted">{row.mime}</Badge>
+            {dims ? <Badge tone="muted">{dims}</Badge> : null}
+            <span className="text-xs text-text-muted">
+              {Math.round(row.size / 1024)} KB
+              {row.folder ? ` · ${row.folder}` : ''}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'alt',
+      header: 'Alt text',
+      cell: (row) => {
+        const value = altDrafts[row.id] ?? row.alt ?? '';
+        return (
+          <div className="flex min-w-[12rem] max-w-xs items-end gap-2">
+            <div className="flex-1">
+              <Input
+                aria-label={`Alt text for ${row.filename}`}
+                value={value}
+                maxLength={200}
+                placeholder="Describe the image"
+                className="h-9"
+                onChange={(e) =>
+                  setAltDrafts((prev) => ({ ...prev, [row.id]: e.target.value }))
+                }
+              />
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              isLoading={savingAltId === row.id}
+              disabled={(row.alt ?? '') === value.trim()}
+              onClick={async () => {
+                setSavingAltId(row.id);
+                try {
+                  const next = value.trim() ? value.trim() : null;
+                  await adminCatalogService.updateMediaAlt(row.id, next);
+                  toast('Alt text saved', 'success');
+                  setAltDrafts((prev) => {
+                    const next = { ...prev };
+                    delete next[row.id];
+                    return next;
+                  });
+                  void qc.invalidateQueries({ queryKey: ['admin', 'media'] });
+                } catch (err) {
+                  toast(
+                    err instanceof AppError ? err.message : 'Could not save alt',
+                    'error',
+                  );
+                } finally {
+                  setSavingAltId(null);
+                }
+              }}
+            >
+              Save
+            </Button>
+          </div>
+        );
+      },
     },
     {
       key: 'when',
@@ -118,8 +189,8 @@ export default function AdminMediaPage() {
             Media
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Shared image library for products. Delete is blocked while still
-            attached.
+            JPEG / PNG / WebP are stored as optimized WebP. SVG passes through.
+            GIF and HEIC are rejected.
           </p>
         </div>
         <Button
@@ -133,7 +204,7 @@ export default function AdminMediaPage() {
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/svg+xml"
           className="hidden"
           onChange={async (e) => {
             const file = e.target.files?.[0];
