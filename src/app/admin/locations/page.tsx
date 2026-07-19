@@ -219,7 +219,7 @@ export default function AdminLocationsPage() {
           { label: 'Locations' },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
+      <h1 className="font-display text-3xl font-semibold text-text-primary">
         Locations
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
@@ -271,7 +271,7 @@ export default function AdminLocationsPage() {
             <p className="text-sm text-text-muted">Loading…</p>
           ) : (
             <div className="space-y-3">
-              {zones.map((z) => (
+              {zones.map((z: ShippingZoneDTO) => (
                 <ZoneFeeRow key={z.zone} zone={z} />
               ))}
             </div>

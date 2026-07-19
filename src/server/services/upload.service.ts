@@ -10,13 +10,7 @@ import {
   type ProcessedImage,
 } from '@/server/lib/image/process-upload';
 
-const MAX_BRIDAL_BYTES = 25 * 1024 * 1024;
 const MAX_CATALOG_BYTES = 5 * 1024 * 1024;
-
-function sanitizeFilename(name: string): string {
-  const base = name.split(/[/\\]/).pop() ?? 'upload';
-  return base.replace(/[^\w.\-()+ ]+/g, '_').slice(0, 120) || 'upload';
-}
 
 function extFromFile(file: File): string {
   const fromName = file.name.split('.').pop()?.toLowerCase();
@@ -27,25 +21,6 @@ function extFromFile(file: File): string {
   if (file.type === 'image/gif') return 'gif';
   if (file.type === 'image/svg+xml') return 'svg';
   return 'bin';
-}
-
-export async function putBridalUpload(
-  requestId: string,
-  file: File,
-): Promise<{ key: string; fileName: string; fileType: string }> {
-  const env = await getCloudflareEnv();
-  const fileName = sanitizeFilename(file.name);
-  const key = `bridal/${requestId}/${fileName}`;
-  const bytes = await file.arrayBuffer();
-  if (bytes.byteLength > MAX_BRIDAL_BYTES) {
-    throw new PayloadTooLargeError('File must be smaller than 25 MB');
-  }
-  await env.UPLOADS.put(key, bytes, {
-    httpMetadata: {
-      contentType: file.type || 'application/octet-stream',
-    },
-  });
-  return { key, fileName, fileType: file.type || 'application/octet-stream' };
 }
 
 /** Catalog (product/category) image → R2. Returns public media path. */
@@ -182,4 +157,4 @@ export async function getUploadObject(
   return env.UPLOADS.get(key);
 }
 
-export { MAX_BRIDAL_BYTES, MAX_CATALOG_BYTES };
+export { MAX_CATALOG_BYTES };

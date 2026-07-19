@@ -1,8 +1,9 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150/fdfbf7/c4a484?text=Z" alt="Zaya Logo" width="120" height="120" />
-  <h1>✨ Zaya — Premium Women's Accessories ✨</h1>
-  <p><strong>Curated women's accessories (زينة) delivered anywhere in Egypt — Cash on Delivery today; card &amp; mobile wallet coming via Paymob.</strong></p>
-  <p>A sleek, feature-based Next.js storefront engineered for scalability, stunning UI/UX, and robust performance.</p>
+  <img src="https://via.placeholder.com/150x150/fbfaf6/129488?text=S" alt="Sqoosh Logo" width="120" height="120" />
+  <h1>🫧 Sqoosh — Squishy Toys &amp; Stress Relief 🫧</h1>
+  <p><strong>Irresistibly cute squishies (سكوش) delivered anywhere in Egypt — Cash on Delivery today; card &amp; mobile wallet coming via Paymob.</strong></p>
+  <p>A playful, feature-based Next.js storefront engineered for scalability, delightful UI/UX, and robust performance.</p>
+  <p><em>Rebrand in progress: docs are Sqoosh; code migration tracked in <a href="./docs/rebrand-migration-plan.md">docs/rebrand-migration-plan.md</a>.</em></p>
 </div>
 
 <hr />
@@ -175,5 +176,5 @@ Detailed, phased specs for all of the above: [`docs/backend/`](./docs/backend/RE
 ---
 
 <div align="center">
-  <p>Crafted with elegance for Zaya.</p>
+  <p>Made with a sqoosh for Sqoosh. 🫧</p>
 </div>

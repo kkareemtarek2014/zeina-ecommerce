@@ -1,9 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Sparkles, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { CATEGORIES } from '@/shared/data/categories.data';
 import { useProducts } from '../hooks/useProducts';
 import {
@@ -80,20 +79,6 @@ export function ShopView({ category }: { category?: string }) {
         </div>
       </div>
 
-      {category === 'bride' && (
-        <Link
-          href="/bride/custom"
-          className="mt-6 flex items-center gap-3 rounded-(--radius) border border-brand-primary/30 bg-brand-blush/40 px-5 py-4 transition-colors hover:bg-brand-blush"
-        >
-          <Sparkles className="size-5 shrink-0 text-brand-primary" />
-          <span className="text-sm text-text-secondary">
-            Looking for something custom for your wedding?{' '}
-            <span className="font-medium text-brand-primary">
-              Send us a photo — we reply within 2 days.
-            </span>
-          </span>
-        </Link>
-      )}
 
       <div className="mt-8">
         <ProductGrid products={visibleProducts} isLoading={isLoading} />

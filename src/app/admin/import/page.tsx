@@ -84,7 +84,7 @@ export default function AdminTemuImportPage() {
           value={categorySlug}
           onChange={(e) => setCategorySlug(e.target.value)}
         >
-          <option value="">Default (jewelry or first)</option>
+          <option value="">Default (medium or first)</option>
           {categories.map((c) => (
             <option key={c.slug} value={c.slug}>
               {c.name}

@@ -205,7 +205,7 @@ export async function createAdminProduct(raw: unknown): Promise<AdminProductDTO>
     emptyToNull(parsed.data.slug) ??
     `${slugify(parsed.data.name)}-${id.slice(2, 6)}`;
   const sku =
-    emptyToNull(parsed.data.sku) ?? `ZAYA-${id.toUpperCase()}`;
+    emptyToNull(parsed.data.sku) ?? `SQ-${id.toUpperCase()}`;
   const stockQty = parsed.data.stockQty ?? (parsed.data.inStock ? 50 : 0);
 
   const desc = prepareProductDescription(
@@ -426,7 +426,7 @@ export async function duplicateAdminProduct(
 
   const newId = `p-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
   const slug = `${slugify(source.name)}-${newId.slice(2, 6)}`;
-  const sku = `ZAYA-${newId.toUpperCase()}`;
+  const sku = `SQ-${newId.toUpperCase()}`;
 
   const row = await productsRepo.insertProduct(db, {
     id: newId,
@@ -740,7 +740,7 @@ export async function importAdminProductsCsv(
       } else {
         const id = `p-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
         const finalSlug = slug ?? `${slugify(name)}-${id.slice(2, 6)}`;
-        const finalSku = sku ?? `ZAYA-${id.toUpperCase()}`;
+        const finalSku = sku ?? `SQ-${id.toUpperCase()}`;
         await assertUniqueSlugSku(db, finalSlug, finalSku);
         await productsRepo.insertProduct(db, {
           id,
@@ -844,7 +844,7 @@ export async function createAdminCategory(raw: unknown): Promise<AdminCategoryDT
   const row = await categoriesRepo.insertCategory(db, {
     slug: parsed.data.slug,
     name: parsed.data.name,
-    image: parsed.data.image || '/images/cat-jewelry.svg',
+    image: parsed.data.image || '/images/cat-medium.svg',
     seoDescription: parsed.data.seoDescription,
     sortOrder: parsed.data.sortOrder ?? 99,
   });

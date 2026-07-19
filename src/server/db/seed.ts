@@ -97,7 +97,7 @@ const ZONE_LABELS: Record<keyof typeof SHIPPING_RATES, string> = {
   far: 'Far (Upper Egypt / Sinai)',
 };
 
-const ADMIN_EMAIL = 'admin@zaya-eg.com';
+const ADMIN_EMAIL = 'admin@sqoosh-eg.com';
 const ADMIN_PASSWORD = 'password123';
 
 /** D1 rejects large multi-row inserts (SQL variable limit). */
@@ -154,7 +154,7 @@ async function main() {
       tags: p.tags ?? null,
       createdAt: new Date(baseCreated + i * 86_400_000),
       slug: slugify(p.name),
-      sku: `ZAYA-${p.id.toUpperCase()}`,
+      sku: `SQ-${p.id.toUpperCase()}`,
       status: 'published' as const,
       stockQty: 50,
       reservedQty: 0,
@@ -263,7 +263,7 @@ async function main() {
       .values({
         id: 'user_admin',
         email: ADMIN_EMAIL,
-        name: 'Zaya Admin',
+        name: 'Sqoosh Admin',
         phone: null,
         passwordHash: adminHash,
         role: 'admin',
@@ -353,7 +353,7 @@ async function main() {
         orderId: 'ZN-MOCK-123',
         productId: mockProduct.id,
         name: mockProduct.name,
-        image: mockProduct.images[0] ?? '/images/p-001.svg',
+        image: mockProduct.images[0] ?? '/images/sq-001.svg',
         unitPrice: 500,
         quantity: 1,
         isPreorder: false,

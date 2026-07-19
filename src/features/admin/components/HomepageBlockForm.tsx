@@ -52,7 +52,7 @@ function defaultConfig(type: HomepageBlockType): Record<string, unknown> {
     case 'collection':
       return {
         title: 'Shop the collection',
-        categorySlug: 'jewelry',
+        categorySlug: 'medium',
         description: '',
       };
     case 'promo':

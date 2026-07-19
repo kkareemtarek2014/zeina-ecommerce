@@ -1,35 +1,36 @@
 /**
- * Zaya — single place to tune business rules.
+ * Sqoosh — single place to tune business rules.
  * Change a value here and the whole storefront follows.
  */
 export const SITE = {
-  name: 'Zaya',
-  tagline: 'Adorn yourself effortlessly with premium accessories.',
+  name: 'Sqoosh',
+  tagline: 'Squeeze the stress away.',
   description:
-    'Shop women\'s accessories online in Egypt — jewelry, bags, scarves, sunglasses & watches. Cash on delivery & fast shipping.',
-  /** Production domain — UPDATE when you buy the real domain. */
-  url: 'https://zaya-ecommerce.kkareemtarek2.workers.dev/',
+    'Shop squishy stress toys online in Egypt — small, medium & jumbo slow-rising squishies for everyday calm. Cash on delivery & fast shipping.',
+  /** Production domain — UPDATE when you buy the real domain (sqoosh-eg.com). */
+  url: 'https://sqoosh-eg.com',
   currency: 'EGP',
   locale: 'en-EG',
   keywords: [
-    'women accessories Egypt',
-    'accessories online Egypt',
-    'jewelry Egypt',
-    'bags Egypt',
-    'اكسسوارات حريمي',
-    'اكسسوارات بنات',
-    'شنط حريمي',
-    'مجوهرات',
+    'squishy toys Egypt',
+    'stress toys Egypt',
+    'slow rising squishy',
+    'fidget toys Egypt',
+    'سكويشي',
+    'سكويشي مصر',
+    'العاب ضغط',
+    'فيدجت',
+    'سكوش',
     'cash on delivery Egypt',
-    'Zaya',
+    'Sqoosh',
   ],
 } as const;
 
 /**
- * Profit margin applied on top of the sourcing cost.
- * Business rule: 25% (allowed range 20–30%).
+ * Profit margin applied on top of the landed sourcing cost.
+ * Business rule: 60% (allowed range 40–80%). See BUSINESS-PLAN.md §2b.
  */
-export const PROFIT_MARGIN = 0.25;
+export const PROFIT_MARGIN = 0.6;
 
 /** Delivery zones used across shipping + governorate data. */
 export type ShippingZone = 'cairo_giza' | 'near' | 'far';
@@ -42,4 +43,4 @@ export const SHIPPING_RATES: Record<ShippingZone, number> = {
 };
 
 /** Orders at or above this subtotal (EGP) ship for free. */
-export const FREE_SHIPPING_THRESHOLD = 1500;
+export const FREE_SHIPPING_THRESHOLD = 500;

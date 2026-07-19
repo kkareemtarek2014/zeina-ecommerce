@@ -25,7 +25,7 @@ export default function VouchersPage() {
             <h3 className="font-(family-name:--font-display) text-2xl font-bold text-text-primary">10% OFF</h3>
             <p className="mt-1 text-sm text-text-secondary">On all accessories</p>
             <div className="mt-4 flex items-center gap-2">
-              <code className="rounded border border-border bg-surface-raised px-2 py-1 text-sm font-mono font-bold text-brand-primary">ZAYA10</code>
+              <code className="rounded border border-border bg-surface-raised px-2 py-1 text-sm font-mono font-bold text-brand-primary">SQOOSH10</code>
             </div>
             <p className="mt-4 text-xs text-text-muted">Expires: 31 Dec 2026</p>
           </div>
@@ -45,7 +45,7 @@ export default function VouchersPage() {
             <h3 className="font-(family-name:--font-display) text-2xl font-bold text-text-primary">20% OFF</h3>
             <p className="mt-1 text-sm text-text-secondary">Orders above 2000 EGP</p>
             <div className="mt-4 flex items-center gap-2">
-              <code className="rounded border border-border bg-surface-raised px-2 py-1 text-sm font-mono font-bold text-brand-primary">ZAYA20</code>
+              <code className="rounded border border-border bg-surface-raised px-2 py-1 text-sm font-mono font-bold text-brand-primary">SQOOSH20</code>
             </div>
             <p className="mt-4 text-xs text-text-muted">Expires: 15 Nov 2026</p>
           </div>

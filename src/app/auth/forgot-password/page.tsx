@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from '@/features/auth';
 
 export const metadata: Metadata = {
   title: 'Forgot Password',
-  description: 'Reset your Zaya account password.',
+  description: 'Reset your Sqoosh account password.',
 };
 
 export default function ForgotPasswordPage() {

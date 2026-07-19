@@ -1,6 +1,5 @@
 import { api } from '@/shared/lib/api-client';
 import type {
-  AdminBridalRequestDTO,
   AdminPromoDTO,
   AdminPromoWrite,
   AdminPromoUpdate,
@@ -14,22 +13,6 @@ import type {
   AdminGovernorateDTO,
   GovernorateDTO,
 } from '@/shared/contracts/product.contract';
-import type { Paginated } from '@/shared/contracts/admin-catalog.contract';
-
-export type BridalListParams = {
-  page?: number;
-  pageSize?: number;
-  status?: 'pending' | 'answered';
-};
-
-function q(params: Record<string, string | number | undefined>): string {
-  const sp = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v !== undefined && v !== '') sp.set(k, String(v));
-  }
-  const s = sp.toString();
-  return s ? `?${s}` : '';
-}
 
 export const storefrontConfigService = {
   get(): Promise<StorefrontConfigDTO> {
@@ -39,10 +22,15 @@ export const storefrontConfigService = {
 
 export const adminLocationsService = {
   listGovernorates(): Promise<AdminGovernorateDTO[]> {
-    return api.get('/api/admin/governorates');
+    return api.get('/api/admin/locations/governorates');
   },
-  createGovernorate(input: AdminGovernorateWrite): Promise<AdminGovernorateDTO> {
-    return api.post('/api/admin/governorates', input);
+  listStorefrontGovernorates(): Promise<GovernorateDTO[]> {
+    return api.get('/api/locations/governorates');
+  },
+  createGovernorate(
+    input: AdminGovernorateWrite,
+  ): Promise<AdminGovernorateDTO> {
+    return api.post('/api/admin/locations/governorates', input);
   },
   updateGovernorate(
     id: string,
@@ -90,31 +78,6 @@ export const adminPromosService = {
   },
   delete(code: string): Promise<{ ok: true }> {
     return api.del(`/api/admin/promos/${encodeURIComponent(code)}`);
-  },
-};
-
-export const adminBridalService = {
-  list(
-    params: BridalListParams = {},
-  ): Promise<Paginated<AdminBridalRequestDTO>> {
-    return api.get(
-      `/api/admin/bridal-requests${q({
-        page: params.page,
-        pageSize: params.pageSize,
-        status: params.status,
-      })}`,
-    );
-  },
-  get(id: string): Promise<AdminBridalRequestDTO> {
-    return api.get(`/api/admin/bridal-requests/${encodeURIComponent(id)}`);
-  },
-  updateStatus(
-    id: string,
-    status: 'pending' | 'answered',
-  ): Promise<AdminBridalRequestDTO> {
-    return api.patch(`/api/admin/bridal-requests/${encodeURIComponent(id)}`, {
-      status,
-    });
   },
 };
 

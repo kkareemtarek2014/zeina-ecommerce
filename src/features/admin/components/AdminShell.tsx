@@ -11,7 +11,6 @@ import {
   Users,
   MapPin,
   Ticket,
-  Heart,
   Settings,
   Menu,
   X,
@@ -111,12 +110,6 @@ const NAV: ReadonlyArray<{
     permission: 'promos:write',
   },
   {
-    href: '/admin/bridal',
-    label: 'Bridal',
-    icon: Heart,
-    permission: 'bridal:write',
-  },
-  {
     href: '/admin/homepage',
     label: 'Homepage',
     icon: LayoutTemplate,
@@ -207,7 +200,7 @@ export function AdminSidebar({
             className="font-display text-xl font-bold italic text-brand-primary"
             onClick={onClose}
           >
-            Zaya Admin
+            Sqoosh Admin
           </Link>
           <button
             type="button"

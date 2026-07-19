@@ -29,8 +29,10 @@ Flags stay as configured (`homepage_builder` ON; `social_proof` / `bundles` /
 
 ## Vibe / collection tiles (~3 min)
 
-1. For each **Collection** block: set `categorySlug` to this week’s vibe
-   (e.g. `jewelry`, `bags`, `bride`) and refresh title/description copy.
+1. For each **Collection** block: set `categorySlug` to a size category
+   (`small`, `medium`, `large` — see `docs/brand/catalog-categories-sourcing.md`)
+   and refresh title/description copy around the week’s theme (themes are tags, not
+   categories).
 2. Optional: swap a **Featured** block’s product IDs to the week’s hero SKUs
    (catalog IDs only — never paste prices).
 

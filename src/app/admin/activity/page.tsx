@@ -27,7 +27,6 @@ const ENTITY_OPTIONS = [
   'governorate',
   'shipping_zone',
   'settings',
-  'bridal_request',
   'inventory',
   'media',
 ] as const;
@@ -97,15 +96,15 @@ export default function AdminActivityPage() {
           { label: 'Activity' },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
+      <h1 className="font-display text-3xl font-semibold text-text-primary">
         Activity
       </h1>
       <p className="mt-1 text-sm text-text-secondary">
         Recent admin actions and full audit log.
       </p>
 
-      <section className="mt-8 rounded-(--radius-lg) border border-border bg-surface-raised p-5">
-        <h2 className="font-(family-name:--font-display) text-lg font-semibold text-text-primary">
+      <section className="mt-8 rounded-lg border border-border bg-surface-raised p-5">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
           Recent feed
         </h2>
         <div className="mt-4">
@@ -121,7 +120,7 @@ export default function AdminActivityPage() {
 
       <section className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="font-(family-name:--font-display) text-lg font-semibold text-text-primary">
+          <h2 className="font-display text-lg font-semibold text-text-primary">
             Audit log
           </h2>
           <Select

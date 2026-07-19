@@ -92,13 +92,6 @@ export default function AdminSettingsPage() {
                     footerText: n(values.footerText),
                     announcementItems: values.announcementItems,
                     maintenanceMode: values.maintenanceMode,
-                    bridalPageEnabled: values.bridalPageEnabled,
-                    bridalShowCollections: values.bridalShowCollections,
-                    bridalShowPersonalization: values.bridalShowPersonalization,
-                    bridalShowTiers: values.bridalShowTiers,
-                    bridalShowFinalCta: values.bridalShowFinalCta,
-                    bridalShowHomeSpotlight: values.bridalShowHomeSpotlight,
-                    bridalCustomEnabled: values.bridalCustomEnabled,
                     unpaidOrderTimeoutMinutes: values.unpaidOrderTimeoutMinutes,
                     pendingReminderHours: values.pendingReminderHours,
                   });

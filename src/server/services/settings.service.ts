@@ -222,13 +222,6 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
     'footer_text',
     'announcement_items',
     'maintenance_mode',
-    'bridal_page_enabled',
-    'bridal_show_collections',
-    'bridal_show_personalization',
-    'bridal_show_tiers',
-    'bridal_show_final_cta',
-    'bridal_show_home_spotlight',
-    'bridal_custom_enabled',
     'temu_scraper_enabled',
     'unpaid_order_timeout_minutes',
     'pending_reminder_hours',
@@ -303,14 +296,6 @@ export async function getAdminSettings(): Promise<AdminSettingsDTO> {
     footerText: asString(map.footer_text),
     announcementItems: parseAnnouncementItemsForAdmin(map.announcement_items),
     maintenanceMode: asBool(map.maintenance_mode, false),
-    // Default ON — bridal landing page is visible until an admin hides it
-    bridalPageEnabled: asBool(map.bridal_page_enabled, true),
-    bridalShowCollections: asBool(map.bridal_show_collections, true),
-    bridalShowPersonalization: asBool(map.bridal_show_personalization, true),
-    bridalShowTiers: asBool(map.bridal_show_tiers, true),
-    bridalShowFinalCta: asBool(map.bridal_show_final_cta, true),
-    bridalShowHomeSpotlight: asBool(map.bridal_show_home_spotlight, true),
-    bridalCustomEnabled: asBool(map.bridal_custom_enabled, true),
     // Default ON so import/sync work until an admin flips the kill switch
     temuScraperEnabled: asBool(map.temu_scraper_enabled, true),
     unpaidOrderTimeoutMinutes:
@@ -358,13 +343,6 @@ const WRITE_KEYS: { field: keyof AdminSettingsWrite; key: string }[] = [
   { field: 'footerText', key: 'footer_text' },
   { field: 'announcementItems', key: 'announcement_items' },
   { field: 'maintenanceMode', key: 'maintenance_mode' },
-  { field: 'bridalPageEnabled', key: 'bridal_page_enabled' },
-  { field: 'bridalShowCollections', key: 'bridal_show_collections' },
-  { field: 'bridalShowPersonalization', key: 'bridal_show_personalization' },
-  { field: 'bridalShowTiers', key: 'bridal_show_tiers' },
-  { field: 'bridalShowFinalCta', key: 'bridal_show_final_cta' },
-  { field: 'bridalShowHomeSpotlight', key: 'bridal_show_home_spotlight' },
-  { field: 'bridalCustomEnabled', key: 'bridal_custom_enabled' },
   { field: 'temuScraperEnabled', key: 'temu_scraper_enabled' },
   { field: 'unpaidOrderTimeoutMinutes', key: 'unpaid_order_timeout_minutes' },
   { field: 'pendingReminderHours', key: 'pending_reminder_hours' },
@@ -428,48 +406,7 @@ export async function getStorefrontConfig(): Promise<StorefrontConfigDTO> {
     })),
     maintenanceMode: asBool(maintenanceRaw, false),
     onlinePayments: await getOnlinePaymentsAvailability(),
-    bridalPage: await isBridalPageEnabled(),
     whatsappNumber: asString(await getSettingValue('whatsapp_number')),
-  };
-}
-
-/** Bridal landing page visibility (admin toggle; default visible). */
-export async function isBridalPageEnabled(): Promise<boolean> {
-  const raw = await getSettingValue('bridal_page_enabled');
-  return asBool(raw, true);
-}
-
-export type BridalPageConfig = {
-  /** Master toggle — off → /bride and /bride/custom show coming soon. */
-  enabled: boolean;
-  collections: boolean;
-  personalization: boolean;
-  tiers: boolean;
-  finalCta: boolean;
-  homeSpotlight: boolean;
-  /** Custom-request funnel: /bride/custom page + custom CTAs. */
-  customRequests: boolean;
-};
-
-/** All bridal storefront toggles in one read (admin-editable, default ON). */
-export async function getBridalPageConfig(): Promise<BridalPageConfig> {
-  const map = await getSettingsMap([
-    'bridal_page_enabled',
-    'bridal_show_collections',
-    'bridal_show_personalization',
-    'bridal_show_tiers',
-    'bridal_show_final_cta',
-    'bridal_show_home_spotlight',
-    'bridal_custom_enabled',
-  ]);
-  return {
-    enabled: asBool(map.bridal_page_enabled, true),
-    collections: asBool(map.bridal_show_collections, true),
-    personalization: asBool(map.bridal_show_personalization, true),
-    tiers: asBool(map.bridal_show_tiers, true),
-    finalCta: asBool(map.bridal_show_final_cta, true),
-    homeSpotlight: asBool(map.bridal_show_home_spotlight, true),
-    customRequests: asBool(map.bridal_custom_enabled, true),
   };
 }
 

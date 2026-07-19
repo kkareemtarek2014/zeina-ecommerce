@@ -14,18 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 0.9,
     },
-    {
-      url: `${SITE.url}/bride`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${SITE.url}/bride/custom`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
   ];
 
   const categoryPages: MetadataRoute.Sitemap = CATEGORIES.map((cat) => ({

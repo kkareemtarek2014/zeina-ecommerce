@@ -69,7 +69,7 @@ export async function importTemuProduct(
   const allCats = await categoriesRepo.findAllCategories(db);
   const categorySlug =
     parsed.data.categorySlug ??
-    allCats.find((c) => c.slug === 'jewelry')?.slug ??
+    allCats.find((c) => c.slug === 'medium')?.slug ??
     allCats[0]?.slug;
   if (!categorySlug) {
     throw new ValidationError('No categories available — create one first');
@@ -79,7 +79,7 @@ export async function importTemuProduct(
 
   const id = `p-${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`;
   const slug = `${slugify(normalized.title)}-${id.slice(2, 6)}`;
-  const sku = `ZAYA-${id.toUpperCase()}`;
+  const sku = `SQ-${id.toUpperCase()}`;
 
   const imageUrls: string[] = [];
   for (const remote of normalized.imageUrls.slice(0, 6)) {

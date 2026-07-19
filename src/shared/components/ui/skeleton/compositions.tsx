@@ -203,55 +203,6 @@ export function ProductPageSkeleton() {
   );
 }
 
-export function BridalLandingSkeleton() {
-  return (
-    <div aria-busy="true" aria-label="Loading bridal page">
-      <section className="relative overflow-hidden bg-linear-to-b from-[#fdf8f3] via-brand-blush/60 to-surface">
-        <div className="mx-auto grid max-w-container items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:px-8 lg:py-24">
-          <div className="max-w-xl space-y-5">
-            <Skeleton className="h-8 w-36 rounded-full" />
-            <Skeleton className="h-12 w-full lg:h-14" />
-            <Skeleton className="h-12 w-3/4 lg:h-14" />
-            <SkeletonText lines={3} />
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Skeleton className="h-12 w-56" />
-              <Skeleton className="h-12 w-48" />
-            </div>
-          </div>
-          <SkeletonImage aspect="hero" />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-container px-4 py-16 lg:px-8">
-        <SectionHeaderSkeleton centered className="mb-10" />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="overflow-hidden rounded-lg border border-border bg-surface-raised"
-            >
-              <SkeletonImage aspect="square" className="rounded-none" />
-              <div className="space-y-2 p-4">
-                <Skeleton className="h-4 w-3/4" />
-                <SkeletonText lines={2} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-container px-4 pb-16 lg:px-8">
-        <SectionHeaderSkeleton centered className="mb-10" />
-        <div className="grid gap-5 md:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-44 rounded-lg" />
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
 export function FormSkeleton({
   fields = 5,
   className,
@@ -268,25 +219,6 @@ export function FormSkeleton({
         </div>
       ))}
       <Skeleton className="mt-2 h-12 w-full" />
-    </div>
-  );
-}
-
-export function BridalCustomSkeleton() {
-  return (
-    <div
-      className="mx-auto max-w-container px-4 py-12 lg:px-8"
-      aria-busy="true"
-      aria-label="Loading custom bridal form"
-    >
-      <div className="mx-auto mb-10 max-w-lg space-y-3 text-center">
-        <Skeleton className="mx-auto h-3 w-28" />
-        <Skeleton className="mx-auto h-9 w-72 max-w-full" />
-        <SkeletonText lines={2} className="mx-auto max-w-md" />
-      </div>
-      <div className="mx-auto max-w-lg">
-        <FormSkeleton fields={6} />
-      </div>
     </div>
   );
 }

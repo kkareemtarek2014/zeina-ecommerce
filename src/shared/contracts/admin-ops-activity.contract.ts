@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const notificationTypeSchema = z.enum([
   'new_order',
   'low_stock',
-  'bridal_request',
   'payment_failed',
   'order_reminder',
   'daily_summary',

@@ -6,7 +6,6 @@ export const notifications = sqliteTable('notifications', {
     enum: [
       'new_order',
       'low_stock',
-      'bridal_request',
       'payment_failed',
       'order_reminder',
       'daily_summary',

@@ -1,53 +1,44 @@
 import type { LucideIcon } from 'lucide-react';
-import {
-  Gem,
-  Heart,
-  Scissors,
-  ShoppingBag,
-  Sparkles,
-  Sun,
-  Watch,
-} from 'lucide-react';
+import { Circle, CircleDot, Cloud, Gift, Moon } from 'lucide-react';
 
 export const CATEGORY_ICON_MAP: Record<string, LucideIcon> = {
-  jewelry: Gem,
-  bags: ShoppingBag,
-  hair: Scissors,
-  scarves: Sparkles,
-  sunglasses: Sun,
-  watches: Watch,
-  bride: Heart,
+  small: CircleDot,
+  medium: Circle,
+  large: Cloud,
+  // Legacy slugs (kept until D1 data is reseeded everywhere)
+  glow: Moon,
+  mystery: Gift,
 };
 
 export const CATEGORY_BADGES: Record<
   string,
   { label: string; tone: 'primary' | 'accent' }
 > = {
-  jewelry: { label: 'Hot', tone: 'primary' },
-  bags: { label: 'Trending', tone: 'accent' },
+  medium: { label: 'Popular', tone: 'primary' },
+  large: { label: 'Big squeeze', tone: 'accent' },
 };
 
 export const FEATURED_COLLECTIONS = [
   {
     name: 'New Arrivals',
     href: '/shop?sort=newest',
-    desc: 'Explore the latest weekly drops',
+    desc: 'Fresh squishies from the latest drop',
     badge: 'New',
   },
   {
     name: 'Best Sellers',
     href: '/shop?featured=true',
-    desc: 'Most loved by our community',
+    desc: 'The squishies everyone squeezes',
     badge: 'Popular',
   },
   {
-    name: 'Bridal Atelier',
-    href: '/bride',
-    desc: 'Custom accessories for your big day',
-    badge: 'Bespoke',
+    name: 'Calm Kits',
+    href: '/shop?featured=true',
+    desc: 'Ready-packed stress-relief bundles',
+    badge: 'Gift-ready',
   },
 ] as const;
 
 export function categoryHref(slug: string): string {
-  return slug === 'bride' ? '/bride' : `/shop/${slug}`;
+  return `/shop/${slug}`;
 }

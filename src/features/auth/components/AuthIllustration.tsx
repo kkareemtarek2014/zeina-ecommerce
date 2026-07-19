@@ -3,7 +3,7 @@ import React from 'react';
 type AuthIllustrationProps = React.SVGProps<SVGSVGElement>;
 
 /**
- * Zaya-themed auth illustration — a delicate jewelry / accessories motif
+ * Sqoosh-themed auth illustration — a delicate squishy stress toys motif
  * (necklace + pendant + gift) rendered in the brand rose/gold/blush palette.
  * Colours are pulled from the design tokens so it re-themes automatically.
  */

@@ -144,7 +144,7 @@ export function LoginForm() {
         <div className="order-2 rounded-lg border border-border bg-brand-blush/40 p-6 lg:order-2">
           <div className="flex h-full flex-col items-center justify-center gap-5 text-center">
             <h2 className="w-full border-b border-border pb-4 font-display text-2xl font-semibold text-text-primary">
-              New to Zaya?
+              New to Sqoosh?
             </h2>
             <div className="flex flex-col items-center gap-5 pt-2 lg:pb-4">
               <AuthIllustration />

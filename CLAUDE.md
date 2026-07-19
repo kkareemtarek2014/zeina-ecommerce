@@ -1,51 +1,66 @@
-# Zaya — Claude Code Project Brain
+# Sqoosh — Claude Code Project Brain
 
 > Read this file at the start of EVERY session before touching code.
 > Backend/admin/integrations specs: `docs/backend/README.md`.
 > Performance / SEO / skeletons: `docs/performance-seo-plan.md`.
 > DRY / reuse cleanup: `docs/code-duplication-cleanup-plan.md`.
 > Business tactics (sales/retention): `BUSINESS-PLAN.md`.
+> Brand identity / styling / catalog: `docs/brand/`.
+> **Rebrand execution map: `docs/rebrand-migration-plan.md`.**
 
 ---
 
+## ⚠️ Rebrand Status
+
+The business has pivoted from **Zaya** (women's accessories) to **Sqoosh (سكوش)** — squishy
+stress toys & desk fidgets. **Docs are updated; the CODE still says Zaya** (name, palette,
+categories, bridal feature) until the phases in `docs/rebrand-migration-plan.md` are executed.
+When touching any surface, apply the Sqoosh target from that plan — do not add new Zaya-branded
+copy or extend the bridal feature (it is being removed, with no customization replacement).
+
 ## What This Is
 
-**Zaya** (زينة, "adornment") is a women's accessories e-commerce storefront for Egypt, targeting
-Class A/B customers. Business model: dropshipping — products sourced from Temu/Shein-style suppliers,
-sold with a 20–30% margin, delivered across Egypt (cash on delivery today; card/wallet via **Paymob**
-and fulfilment via **Bosta** are built behind feature flags — see Roadmap +
-`docs/backend/09-integrations-bosta-paymob.md`).
+**Sqoosh** (سكوش, "skoosh") is a stress-relief e-commerce storefront for Egypt selling **one
+product type only: squishy stress toys**, in three size categories (Small / Medium / Large).
+Positioning is calm/wellness-first with an honest-claims rule (no medical claims) — see
+`docs/brand/brand-identity.md` §3. Audience: teens/young adults 13–30, office workers, and
+gift buyers. Business model: small-bulk
+imports from **Alibaba** (micro-warehousing, e.g. glow-in-the-dark dumpling squishies), sold at
+impulse prices (79–349 EGP) with 40–80% margins, delivered across Egypt (cash on delivery today;
+card/wallet via **Paymob** and fulfilment via **Bosta** behind feature flags — see
+`docs/backend/09-integrations-bosta-paymob.md`). **No product customization anywhere.**
 
 **Current state:** storefront + admin are feature-complete on **Cloudflare** (OpenNext Workers +
 **D1** + **R2** + Drizzle). Client features call **services → `/api/*`** only. Cart / favorites /
-recently-viewed remain client Zustand; auth, catalog, orders, account, bridal, reviews, promos, and
+recently-viewed remain client Zustand; auth, catalog, orders, account, reviews, promos, and
 admin are server-backed. Live HTTP contract: **`API.md`**.
 
 ## Business Rules (single source: `src/config/site.config.ts`)
 
-| Rule | Value | Where |
+| Rule | Value (target) | Where |
 | --- | --- | --- |
-| Profit margin | 25% (allowed 20–30%) | `PROFIT_MARGIN` |
+| Profit margin | 60% (allowed 40–80%) — *code still 25% until Phase A* | `PROFIT_MARGIN` |
 | Shipping Cairo/Giza | 50 EGP | `SHIPPING_RATES.cairo_giza` |
 | Shipping nearby governorates | 80 EGP | `SHIPPING_RATES.near` |
 | Shipping far (Upper Egypt/Sinai) | 100 EGP | `SHIPPING_RATES.far` |
-| Free shipping | orders ≥ 1,500 EGP | `FREE_SHIPPING_THRESHOLD` |
+| Free shipping | orders ≥ 500 EGP — *code still 1,500 until Phase A* | `FREE_SHIPPING_THRESHOLD` |
 | Payment | COD default; **Paymob** (card + wallet) behind `online_payments` | checkout feature |
 | Fulfilment | Manual default; **Bosta** behind `bosta_shipping` (P15 hardening done) | orders / shipments |
-| Domain (placeholder) | `SITE.url` — update when real domain bought | |
+| Domain (placeholder) | `SITE.url` → `sqoosh-eg.com` when bought | |
 
-**Pricing model:** products store `basePrice` (EGP cost) and optional `basePriceUsd` /
+**Pricing model:** products store `basePrice` (EGP landed cost) and optional `basePriceUsd` /
 `landedCost` (server-only). Customer price = `computeSellPrice(product, settings)` —
 flag `dynamic_pricing` OFF (default) → flat EGP cost × `(1+profit_margin)`, rounded up to 5 EGP;
 ON + USD base → landed-cost engine (`docs/backend/11` §1.2: FX + shipping + customs + VAT +
 handling → target margin). Never hardcode sell prices; cost inputs never go to the storefront.
-Rates are settings-driven and **must be verified** against current regulations before go-live.
+Verify **toy** HS codes/customs rates (different from accessories) before go-live.
 
 **Governorate → zone mapping:** D1 `governorates` (admin-editable). Shipping =
 server `getShippingCost` (zone fees + free threshold from DB). Checkout/cart **preview** uses
 `GET /api/storefront-config` (not static `SHIPPING_RATES` alone).
 
 **Promo codes:** D1 `promos` via `POST /api/promos/validate` (admin CRUD). Applied in cart.
+Also powers the referral/UGC codes in `BUSINESS-PLAN.md` §4.
 
 ## Stack
 
@@ -101,7 +116,8 @@ seed catalogs until wired to D1 (see `docs/performance-seo-plan.md`).
 8. **Feature flags** — `src/config/features.config.ts` drives `middleware.ts` (disabled routes → 404)
    and `FeatureContext`. Respect flags (`wallet` OFF; `homepage_builder` gates `/admin/homepage`;
    `dynamic_pricing` / `online_payments` / `bosta_shipping` / `bundles` / `preorders` /
-   `social_auth` / `social_proof` default OFF unless flipped).
+   `social_auth` / `social_proof` default OFF unless flipped). Bridal flags are slated for
+   **removal**, not use (migration plan Phase E).
 9. **Secrets / cost fields** — never expose `basePrice`, `passwordHash`, or landed-cost internals in
    storefront DTOs (`pnpm assert:no-secrets`).
 10. **Pagination / envelopes** — prefer `PaginationQuerySchema` + `paginatedSchema` /
@@ -115,30 +131,30 @@ seed catalogs until wired to D1 (see `docs/performance-seo-plan.md`).
 | Feature | Path | Notes |
 | --- | --- | --- |
 | Shop/catalog | `features/shop/` | grid, category pills, sort, services + React Query hooks |
-| Product details | `features/product/` | gallery, add-to-bag, related, reviews API, recently-viewed, new arrivals |
+| Product details | `features/product/` | gallery, add-to-bag, related, reviews API, recently-viewed, new arrivals, sticky buy bar |
 | Product search | `features/product-search/` | modal search over name/category/tags (`useSearch`) |
-| Cart | `features/cart/` | `cart.store.ts` (persist `Zaya-cart`): items, coupon, note; recommendations |
+| Cart | `features/cart/` | `cart.store.ts` (persist key → `Sqoosh-cart` after Phase D): items, coupon, note; gap-closing recommendations + free-shipping bar |
 | Checkout | `features/checkout/` | Zod schema (Egyptian phone), shipping calc, COD (+ Paymob when flagged) |
 | Orders | `features/order/` | confirmation + details via `/api/orders`; status timeline |
 | Account | `features/account/` | profile/addresses/favorites/wallet via `/api/account/*`; wallet flag OFF; vouchers UI only |
-| Auth | `features/auth/` | login/register/forgot, illustration + social buttons (gated), `AuthGuard`, `/api/auth/*` |
+| Auth | `features/auth/` | login/register/forgot, social buttons (gated), `AuthGuard`, `/api/auth/*` |
 | Favorites/wishlist | `shared/store/favorites.store.ts` | guest wishlist; synced to `/api/account/favorites` on login |
-| Bridal custom | `features/bridal-custom/` | landing + coming-soon + multipart → `/api/bridal-requests` + R2 |
-| Homepage | `features/homepage/` | classic home + optional `homepage_blocks` (`homepage_builder` flag) |
+| ~~Bridal custom~~ | `features/bridal-custom/` | **REMOVE — Phase E of migration plan. Do not extend.** |
+| Homepage | `features/homepage/` | classic home + optional `homepage_blocks` (`homepage_builder` flag); monthly drop swaps |
 | Admin | `features/admin/` | CRUD + dashboard/stats/audit + media/shipments/bundles/import |
 
-**Persisted Zustand keys:** `Zaya-cart`, `Zaya-favorites`, `Zaya-recently-viewed`.
-Auth / profile / addresses / orders / wallet / bridal / reviews are server-backed.
+**Persisted Zustand keys:** `Zaya-cart`, `Zaya-favorites`, `Zaya-recently-viewed` (renamed to
+`Sqoosh-*` in migration Phase D). Auth / profile / addresses / orders / wallet / reviews are
+server-backed.
 
 ## Pages
 
 **Storefront:** `/` · `/shop` · `/shop/[category]` · `/product/[id]` · `/cart` · `/checkout` ·
-`/order/[id]` · `/bride` (admin toggles `bridal_page_enabled` + `bridal_show_*` /
-`bridal_custom_enabled`; off → coming soon) · `/bride/custom`
+`/order/[id]` · ~~`/bride` · `/bride/custom`~~ (removed in Phase E)
 
 **Auth (unified — no legacy `/login` or `/register`):** `/auth/login` · `/auth/register` ·
-`/auth/forgot-password` · (flag routes may include reset-password). Header account affordance →
-`/account`; `AuthGuard` sends guests to `/auth/login`.
+`/auth/forgot-password`. Header account affordance → `/account`; `AuthGuard` sends guests to
+`/auth/login`.
 
 **Account** (`AuthGuard`): `/account` · `/account/profile` · `/account/addresses` ·
 `/account/favorites` · `/account/orders` · `/account/wallet` · `/account/vouchers`
@@ -146,13 +162,17 @@ Auth / profile / addresses / orders / wallet / bridal / reviews are server-backe
 **Admin** (`AdminGuard` + `requireAdmin`): `/admin` · `/admin/login` · `/admin/forbidden` ·
 `/admin/products` · `/admin/products/new` · `/admin/products/[id]/edit` · `/admin/categories` ·
 `/admin/categories/new` · `/admin/categories/[slug]/edit` · `/admin/orders` · `/admin/orders/[id]` ·
-`/admin/users` · `/admin/users/[id]` · `/admin/locations` · `/admin/promos` · `/admin/bridal` ·
-`/admin/bridal/[id]` · `/admin/activity` · `/admin/settings` · `/admin/homepage` · `/admin/media` ·
-`/admin/shipments` · `/admin/bundles` · `/admin/import`
+`/admin/users` · `/admin/users/[id]` · `/admin/locations` · `/admin/promos` ·
+~~`/admin/bridal` · `/admin/bridal/[id]`~~ (removed in Phase E) · `/admin/activity` ·
+`/admin/settings` · `/admin/homepage` · `/admin/media` · `/admin/shipments` · `/admin/bundles` ·
+`/admin/import`
 
 **Legal/marketing:** `/about` · `/contact` · `/privacy` · `/terms` · `/cookies`
 
-**Categories:** jewelry, bags, hair, scarves, sunglasses, watches, **bride**.
+**Categories (target — replaces accessories set in Phase B):** `small` · `medium` · `large`
+— squishy stress toys only, categorized by size; themes (food/animal/glow/…) are product
+**tags**, not categories. Mystery boxes are bundle products. See
+`docs/brand/catalog-categories-sourcing.md`.
 
 ### Route loading skeletons
 
@@ -163,7 +183,9 @@ Prefer shared compositions from `shared/components/ui/skeleton` (exported via `u
 | `/` | `HomePageSkeleton` |
 | `/shop`, `/shop/[category]` | `ShopPageSkeleton` |
 | `/product/[id]` | `ProductPageSkeleton` |
-| `/cart` · `/checkout` · `/order/[id]` · `/account` · `/bride*` · `/auth/*` | matching `*Skeleton` |
+| `/cart` · `/checkout` · `/order/[id]` · `/account` · `/auth/*` | matching `*Skeleton` |
+
+(`Bride*` skeletons removed with Phase E.)
 
 ## User/Data Logic (how the site actually works)
 
@@ -173,20 +195,26 @@ Prefer shared compositions from `shared/components/ui/skeleton` (exported via `u
 - **Checkout → order:** `usePlaceOrder` → `POST /api/orders` (server totals); confirmation via
   `GET /api/orders/[id]`.
 - **Auth:** `authService` → `/api/auth/*`; session cookie is source of truth; `AuthGuard` waits on `/me`.
-- **Bridal:** landing from settings/flags; `BridalRequestForm` → `POST /api/bridal-requests`
-  (multipart; optional image/video ≤25MB → R2).
 - **Reviews:** `ProductReviews` → `GET /api/reviews?productId=`. Create API exists (auth); no
   storefront submit UI yet.
 - **Admin lists:** parse `page` / `pageSize` via `parsePaginationFromUrl` / contract schemas; return
   `buildPaginatedResult` / `Paginated<T>` envelopes.
 
-## SEO (keep intact; improve per plan)
+## Styling (Sqoosh — Ocean Calm, gender-neutral)
+
+Single source: `docs/brand/color-styling-guide.md`. Summary: calm teal `#129488` is the only
+action color; apricot accent; aqua/mint/sky/sand washes for tints; chubby radii
+(0.75/1.25rem); target fonts Baloo 2 (display) + Nunito (body) + Baloo Bhaijaan 2 (Arabic).
+The palette must stay gender-neutral (no pink-dominant look). Everything flows from
+`tokens.css` — never hardcode brand hex values in components.
+
+## SEO (keep intact; re-keyword per migration Phase C)
 
 - `layout.tsx`: metadataBase, title template, OG/Twitter, robots, Organization+WebSite JSON-LD
 - `product/[id]/page.tsx`: `generateMetadata` + Product JSON-LD (price, availability, rating)
 - `shop/[category]`: per-category meta + `generateStaticParams`
 - `app/sitemap.ts` + `app/robots.ts` (cart/checkout/order disallowed & noindexed)
-- Keywords include Arabic terms (اكسسوارات حريمي, اكسسوارات فرح)
+- Keywords target: سكويشي, سكويشي مصر, العاب ضغط, فيدجت, squishy toys Egypt, stress toys Egypt
 - When adding a page: add metadata + canonical + sitemap entry. When adding a category: fill
   `seoDescription`.
 - **Open gaps:** sitemap still seeded from `shared/data`; deeper RSC for shop/product HTML; ISR /
@@ -223,25 +251,32 @@ Components PascalCase · hooks `useX` · dirs kebab-case · `*.types.ts` / `*.st
 
 | Doc | Purpose |
 | --- | --- |
+| `docs/rebrand-migration-plan.md` | **Zaya → Sqoosh execution map (start here for rebrand work)** |
+| `docs/brand/brand-identity.md` | Name, voice, logo, packaging |
+| `docs/brand/color-styling-guide.md` | Palette, typography, motion, conversion-psych levers |
+| `docs/brand/catalog-categories-sourcing.md` | Categories, launch assortment, Alibaba playbook |
 | `docs/backend/README.md` | Phased backend / admin / integrations specs |
-| `docs/backend/01`–`11` | Architecture, data model, API, plan, admin, Bosta/Paymob, enhancements, sourcing |
+| `docs/backend/01`–`11` | Architecture, data model, API, plan, admin, Bosta/Paymob, enhancements, sourcing (read "Temu" as "Alibaba") |
 | `docs/performance-seo-plan.md` | CWV, skeletons, sitemap/ISR, SEO backlog |
 | `docs/code-duplication-cleanup-plan.md` | jscpd baseline + phased DRY work |
 | `API.md` | Live storefront + admin HTTP contract |
-| `BUSINESS-PLAN.md` | Sales / CRO / retention tactics mapped to features |
+| `BUSINESS-PLAN.md` | Sqoosh sales / CRO / retention tactics mapped to features |
 
 ## Known Placeholders / TODO
 
-- Product images are often gradient SVGs in `public/images/` — replace with real photos (admin → R2).
-- `SITE.url` is still a placeholder domain (`https://Zaya-eg.com`) — update when purchased.
+- **Rebrand phases A–E not yet executed** — see `docs/rebrand-migration-plan.md`; future
+  `tasks.md` will be derived from it.
+- Product images are placeholder SVGs — replace with real squishy photos + squish videos
+  (admin → R2).
+- `SITE.url` placeholder → `sqoosh-eg.com` when purchased; verify @sqoosh.eg social handles.
 - Wallet flag OFF → page + API 404 (seeded wallet txns ready when flag flips).
 - Review **create** API exists (auth); no storefront submit UI yet.
 - Seed passwords (`password123`) are for bootstrap only — rotate before public go-live.
 - **API.md** documents the live contract. Admin Phase 8–12 + P16–P26 done; **P13 Paymob** +
   **P14 Bosta** + **P15 hardening** done — see `09`. Flags `online_payments` / `bosta_shipping`
   default OFF.
-- **Roadmap:** production secret cutover + deploy smoke, Arabic RTL, D1-backed sitemap, tighten
-  RSC for catalog pages.
+- **Roadmap:** rebrand phases A–E → production secret cutover + deploy smoke, Arabic RTL,
+  D1-backed sitemap, tighten RSC for catalog pages.
 - **Catalog visibility:** lists/search = `published` only; product detail allows `published`|`hidden`;
   checkout requires `published` + available stock (reserves on place; cancel releases; delivered sells).
   Admin create defaults to `draft`; DELETE archives.

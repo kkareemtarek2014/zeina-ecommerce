@@ -109,26 +109,6 @@ export const adminPromoActiveSchema = z.object({
   active: z.boolean(),
 });
 
-export const adminBridalRequestDtoSchema = z.object({
-  id: z.string(),
-  userId: z.string().nullable(),
-  fullName: z.string(),
-  phone: z.string(),
-  weddingDate: z.string().nullable().optional(),
-  description: z.string(),
-  fileName: z.string().nullable().optional(),
-  fileType: z.string().nullable().optional(),
-  mediaUrl: z.string().nullable().optional(),
-  status: z.enum(['pending', 'answered']),
-  createdAt: z.string(),
-});
-
-export type AdminBridalRequestDTO = z.infer<typeof adminBridalRequestDtoSchema>;
-
-export const adminBridalStatusSchema = z.object({
-  status: z.enum(['pending', 'answered']),
-});
-
 export const adminSettingsDtoSchema = z.object({
   profitMargin: z.number(),
   freeShippingThreshold: z.number().int(),
@@ -162,16 +142,6 @@ export const adminSettingsDtoSchema = z.object({
   footerText: z.string().nullable(),
   announcementItems: AnnouncementItemsSchema,
   maintenanceMode: z.boolean(),
-  /** Show/hide the /bride landing page (dashboard toggle). Hidden → coming soon. */
-  bridalPageEnabled: z.boolean(),
-  /** Per-section bridal toggles (all default ON). */
-  bridalShowCollections: z.boolean(),
-  bridalShowPersonalization: z.boolean(),
-  bridalShowTiers: z.boolean(),
-  bridalShowFinalCta: z.boolean(),
-  bridalShowHomeSpotlight: z.boolean(),
-  /** Custom-request funnel: /bride/custom + all "custom piece" CTAs. */
-  bridalCustomEnabled: z.boolean(),
   /** Kill switch for Temu import + stock sync (dashboard toggle). */
   temuScraperEnabled: z.boolean(),
   unpaidOrderTimeoutMinutes: z.number().int(),
@@ -212,13 +182,6 @@ export const adminSettingsWriteSchema = z.object({
   footerText: z.string().trim().nullable().optional(),
   announcementItems: AnnouncementItemsSchema.optional(),
   maintenanceMode: z.boolean().optional(),
-  bridalPageEnabled: z.boolean().optional(),
-  bridalShowCollections: z.boolean().optional(),
-  bridalShowPersonalization: z.boolean().optional(),
-  bridalShowTiers: z.boolean().optional(),
-  bridalShowFinalCta: z.boolean().optional(),
-  bridalShowHomeSpotlight: z.boolean().optional(),
-  bridalCustomEnabled: z.boolean().optional(),
   temuScraperEnabled: z.boolean().optional(),
   unpaidOrderTimeoutMinutes: z.number().int().min(5).max(7 * 24 * 60).optional(),
   pendingReminderHours: z.number().int().min(1).max(30 * 24).optional(),
@@ -232,8 +195,6 @@ export const storefrontConfigSchema = z.object({
   maintenanceMode: z.boolean(),
   /** Paymob card/wallet available (flag + secrets). */
   onlinePayments: z.boolean().optional(),
-  /** Bridal landing page visible (admin toggle). */
-  bridalPage: z.boolean().optional(),
   /** Digits or E.164-ish WhatsApp for PDP concierge (null when unset). */
   whatsappNumber: z.string().nullable().optional(),
 });

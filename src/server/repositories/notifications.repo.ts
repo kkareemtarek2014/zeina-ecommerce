@@ -7,7 +7,6 @@ export type NotificationRow = typeof notifications.$inferSelect;
 export type NotificationType =
   | 'new_order'
   | 'low_stock'
-  | 'bridal_request'
   | 'payment_failed'
   | 'order_reminder'
   | 'daily_summary';

@@ -1,6 +1,6 @@
 import 'server-only';
 
-export const SESSION_COOKIE = 'zaya_session';
+export const SESSION_COOKIE = 'sqoosh_session';
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 function toBase64Url(bytes: Uint8Array): string {

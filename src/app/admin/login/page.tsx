@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-md rounded-(--radius-lg) border border-border bg-surface-raised p-8 shadow-sm">
         <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-brand-primary italic">
-          Zaya Admin
+          Sqoosh Admin
         </h1>
         <p className="mt-2 text-sm text-text-secondary">
           Sign in with an admin account to manage the store.

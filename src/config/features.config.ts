@@ -5,7 +5,6 @@ export type FeatureKey =
   | 'checkout'
   | 'order'
   | 'account'
-  | 'bridal-custom'
   | 'product-search'
   | 'auth'
   | 'wallet'
@@ -34,7 +33,6 @@ export const FEATURES: Record<FeatureKey, FeatureConfig> = {
   checkout: { key: 'checkout', label: 'Checkout', enabled: true },
   order: { key: 'order', label: 'Order', enabled: true, routes: ['/order'] },
   account: { key: 'account', label: 'Account', enabled: true, routes: ['/account'] },
-  'bridal-custom': { key: 'bridal-custom', label: 'Bridal Custom', enabled: true },
   'product-search': { key: 'product-search', label: 'Product Search', enabled: true },
   auth: { key: 'auth', label: 'Authentication', enabled: true, routes: ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'] },
   wallet: { key: 'wallet', label: 'Wallet', enabled: false, routes: ['/account/wallet'] },

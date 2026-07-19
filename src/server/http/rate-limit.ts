@@ -40,14 +40,13 @@ export function assertRateLimit(
   }
 }
 
-/** Rate-limit auth login/register/forgot, bridal submit, and admin APIs by client IP. */
+/** Rate-limit auth login/register/forgot and admin APIs by client IP. */
 export function rateLimitByIp(
   request: Request,
   route:
     | 'auth-login'
     | 'auth-register'
     | 'auth-forgot'
-    | 'bridal'
     | 'admin'
     | 'temu-import'
     | 'paymob-intention'

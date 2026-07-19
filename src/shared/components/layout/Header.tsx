@@ -9,22 +9,23 @@ import { cn } from '@/shared/utils/cn';
 import { useFeature } from '@/shared/contexts/FeatureContext';
 import { CartDrawer } from '@/features/cart';
 import { SearchButton } from '@/features/product-search';
-import { useStorefrontConfig } from '@/features/admin';
+import { CATEGORIES } from '@/shared/data/categories.data';
 import type { FeatureKey } from '@/config/features.config';
 import type { SiteBrandingDTO } from '@/shared/contracts/storefront-branding.contract';
 import { AnnouncementBar } from './AnnouncementBar';
-import { CollectionsMegaMenu } from './CollectionsMegaMenu';
 import { MobileNavDrawer } from './MobileNavDrawer';
 
 const NAV_LINKS: {
   href: string;
   label: string;
   feature?: FeatureKey;
-  bridal?: boolean;
 }[] = [
   { href: '/', label: 'Home' },
-  { href: '/shop', label: 'Collections', feature: 'shop' },
-  { href: '/bride', label: 'Bride', bridal: true },
+  ...CATEGORIES.map((cat) => ({
+    href: `/shop/${cat.slug}`,
+    label: cat.name,
+    feature: 'shop' as FeatureKey,
+  })),
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -38,13 +39,9 @@ export function Header({ branding }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const isShopEnabled = useFeature('shop');
   const isSearchEnabled = useFeature('product-search');
-  const { data: storefrontConfig } = useStorefrontConfig();
-  // Visible by default; hidden only when the admin toggle is explicitly off.
-  const isBridalVisible = storefrontConfig?.bridalPage !== false;
 
   const navLinks = NAV_LINKS.filter((link) => {
     if (link.feature && !isShopEnabled) return false;
-    if (link.bridal && !isBridalVisible) return false;
     return true;
   });
 
@@ -84,12 +81,6 @@ export function Header({ branding }: HeaderProps) {
             const isActive =
               pathname === link.href ||
               (link.href !== '/' && pathname.startsWith(link.href));
-
-            if (link.label === 'Collections') {
-              return (
-                <CollectionsMegaMenu key={link.href} isActive={isActive} />
-              );
-            }
 
             return (
               <Link

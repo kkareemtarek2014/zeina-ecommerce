@@ -13,7 +13,6 @@ export type AuditEntity =
   | 'governorate'
   | 'shipping_zone'
   | 'settings'
-  | 'bridal_request'
   | 'inventory'
   | 'media'
   | 'homepage_block'

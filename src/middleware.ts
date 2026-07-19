@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { FEATURES } from '@/config/features.config';
 
-const SESSION_COOKIE = 'zaya_session';
+const SESSION_COOKIE = 'sqoosh_session';
 
 function isMaintenanceBypass(pathname: string): boolean {
   if (pathname.startsWith('/admin')) return true;

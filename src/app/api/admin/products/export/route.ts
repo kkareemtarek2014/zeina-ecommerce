@@ -14,7 +14,7 @@ export const GET = withHandler(async (request) => {
     status: 200,
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="zaya-products.csv"',
+      'Content-Disposition': 'attachment; filename="sqoosh-products.csv"',
     },
   });
 });

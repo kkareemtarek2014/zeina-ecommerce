@@ -16,8 +16,6 @@ function hrefFor(entity: string, entityId: string): string | undefined {
       return `/admin/orders/${entityId}`;
     case 'product':
       return `/admin/products/${entityId}/edit`;
-    case 'bridal_request':
-      return `/admin/bridal/${entityId}`;
     default:
       return undefined;
   }

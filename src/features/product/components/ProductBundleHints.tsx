@@ -62,7 +62,7 @@ export function ProductBundleHints({ productId }: { productId: string }) {
                     className="block overflow-hidden rounded-(--radius) border border-border bg-surface-raised"
                   >
                     <Image
-                      src={p.image || '/images/cat-jewelry.svg'}
+                      src={p.image || '/images/cat-medium.svg'}
                       alt={p.name}
                       width={64}
                       height={64}

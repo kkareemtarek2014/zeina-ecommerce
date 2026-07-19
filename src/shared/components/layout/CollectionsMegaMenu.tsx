@@ -69,14 +69,7 @@ export function CollectionsMegaMenu({ isActive }: { isActive: boolean }) {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex size-9 items-center justify-center rounded-lg border border-border/60 bg-surface shadow-xs transition-transform group-hover/item:scale-105">
-                          <Icon
-                            className={cn(
-                              'size-4',
-                              category.slug === 'bride'
-                                ? 'text-brand-accent'
-                                : 'text-brand-primary',
-                            )}
-                          />
+                          <Icon className="size-4 text-brand-primary" />
                         </div>
                         {badge && (
                           <span

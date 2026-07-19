@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 
 /**
  * Wishlist / favorites store (guest + optimistic UI).
- * Guests persist to `Zaya-favorites`. On login, ids are PUT to
+ * Guests persist to `Sqoosh-favorites`. On login, ids are PUT to
  * `/api/account/favorites`; while authenticated, toggles PUT the set too.
  */
 interface FavoritesState {
@@ -42,7 +42,7 @@ export const useFavoritesStore = create<FavoritesState>()(
       isFavorite: (productId) => get().ids.includes(productId),
       clear: () => set({ ids: [] }),
     }),
-    { name: 'Zaya-favorites' },
+    { name: 'Sqoosh-favorites' },
   ),
 );
 

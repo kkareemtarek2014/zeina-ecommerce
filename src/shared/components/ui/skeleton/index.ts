@@ -15,8 +15,6 @@ export {
   HomePageSkeleton,
   ShopPageSkeleton,
   ProductPageSkeleton,
-  BridalLandingSkeleton,
-  BridalCustomSkeleton,
   FormSkeleton,
   CartPageSkeleton,
   CartDrawerSkeleton,

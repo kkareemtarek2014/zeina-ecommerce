@@ -20,8 +20,6 @@ function hrefFor(entity: string, entityId: string): string | undefined {
       return `/admin/users/${entityId}`;
     case 'promo':
       return `/admin/promos`;
-    case 'bridal_request':
-      return `/admin/bridal/${entityId}`;
     case 'settings':
       return `/admin/settings`;
     case 'governorate':

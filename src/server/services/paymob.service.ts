@@ -109,7 +109,7 @@ function orderEmail(orderId: string): string {
     const host = new URL(SITE.url).hostname;
     return `order+${orderId.toLowerCase()}@${host}`;
   } catch {
-    return `order+${orderId.toLowerCase()}@zaya.local`;
+    return `order+${orderId.toLowerCase()}@sqoosh.local`;
   }
 }
 

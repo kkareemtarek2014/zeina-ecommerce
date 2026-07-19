@@ -119,7 +119,7 @@ export const useCartStore = create<CartState>()(
         set({ items: [], couponCode: null, couponDiscount: 0, note: '' }),
     }),
     {
-      name: 'Zaya-cart',
+      name: 'Sqoosh-cart',
       partialize: (state) => ({
         items: state.items,
         couponCode: state.couponCode,

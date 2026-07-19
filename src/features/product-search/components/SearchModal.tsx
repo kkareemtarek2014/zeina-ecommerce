@@ -49,7 +49,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
       <div className="relative flex justify-center px-4 pt-20">
         <div
           ref={panelRef}
-          className="animate-fade-up w-full max-w-xl overflow-hidden rounded-(--radius-lg) bg-surface-raised shadow-2xl"
+          className="animate-fade-up w-full max-w-xl overflow-hidden rounded-lg bg-surface-raised shadow-2xl"
         >
           {/* Input */}
           <div className="flex items-center gap-3 border-b border-border px-4">
@@ -58,7 +58,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
               type="search"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Search jewelry, bags, bridal…"
+              placeholder="Search squishies, dumplings, glow…"
               aria-label="Search products"
               className="h-14 w-full bg-transparent text-sm outline-none placeholder:text-text-muted [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             />
@@ -153,7 +153,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
                   No results for “{value}”
                 </p>
                 <p className="text-xs text-text-muted">
-                  Try “necklace”, “bag”, or “bride”
+                  Try “dumpling”, “glow”, or “jumbo”
                 </p>
               </div>
             )}

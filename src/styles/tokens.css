@@ -1,39 +1,40 @@
 :root {
-  /* ─── Zaya brand palette ───────────────────────────────
-     Feminine, warm, premium. Edit here → whole site updates. */
+  /* ─── Sqoosh brand palette ─────────────────────────────
+     Ocean Calm: teal + mint + sand on warm cream.
+     Calm, playful, gender-neutral. Edit here → whole site updates. */
 
   /* Brand colours */
-  --color-brand-primary:   #b4536a;  /* Deep rose — CTAs, links, active states */
-  --color-brand-secondary: #8c3d52;  /* Darker rose — hover states */
-  --color-brand-accent:    #c9a24b;  /* Soft gold — badges, highlights */
-  --color-brand-blush:     #f7e9e6;  /* Blush wash — soft section backgrounds */
+  --color-brand-primary:   #129488;  /* Calm teal — CTAs, links, active states */
+  --color-brand-secondary: #0c7266;  /* Deep teal — hover states */
+  --color-brand-accent:    #f2a65a;  /* Warm apricot — badges, highlights, "new" */
+  --color-brand-blush:     #e3f4f1;  /* Aqua wash — soft section backgrounds (name kept for compat) */
 
   /* Surfaces */
-  --color-surface:         #fdfaf7;  /* Warm cream page background */
+  --color-surface:         #fbfaf6;  /* Warm off-white page background */
   --color-surface-raised:  #ffffff;  /* Cards, modals, drawers */
-  --color-surface-overlay: #2b2226;  /* Backdrop (used at opacity) */
+  --color-surface-overlay: #22333a;  /* Backdrop (used at opacity) */
 
   /* Text */
-  --color-text-primary:    #2b2226;  /* Warm charcoal — body copy, headings */
-  --color-text-secondary:  #6b5a60;  /* Subtitles, labels */
-  --color-text-muted:      #a4949a;  /* Placeholders, captions */
-  --color-text-inverse:    #ffffff;  /* Text on dark/coloured backgrounds */
+  --color-text-primary:    #26343a;  /* Deep slate — body copy, headings */
+  --color-text-secondary:  #5d6b70;  /* Subtitles, labels */
+  --color-text-muted:      #97a5a8;  /* Placeholders, captions */
+  --color-text-inverse:    #ffffff;
 
   /* Borders */
-  --color-border:          #eddfd9;  /* Default dividers, input borders */
-  --color-border-strong:   #ddc9c1;  /* Stronger separators */
+  --color-border:          #e5ece9;
+  --color-border-strong:   #cfddd8;
 
   /* Status */
-  --color-status-success:  #4e7d5b;
-  --color-status-warning:  #b0802f;
-  --color-status-error:    #b23a48;
-  --color-status-info:     #4a6b8a;
+  --color-status-success:  #3f9e77;
+  --color-status-warning:  #c98a2e;
+  --color-status-error:    #d95f5f;
+  --color-status-info:     #4a8fbd;
 
   /* Typography */
   --font-sans: var(--font-jost), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-playfair), Georgia, serif;
 
-  /* Border radius */
-  --radius:    0.5rem;    /* inputs, buttons */
-  --radius-lg: 0.875rem;  /* cards, modals */
+  /* Border radius — chubby (squishy feel) */
+  --radius:    0.75rem;   /* inputs, buttons */
+  --radius-lg: 1.25rem;   /* cards, modals */
 }

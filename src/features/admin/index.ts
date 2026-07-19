@@ -68,9 +68,7 @@ export {
   storefrontConfigService,
   adminLocationsService,
   adminPromosService,
-  adminBridalService,
   adminSettingsService,
-  type BridalListParams,
 } from './services/admin-config.service';
 export {
   useStorefrontConfig,
@@ -85,9 +83,6 @@ export {
   useUpdatePromo,
   useTogglePromo,
   useDeletePromo,
-  useAdminBridalRequests,
-  useAdminBridalRequest,
-  useUpdateBridalStatus,
   useAdminSettings,
   useUpdateAdminSettings,
   adminConfigKeys,

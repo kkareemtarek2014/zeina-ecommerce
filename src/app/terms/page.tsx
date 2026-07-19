@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms and Conditions',
   description:
-    'Terms and conditions for shopping at Zaya — orders, delivery and payment across Egypt.',
+    'Terms and conditions for shopping at Sqoosh — orders, delivery and payment across Egypt.',
   alternates: { canonical: '/terms' },
 };
 

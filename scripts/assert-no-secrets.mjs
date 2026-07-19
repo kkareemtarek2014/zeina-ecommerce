@@ -11,9 +11,12 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function rg(pattern, globs) {
-  const globArgs = globs.map((g) => `--glob '${g}'`).join(' ');
+  const globArgs = globs.map((g) => {
+    if (g.startsWith('!')) return `':(exclude)${g.slice(1)}'`;
+    return `'${g}'`;
+  }).join(' ');
   try {
-    return execSync(`rg -n '${pattern}' ${globArgs} .`, {
+    return execSync(`git grep -n -E '${pattern}' -- ${globArgs}`, {
       cwd: root,
       encoding: 'utf8',
     }).trim();

@@ -4,8 +4,8 @@ import { MessageCircle } from 'lucide-react';
 import { useStorefrontConfig } from '@/features/admin';
 import { normalizeWhatsAppDigits } from '@/shared/lib/contact-links';
 
-/** Categories where styling uncertainty is high — bridal + jewelry. */
-const CONCIERGE_CATEGORIES = new Set(['bride', 'jewelry']);
+/** Categories where purchase uncertainty is higher — show WhatsApp help. */
+const CONCIERGE_CATEGORIES = new Set(['large']);
 
 interface PdpWhatsAppCtaProps {
   productName: string;
@@ -13,7 +13,7 @@ interface PdpWhatsAppCtaProps {
 }
 
 /**
- * Inline (not FAB) WhatsApp deep-link for bridal + jewelry PDPs.
+ * Inline (not FAB) WhatsApp deep-link for PDPs with higher decision friction.
  * Pre-fills product name to reduce decision fatigue.
  */
 export function PdpWhatsAppCta({ productName, category }: PdpWhatsAppCtaProps) {

@@ -3,7 +3,7 @@ import { MyWallet } from '@/features/account';
 
 export const metadata: Metadata = {
   title: 'My Wallet',
-  description: 'View your Zaya store credit and transaction history.',
+  description: 'View your Sqoosh store credit and transaction history.',
 };
 
 export default function WalletPage() {

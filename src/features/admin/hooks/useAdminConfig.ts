@@ -8,12 +8,10 @@ import type {
 } from '@/shared/contracts/admin-config.contract';
 import type { AdminGovernorateDTO } from '@/shared/contracts/product.contract';
 import {
-  adminBridalService,
   adminLocationsService,
   adminPromosService,
   adminSettingsService,
   storefrontConfigService,
-  type BridalListParams,
 } from '../services/admin-config.service';
 
 export const adminConfigKeys = {
@@ -21,9 +19,6 @@ export const adminConfigKeys = {
   governorates: ['admin', 'governorates'] as const,
   zones: ['admin', 'shipping-zones'] as const,
   promos: ['admin', 'promos'] as const,
-  bridal: (params: BridalListParams) =>
-    ['admin', 'bridal', params] as const,
-  bridalOne: (id: string) => ['admin', 'bridal', id] as const,
   settings: ['admin', 'settings'] as const,
 };
 
@@ -154,33 +149,6 @@ export function useDeletePromo() {
     mutationFn: (code: string) => adminPromosService.delete(code),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: adminConfigKeys.promos });
-    },
-  });
-}
-
-export function useAdminBridalRequests(params: BridalListParams) {
-  return useQuery({
-    queryKey: adminConfigKeys.bridal(params),
-    queryFn: () => adminBridalService.list(params),
-  });
-}
-
-export function useAdminBridalRequest(id: string) {
-  return useQuery({
-    queryKey: adminConfigKeys.bridalOne(id),
-    queryFn: () => adminBridalService.get(id),
-    enabled: Boolean(id),
-  });
-}
-
-export function useUpdateBridalStatus(id: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (status: 'pending' | 'answered') =>
-      adminBridalService.updateStatus(id, status),
-    onSuccess: (row) => {
-      qc.setQueryData(adminConfigKeys.bridalOne(id), row);
-      void qc.invalidateQueries({ queryKey: ['admin', 'bridal'] });
     },
   });
 }

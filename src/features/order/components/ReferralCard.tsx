@@ -6,7 +6,7 @@ import { Button } from '@/shared/components/ui';
 
 export const REFERRAL_PROMO_CODE = 'ZAYFRIEND10';
 
-const SHARE_TEXT = `Check out Zaya! Use code ${REFERRAL_PROMO_CODE} for 10% off 💕`;
+const SHARE_TEXT = `Check out Sqoosh! Use code ${REFERRAL_PROMO_CODE} for 10% off 💕`;
 
 /**
  * Post-purchase reciprocity card — fixed shared referral code (promo engine).
@@ -34,7 +34,7 @@ export function ReferralCard() {
         </div>
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-lg font-semibold text-text-primary">
-            Love your Zaya order? Share the love.
+            Love your Sqoosh order? Share the love.
           </h2>
           <p className="mt-1 text-sm text-text-secondary">
             Give your friends 10% off — use code{' '}

@@ -6,7 +6,7 @@ import { ToastProvider } from '@/shared/components/ui';
 export const metadata: Metadata = {
   title: {
     default: 'Admin',
-    template: '%s · Zaya Admin',
+    template: '%s · Sqoosh Admin',
   },
   robots: { index: false, follow: false },
 };

@@ -1,53 +1,30 @@
 import type { Category } from '@/shared/types/product.types';
 
+/**
+ * Sqoosh sells ONE product type — squishy stress toys — in three sizes.
+ * Size is the only category axis; themes (food/animal/glow/…) are tags.
+ * See docs/brand/catalog-categories-sourcing.md.
+ */
 export const CATEGORIES: Category[] = [
   {
-    slug: 'jewelry',
-    name: 'Jewelry',
-    image: '/images/cat-jewelry.svg',
+    slug: 'small',
+    name: 'Small Squishies',
+    image: '/images/cat-small.svg',
     seoDescription:
-      'Shop women’s jewelry online in Egypt — necklaces, earrings and more with cash on delivery to Cairo, Giza and all governorates.',
+      'Small squishy stress toys in Egypt (under 7 cm) — pocket squishies and keychains for calm on the go. Squeeze away everyday stress anywhere. Cash on delivery nationwide.',
   },
   {
-    slug: 'bags',
-    name: 'Bags',
-    image: '/images/cat-bags.svg',
+    slug: 'medium',
+    name: 'Medium Squishies',
+    image: '/images/cat-medium.svg',
     seoDescription:
-      'Trendy women’s bags online in Egypt — shoulder bags, crossbody and mini bags. Cash on delivery nationwide.',
+      'Medium squishy stress toys in Egypt (7–14 cm) — the classic hand-size stress squishy for your desk. Slow-rising, satisfying, made for daily de-stress. Cash on delivery nationwide.',
   },
   {
-    slug: 'hair',
-    name: 'Hair',
-    image: '/images/cat-hair.svg',
+    slug: 'large',
+    name: 'Large Squishies',
+    image: '/images/cat-large.svg',
     seoDescription:
-      'Hair accessories for women in Egypt — clips, scrunchies and claw clips. Fast delivery with cash on delivery.',
-  },
-  {
-    slug: 'scarves',
-    name: 'Scarves',
-    image: '/images/cat-scarves.svg',
-    seoDescription:
-      'Elegant women’s scarves online in Egypt — silky and lightweight styles. Cash on delivery to all governorates.',
-  },
-  {
-    slug: 'sunglasses',
-    name: 'Sunglasses',
-    image: '/images/cat-sunglasses.svg',
-    seoDescription:
-      'Fashion sunglasses for women in Egypt — trending frames with UV protection. Cash on delivery nationwide.',
-  },
-  {
-    slug: 'watches',
-    name: 'Watches',
-    image: '/images/cat-watches.svg',
-    seoDescription:
-      'Women’s watches online in Egypt — minimalist and classic designs. Cash on delivery to Cairo, Giza and beyond.',
-  },
-  {
-    slug: 'bride',
-    name: 'Bride',
-    image: '/images/cat-bride.svg',
-    seoDescription:
-      'Bridal accessories in Egypt — custom pieces for your big day. Send a photo and we reply within 2 days.',
+      'Jumbo squishy stress toys in Egypt (15 cm+) — big slow-rising squishies for the deepest, most relaxing squeeze. Perfect calm-down companions and gifts. Cash on delivery nationwide.',
   },
 ];

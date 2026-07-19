@@ -18,7 +18,7 @@ export const useRecentlyViewedStore = create<RecentlyViewedState>()(
         }),
     }),
     {
-      name: 'Zaya-recently-viewed',
+      name: 'Sqoosh-recently-viewed',
       storage: createJSONStorage(() => localStorage),
     }
   )

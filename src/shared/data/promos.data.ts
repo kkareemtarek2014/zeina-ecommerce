@@ -12,7 +12,7 @@ export const PROMOS_DB: PromoCode[] = [
     value: 0.1, // 10% off
   },
   {
-    code: 'ZAYA50',
+    code: 'SQOOSH50',
     type: 'fixed',
     value: 50, // 50 EGP off
     minOrderValue: 500,

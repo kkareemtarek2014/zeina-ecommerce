@@ -36,7 +36,6 @@ export const PERMISSIONS = [
   'users:write',
   'locations:write',
   'promos:write',
-  'bridal:write',
   'homepage:write',
   'settings:write',
   'activity:read',
@@ -71,7 +70,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
   ],
   content_manager: [
     'dashboard:read',
-    'bridal:write',
     'promos:write',
     'media:write',
     'categories:write',
@@ -125,7 +123,6 @@ export const ADMIN_ROUTE_PERMISSIONS: ReadonlyArray<{
   { prefix: '/admin/locations', permission: 'locations:write' },
   { prefix: '/admin/promos', permission: 'promos:write' },
   { prefix: '/admin/bundles', permission: 'promos:write' },
-  { prefix: '/admin/bridal', permission: 'bridal:write' },
   { prefix: '/admin/homepage', permission: 'homepage:write' },
   { prefix: '/admin/activity', permission: 'activity:read' },
   { prefix: '/admin/cron', permission: 'settings:write' },

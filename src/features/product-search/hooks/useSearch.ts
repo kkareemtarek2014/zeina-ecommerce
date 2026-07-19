@@ -27,7 +27,7 @@ export const useRecentSearches = create<RecentSearchesState>()(
         })),
       clear: () => set({ recent: [] }),
     }),
-    { name: 'Zaya-recent-searches' },
+    { name: 'Sqoosh-recent-searches' },
   ),
 );
 
