@@ -4,9 +4,13 @@ import { SITE } from '@/config/site.config';
 import { ProductGrid } from '@/features/shop';
 import { listStorefrontBundleProducts } from '@/server/services/bundle.service';
 
+// Reads D1 at request time — must not be prerendered at build time
+// (the CI build sandbox has no D1 tables).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Bundle deals',
-  description: `Shop active bundle offers at ${SITE.name}. Mix & match deals on curated accessories — cash on delivery across Egypt.`,
+  description: `Shop active bundle offers at ${SITE.name}. Calm kits & squishy multi-packs — cash on delivery across Egypt.`,
   alternates: { canonical: '/bundles' },
 };
 
