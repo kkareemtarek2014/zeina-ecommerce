@@ -465,8 +465,8 @@ export function AdminListSkeleton({
         <Skeleton className="h-8 w-44" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>
-      <Skeleton className="h-14 w-full rounded-(--radius-lg)" />
-      <div className="overflow-hidden rounded-(--radius-lg) border border-border">
+      <Skeleton className="h-14 w-full rounded-lg" />
+      <div className="overflow-hidden rounded-lg border border-border">
         <div className="border-b border-border bg-brand-blush/30 px-4 py-2.5">
           <Skeleton className="h-4 w-full" />
         </div>

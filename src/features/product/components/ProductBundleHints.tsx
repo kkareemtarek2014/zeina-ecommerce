@@ -40,7 +40,7 @@ export function ProductBundleHints({ productId }: { productId: string }) {
       {hints.map((h) => (
         <div
           key={h.id}
-          className="rounded-(--radius-lg) border border-border bg-brand-blush/40 px-4 py-3 text-sm"
+          className="rounded-lg border border-border bg-brand-blush/40 px-4 py-3 text-sm"
         >
           <div className="flex flex-wrap items-center gap-2">
             <p className="font-medium text-text-primary">{h.name}</p>

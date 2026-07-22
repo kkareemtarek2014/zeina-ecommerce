@@ -24,7 +24,7 @@ export function ActionCard({
     <Link
       href={href}
       className={cn(
-        'group block bg-surface-raised border border-border rounded-(--radius-lg) p-4 shadow-2xs hover:border-brand-primary/40 transition-all animate-fade-up',
+        'group block bg-surface-raised border border-border rounded-lg p-4 shadow-2xs hover:border-brand-primary/40 transition-all animate-fade-up',
         className
       )}
     >

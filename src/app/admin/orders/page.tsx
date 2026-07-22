@@ -329,7 +329,7 @@ export default function AdminOrdersPage() {
 
       {/* Filter Toolbar */}
       <div className="mt-5 flex flex-wrap items-end gap-3">
-        <div className="min-w-[12rem] flex-1">
+        <div className="min-w-48 flex-1">
           <SearchInput
             aria-label="Search orders"
             placeholder="Search order id, phone, name…"
@@ -386,7 +386,7 @@ export default function AdminOrdersPage() {
 
       {/* Bulk Selection Bar */}
       {selectedIds.size > 0 && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-(--radius-lg) border border-brand-primary/30 bg-brand-primary/5 p-3 text-xs">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-primary/30 bg-brand-primary/5 p-3 text-xs">
           <div className="flex items-center gap-2 font-medium text-text-primary">
             <span>{selectedIds.size} order(s) selected</span>
             <button

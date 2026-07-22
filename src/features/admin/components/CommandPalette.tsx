@@ -32,25 +32,25 @@ const QUICK_ACTIONS: ReadonlyArray<{
   href: string;
   permission: Permission;
 }> = [
-  {
-    id: 'new-product',
-    label: 'New product',
-    href: '/admin/products/new',
-    permission: 'products:write',
-  },
-  {
-    id: 'new-promo',
-    label: 'New promo',
-    href: '/admin/promos',
-    permission: 'promos:write',
-  },
-  {
-    id: 'new-category',
-    label: 'New category',
-    href: '/admin/categories/new',
-    permission: 'categories:write',
-  },
-];
+    {
+      id: 'new-product',
+      label: 'New product',
+      href: '/admin/products/new',
+      permission: 'products:write',
+    },
+    {
+      id: 'new-promo',
+      label: 'New promo',
+      href: '/admin/promos',
+      permission: 'promos:write',
+    },
+    {
+      id: 'new-category',
+      label: 'New category',
+      href: '/admin/categories/new',
+      permission: 'categories:write',
+    },
+  ];
 
 function fuzzyMatch(query: string, text: string): boolean {
   const q = query.trim().toLowerCase();
@@ -198,7 +198,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="animate-fade-up w-full max-w-lg overflow-hidden rounded-(--radius-lg) border border-border bg-surface-raised shadow-lg"
+        className="animate-fade-up w-full max-w-lg overflow-hidden rounded-lg border border-border bg-surface-raised shadow-lg"
       >
         <h2 id={titleId} className="sr-only">
           Jump to

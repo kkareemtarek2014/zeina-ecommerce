@@ -104,7 +104,7 @@ export default function AdminMediaPage() {
       cell: (row) => {
         const value = altDrafts[row.id] ?? row.alt ?? '';
         return (
-          <div className="flex min-w-[12rem] max-w-xs items-end gap-2">
+          <div className="flex min-w-48 max-w-xs items-end gap-2">
             <div className="flex-1">
               <Input
                 aria-label={`Alt text for ${row.filename}`}

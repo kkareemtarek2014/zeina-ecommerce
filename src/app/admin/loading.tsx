@@ -15,23 +15,23 @@ export default function AdminDashboardLoading() {
 
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Skeleton className="h-16 rounded-(--radius-lg)" />
-          <Skeleton className="h-16 rounded-(--radius-lg)" />
-          <Skeleton className="h-16 rounded-(--radius-lg)" />
+          <Skeleton className="h-16 rounded-lg" />
+          <Skeleton className="h-16 rounded-lg" />
+          <Skeleton className="h-16 rounded-lg" />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-(--radius-lg)" />
+            <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-72 rounded-(--radius-lg)" />
-          <Skeleton className="h-72 rounded-(--radius-lg)" />
+          <Skeleton className="h-72 rounded-lg" />
+          <Skeleton className="h-72 rounded-lg" />
         </div>
 
-        <Skeleton className="h-64 rounded-(--radius-lg)" />
+        <Skeleton className="h-64 rounded-lg" />
       </div>
     </div>
   );

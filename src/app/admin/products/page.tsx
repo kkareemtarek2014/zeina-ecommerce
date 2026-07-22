@@ -472,7 +472,7 @@ export default function AdminProductsPage() {
       />
 
       {selected.size > 0 ? (
-        <div className="mb-4 flex flex-wrap items-end gap-2 rounded-(--radius-lg) border border-border bg-brand-blush/30 px-3 py-3">
+        <div className="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-border bg-brand-blush/30 px-3 py-3">
           <p className="mr-2 text-sm text-text-secondary">
             {selected.size} selected
           </p>

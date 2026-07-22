@@ -21,7 +21,7 @@
     action button right-aligned (stacks on mobile). Absorbs/deletes `AdminBreadcrumbs` usage later (2.4).
 - [x] **1.4 `SectionCard.tsx`**
   - Props: `title?`, `description?`, `action?`, `children`, `className?`.
-  - `bg-surface-raised border border-border rounded-(--radius-lg) p-5`.
+  - `bg-surface-raised border border-border rounded-lg p-5`.
 - [x] **1.5 `StatChip.tsx`**
   - Props: `label`, `value`, `delta?: number` (renders ▲/▼ + `status-success`/`status-error`),
     `hint?`, `icon?`. Value in `font-display`.
@@ -186,20 +186,20 @@
 
 > Spec: `03-phase-7.md`
 
-- [ ] **7.1 Stats deltas**
+- [x] **7.1 Stats deltas**
   - Extend `AdminStatsDTO` with previous-period fields (or ready `%` deltas) for Today /
     Month revenue and optional avg; wire `StatChip` `delta` on the dashboard.
-- [ ] **7.2 COD to collect**
+- [x] **7.2 COD to collect**
   - Sum unpaid COD totals still in the fulfilment pipeline; add a chip on Today.
-- [ ] **7.3 Needs-action queue**
+- [x] **7.3 Needs-action queue**
   - Top ~5 `placed`/`confirmed` orders on the dashboard with `OrderQuickActions`; invalidate
     stats on advance; link to filtered orders list.
-- [ ] **7.4 Server low-stock**
+- [x] **7.4 Server low-stock**
   - `GET /api/admin/products?lowStock=1` filters in SQL with settings threshold; products
     page uses the param (drop client-only filter / oversized pageSize hack).
-- [ ] **7.5 Command palette**
+- [x] **7.5 Command palette**
   - Cmd/Ctrl+K client modal: fuzzy jump to RBAC-filtered nav + "New product" / "New promo".
-- [ ] **7.6 Verify** — `pnpm build && pnpm typecheck && pnpm lint && pnpm assert:no-secrets`.
+- [x] **7.6 Verify** — `pnpm build && pnpm typecheck && pnpm lint && pnpm assert:no-secrets`.
 
 ---
 

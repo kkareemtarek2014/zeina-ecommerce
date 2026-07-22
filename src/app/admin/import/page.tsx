@@ -42,61 +42,61 @@ export default function AdminTemuImportPage() {
         ]}
       />
 
-      <div className="mt-6 max-w-xl rounded-(--radius-lg) border border-border bg-surface-raised p-5">
+      <div className="mt-6 max-w-xl rounded-lg border border-border bg-surface-raised p-5">
         <form
           className="space-y-4"
           onSubmit={(e) => {
-          e.preventDefault();
-          void importMutation
-            .mutateAsync({
-              url: url.trim(),
-              categorySlug: categorySlug || undefined,
-              fulfilmentType,
-            })
-            .then((product) => {
-              toast('Draft imported — review before publishing', 'success');
-              router.push(`/admin/products/${product.id}/edit`);
-            })
-            .catch((err: unknown) =>
-              toast(
-                err instanceof AppError ? err.message : 'Import failed',
-                'error',
-              ),
-            );
-        }}
-      >
-        <Input
-          label="Product URL"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://..."
-          required
-        />
-        <Select
-          label="Category"
-          value={categorySlug}
-          onChange={(e) => setCategorySlug(e.target.value)}
+            e.preventDefault();
+            void importMutation
+              .mutateAsync({
+                url: url.trim(),
+                categorySlug: categorySlug || undefined,
+                fulfilmentType,
+              })
+              .then((product) => {
+                toast('Draft imported — review before publishing', 'success');
+                router.push(`/admin/products/${product.id}/edit`);
+              })
+              .catch((err: unknown) =>
+                toast(
+                  err instanceof AppError ? err.message : 'Import failed',
+                  'error',
+                ),
+              );
+          }}
         >
-          <option value="">Default (medium or first)</option>
-          {categories.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-        <Select
-          label="Fulfilment type"
-          value={fulfilmentType}
-          onChange={(e) =>
-            setFulfilmentType(e.target.value as 'local_stock' | 'dropship')
-          }
-        >
-          <option value="local_stock">Local stock (micro-warehouse)</option>
-          <option value="dropship">Dropship sourcing (timeline only)</option>
-        </Select>
-        <Button type="submit" isLoading={importMutation.isPending}>
-          Import as draft
-        </Button>
+          <Input
+            label="Product URL"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://..."
+            required
+          />
+          <Select
+            label="Category"
+            value={categorySlug}
+            onChange={(e) => setCategorySlug(e.target.value)}
+          >
+            <option value="">Default (medium or first)</option>
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label="Fulfilment type"
+            value={fulfilmentType}
+            onChange={(e) =>
+              setFulfilmentType(e.target.value as 'local_stock' | 'dropship')
+            }
+          >
+            <option value="local_stock">Local stock (micro-warehouse)</option>
+            <option value="dropship">Dropship sourcing (timeline only)</option>
+          </Select>
+          <Button type="submit" isLoading={importMutation.isPending}>
+            Import as draft
+          </Button>
         </form>
       </div>
     </div>

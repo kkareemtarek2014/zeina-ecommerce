@@ -149,7 +149,7 @@ export function CheckoutForm() {
           <h2 className="font-(family-name:--font-display) text-xl font-semibold">
             Payment
           </h2>
-          <label className="flex cursor-pointer items-center gap-4 rounded-(--radius-lg) border border-brand-primary bg-brand-blush/50 p-4">
+          <label className="flex cursor-pointer items-center gap-4 rounded-lg border border-brand-primary bg-brand-blush/50 p-4">
             <input
               type="radio"
               value="cod"
@@ -169,7 +169,7 @@ export function CheckoutForm() {
       </div>
 
       {/* ── Order summary ───────────────────────────────── */}
-      <aside className="h-fit rounded-(--radius-lg) border border-border bg-surface-raised p-6">
+      <aside className="h-fit rounded-lg border border-border bg-surface-raised p-6">
         <h2 className="font-(family-name:--font-display) text-xl font-semibold">
           Your Order
         </h2>

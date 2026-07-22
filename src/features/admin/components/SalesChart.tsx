@@ -18,7 +18,7 @@ export function SalesChart({ data }: SalesChartProps) {
 
   if (!hasSales) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-(--radius-lg) border border-dashed border-border bg-surface-raised/50">
+      <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border bg-surface-raised/50">
         <p className="text-sm text-text-muted">No sales in the last 14 days.</p>
       </div>
     );

@@ -60,7 +60,7 @@ export default function AdminSettingsPage() {
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tiles.map((t) => (
           <Link key={t.href} href={t.href} className="block">
-            <div className="h-full rounded-(--radius-lg) border border-border bg-surface-raised p-5 transition-colors hover:border-brand-primary/40">
+            <div className="h-full rounded-lg border border-border bg-surface-raised p-5 transition-colors hover:border-brand-primary/40">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <t.icon className="mt-0.5 size-4 text-brand-primary" />

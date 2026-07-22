@@ -16,7 +16,7 @@ export function ProductGallery({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative aspect-square overflow-hidden rounded-(--radius-lg) bg-brand-blush">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-brand-blush">
         <Image
           src={activeImage}
           alt={name}

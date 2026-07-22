@@ -445,3 +445,59 @@ export async function listStorefrontBundleProducts(
   const ids = active.flatMap(({ items }) => items.map((i) => i.productId));
   return listPublishedProductsByIds(ids, limit);
 }
+
+export type BundleSpotlightDTO = {
+  id: string;
+  name: string;
+  image: string;
+  itemCount: number;
+  price: number | null;
+  compareAtPrice: number | null;
+  savingsEgp: number | null;
+};
+
+/**
+ * One active bundle for the homepage "Mystery Box" spotlight moment.
+ * Picks the first active bundle (admin-ordered); returns null when the
+ * `bundles` flag is off or nothing is active — the section simply hides.
+ */
+export async function getHomepageBundleSpotlight(): Promise<BundleSpotlightDTO | null> {
+  if (!isFeatureEnabled('bundles')) return null;
+  const db = await getRequestDb();
+  const active = await bundlesRepo.listActiveBundles(db);
+  const first = active[0];
+  if (!first) return null;
+
+  const { bundle, items } = first;
+  const pricing = await getPricingSettings(db);
+  let separateTotal = 0;
+  let image = '';
+
+  for (const item of items) {
+    const row = await productsRepo.findProductById(db, item.productId);
+    if (!row) continue;
+    if (!image) image = row.images[0] ?? '';
+    separateTotal += computeSellPrice(pricingInputFromRow(row), pricing) * item.qty;
+  }
+
+  if (!image) return null; // no resolvable products — nothing honest to show
+
+  let price: number | null = null;
+  if (bundle.type === 'fixed_price' || bundle.type === 'set') {
+    const fixed = Number(bundle.config?.price);
+    if (Number.isFinite(fixed) && fixed >= 0) price = Math.round(fixed);
+  }
+
+  const savingsEgp =
+    price != null && separateTotal > price ? separateTotal - price : null;
+
+  return {
+    id: bundle.id,
+    name: bundle.name,
+    image,
+    itemCount: items.reduce((sum, i) => sum + i.qty, 0),
+    price,
+    compareAtPrice: price != null && savingsEgp ? separateTotal : null,
+    savingsEgp,
+  };
+}

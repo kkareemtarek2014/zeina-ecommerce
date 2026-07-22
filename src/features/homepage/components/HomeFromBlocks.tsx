@@ -78,7 +78,7 @@ function HeroBlock({ config }: { config: Record<string, unknown> }) {
           ) : null}
         </div>
         <div
-          className="animate-fade-up stagger relative aspect-4/3 overflow-hidden rounded-(--radius-lg) shadow-xl shadow-brand-primary/10"
+          className="animate-fade-up stagger relative aspect-4/3 overflow-hidden rounded-lg shadow-xl shadow-brand-primary/10"
           style={{ '--stagger-i': 2 } as React.CSSProperties}
         >
           <Image
@@ -266,7 +266,7 @@ function PromoBlock({ config }: { config: Record<string, unknown> }) {
           ) : null}
         </div>
         {image ? (
-          <div className="relative aspect-16/10 overflow-hidden rounded-(--radius-lg)">
+          <div className="relative aspect-16/10 overflow-hidden rounded-lg">
             <Image
               src={image}
               alt={title}

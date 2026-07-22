@@ -40,7 +40,7 @@ export function IntegrationsStatusPanel() {
   });
 
   return (
-    <section className="mt-10 max-w-xl rounded-(--radius-lg) border border-border bg-surface-raised p-5">
+    <section className="mt-10 max-w-xl rounded-lg border border-border bg-surface-raised p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-(family-name:--font-display) text-lg font-semibold text-text-primary">

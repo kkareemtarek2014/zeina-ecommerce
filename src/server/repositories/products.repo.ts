@@ -326,3 +326,25 @@ export async function countProductsByCategory(
     .where(eq(products.categorySlug, categorySlug));
   return Number(agg?.c ?? 0);
 }
+
+/**
+ * Site-wide review aggregate from denormalized `products.rating` /
+ * `reviewCount` (published catalog only) — weighted average, never fake.
+ * Used for the homepage rating strip; returns count 0 when nothing to show.
+ */
+export async function siteRatingAggregate(
+  db: Db,
+): Promise<{ average: number; count: number }> {
+  const [agg] = await db
+    .select({
+      weighted: sql<number>`sum(${products.rating} * ${products.reviewCount})`,
+      total: sql<number>`sum(${products.reviewCount})`,
+    })
+    .from(products)
+    .where(eq(products.status, 'published'));
+
+  const total = Number(agg?.total ?? 0);
+  const weighted = Number(agg?.weighted ?? 0);
+  const average = total > 0 ? Math.round((weighted / total) * 10) / 10 : 0;
+  return { average, count: total };
+}

@@ -17,7 +17,7 @@ export function FilterBar({
   return (
     <div
       className={cn(
-        'mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-surface-raised border border-border rounded-(--radius-lg) p-3',
+        'mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-surface-raised border border-border rounded-lg p-3',
         className
       )}
     >
@@ -25,7 +25,7 @@ export function FilterBar({
         children
       ) : (
         <>
-          {leftSlot && <div className="flex-1 min-w-[200px]">{leftSlot}</div>}
+          {leftSlot && <div className="flex-1 min-w-50">{leftSlot}</div>}
           {rightSlot && (
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               {rightSlot}

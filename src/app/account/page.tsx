@@ -35,7 +35,7 @@ export default function AccountPage() {
         <Link
           key={href}
           href={href}
-          className="group rounded-(--radius-lg) border border-border bg-surface-raised p-5 transition-[border-color,transform] hover:-translate-y-0.5 hover:border-brand-primary/40"
+          className="group rounded-lg border border-border bg-surface-raised p-5 transition-[border-color,transform] hover:-translate-y-0.5 hover:border-brand-primary/40"
         >
           <span className="flex size-10 items-center justify-center rounded-full bg-brand-blush text-brand-primary">
             <Icon className="size-5" />

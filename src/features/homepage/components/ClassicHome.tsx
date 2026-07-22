@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {
   ArrowRight,
   Banknote,
+  MessageCircle,
   ShieldCheck,
   Sparkles,
   Truck,
@@ -10,34 +11,61 @@ import {
 import { FREE_SHIPPING_THRESHOLD, SITE } from '@/config/site.config';
 import { FeaturedProducts } from '@/features/shop';
 import { RecentlyViewed } from '@/features/product/components/RecentlyViewed';
+import { WelcomeOfferStrip } from '@/features/welcome-offer';
+import { formatEGP } from '@/shared/utils/price';
 import type { Category } from '@/shared/types/product.types';
+import type { BundleSpotlightDTO } from '@/server/services/bundle.service';
 import { SocialProofSection } from './SocialProofSection';
+import { RatingStrip } from './RatingStrip';
+import { BundleSpotlight } from './BundleSpotlight';
 
 const VIBES = [
   {
     name: 'Pocket Calm',
+    slug: 'small',
     tag: 'Tiny squishies that go anywhere — bag, desk, pocket',
     href: '/shop/small',
     className: 'from-brand-blush via-surface-raised to-brand-blush/60',
   },
   {
     name: 'Desk Companion',
+    slug: 'medium',
     tag: 'Hand-size stress relief for your daily squeeze',
     href: '/shop/medium',
     className: 'from-brand-primary/15 via-brand-blush to-surface-raised',
   },
   {
     name: 'The Big Squeeze',
+    slug: 'large',
     tag: 'Jumbo slow-rising squishies — gifts & bedtime wind-down',
     href: '/shop/large',
     className: 'from-brand-accent/20 via-surface-raised to-brand-blush/70',
   },
 ];
 
+function PriceChip({ price }: { price?: number }) {
+  if (price == null) return null;
+  return (
+    <span className="rounded-full bg-surface-raised px-2.5 py-1 text-xs font-semibold text-brand-primary shadow-sm">
+      From {formatEGP(price)}
+    </span>
+  );
+}
+
 export function ClassicHome({
   categories,
+  categoryMinPrices = {},
+  freeShippingThreshold = FREE_SHIPPING_THRESHOLD,
+  bundleSpotlight = null,
+  rating = { average: 0, count: 0 },
+  whatsappDigits = null,
 }: {
   categories: Category[];
+  categoryMinPrices?: Record<string, number>;
+  freeShippingThreshold?: number;
+  bundleSpotlight?: BundleSpotlightDTO | null;
+  rating?: { average: number; count: number };
+  whatsappDigits?: string | null;
 }) {
   return (
     <>
@@ -128,8 +156,23 @@ export function ClassicHome({
         </div>
       </section>
 
-      {/* Categories */}
+      {/* First-order offer — confirms the ad's promise instantly */}
+      <WelcomeOfferStrip />
+
+      {/* Best sellers — right under the hero, one tap from purchase intent */}
       <section className="mx-auto max-w-container px-4 py-16 lg:px-8">
+        <SectionHeading
+          eyebrow="Fan favourites"
+          title="Best Squishies"
+          href="/shop"
+        />
+        <div className="mt-8">
+          <FeaturedProducts />
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="mx-auto max-w-container px-4 pb-16 lg:px-8">
         <SectionHeading eyebrow="Browse" title="Shop by Size" href="/shop" />
         <div className="mt-8 grid grid-cols-3 gap-4 sm:grid-cols-3 lg:grid-cols-3">
           {categories.map((cat, i) => (
@@ -139,7 +182,7 @@ export function ClassicHome({
               className="group animate-fade-up stagger flex flex-col items-center gap-3"
               style={{ '--stagger-i': i } as React.CSSProperties}
             >
-              <div className="aspect-square w-full overflow-hidden rounded-full border-2 border-transparent bg-brand-blush shadow-sm ring-brand-primary/0 transition-all group-hover:border-brand-primary/40 group-hover:shadow-lg group-hover:shadow-brand-primary/15">
+              <div className="relative aspect-square w-full overflow-hidden rounded-full border-2 border-transparent bg-brand-blush shadow-sm ring-brand-primary/0 transition-all group-hover:border-brand-primary/40 group-hover:shadow-lg group-hover:shadow-brand-primary/15">
                 <Image
                   src={cat.image}
                   alt={cat.name}
@@ -153,10 +196,14 @@ export function ClassicHome({
               <p className="text-center text-sm font-medium transition-colors group-hover:text-brand-primary">
                 {cat.name}
               </p>
+              <PriceChip price={categoryMinPrices[cat.slug]} />
             </Link>
           ))}
         </div>
       </section>
+
+      {/* Mystery Box / bundle spotlight — highest-AOV moment */}
+      {bundleSpotlight ? <BundleSpotlight bundle={bundleSpotlight} /> : null}
 
       {/* Trust band */}
       <section className="border-y border-border bg-surface-raised">
@@ -225,6 +272,11 @@ export function ClassicHome({
                 aria-hidden
                 className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full bg-surface-raised/60 blur-xl transition-transform duration-500 group-hover:scale-125"
               />
+              {categoryMinPrices[vibe.slug] != null ? (
+                <span className="absolute left-6 top-6">
+                  <PriceChip price={categoryMinPrices[vibe.slug]} />
+                </span>
+              ) : null}
               <p className="font-display text-2xl font-semibold italic text-text-primary">
                 {vibe.name}
               </p>
@@ -238,18 +290,6 @@ export function ClassicHome({
         </div>
       </section>
 
-      {/* Featured products */}
-      <section className="mx-auto max-w-container px-4 pb-16 lg:px-8">
-        <SectionHeading
-          eyebrow="Fan favourites"
-          title="Best Squishies"
-          href="/shop"
-        />
-        <div className="mt-8">
-          <FeaturedProducts />
-        </div>
-      </section>
-
       {/* Free shipping promo band */}
       <section className="bg-linear-to-r from-brand-accent/15 via-brand-blush to-brand-accent/15">
         <div className="mx-auto flex max-w-container flex-col items-center justify-between gap-4 px-4 py-8 text-center sm:flex-row sm:text-left lg:px-8">
@@ -260,7 +300,7 @@ export function ClassicHome({
             <div>
               <p className="font-display text-xl font-semibold">
                 Free shipping over{' '}
-                {FREE_SHIPPING_THRESHOLD.toLocaleString()} EGP
+                {freeShippingThreshold.toLocaleString()} EGP
               </p>
               <p className="text-sm text-text-secondary">
                 Treat yourself — your squishies ship free.
@@ -276,7 +316,11 @@ export function ClassicHome({
         </div>
       </section>
 
-      <RecentlyViewed className="mx-auto max-w-container px-4 lg:px-8 pb-16" />
+      <RecentlyViewed className="mx-auto max-w-container px-4 lg:px-8 pb-8" />
+
+      <RatingStrip average={rating.average} count={rating.count} />
+
+      <div className="pb-8" />
 
       <SocialProofSection />
 
@@ -296,10 +340,22 @@ export function ClassicHome({
           >
             Shop new arrivals <ArrowRight className="size-4" />
           </Link>
+          {whatsappDigits ? (
+            <a
+              href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(
+                'Hi! I need help picking a gift 🎁',
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-text-inverse/85 underline-offset-4 hover:text-text-inverse hover:underline"
+            >
+              <MessageCircle className="size-4" /> Need a gift? Chat with us
+            </a>
+          ) : null}
         </div>
       </section>
 
-      <SeoStrip />
+      <SeoStrip freeShippingThreshold={freeShippingThreshold} />
     </>
   );
 }
@@ -377,7 +433,11 @@ export function SectionHeading({
   );
 }
 
-export function SeoStrip() {
+export function SeoStrip({
+  freeShippingThreshold = FREE_SHIPPING_THRESHOLD,
+}: {
+  freeShippingThreshold?: number;
+} = {}) {
   return (
     <section className="border-t border-border bg-brand-blush/30">
       <div className="mx-auto max-w-container px-4 py-14 lg:px-8">
@@ -394,17 +454,16 @@ export function SeoStrip() {
           <p>
             Our collection features glow-in-the-dark squishies, food-shaped stress toys, adorable animal squishies,
             and themed drops that change every month. Bundle packs and mystery boxes make the perfect gift — or the
-            perfect excuse to start a collection. Every order comes with a free sticker and a calm-ritual card.
+            perfect excuse to start a collection.
           </p>
           <p>
             Shopping is simple: browse our collection, add to bag, and pay cash on delivery when your order arrives
             at your doorstep — no credit card needed. We deliver across all of Egypt, from Cairo and Giza to every
-            governorate, with free shipping on orders over {FREE_SHIPPING_THRESHOLD} EGP.
+            governorate, with free shipping on orders over {freeShippingThreshold} EGP.
           </p>
           <p>
             Whether you&apos;re treating yourself after a long day, shopping for a birthday gift, or building your
-            sqoosh collection — {SITE.name} makes it easy to find your next favourite squeeze. Join thousands of
-            happy squeezers across Egypt.
+            sqoosh collection — {SITE.name} makes it easy to find your next favourite squeeze.
           </p>
         </div>
       </div>

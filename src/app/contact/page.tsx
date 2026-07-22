@@ -30,33 +30,33 @@ export default async function ContactPage() {
   const methods = [
     email
       ? {
-          key: 'email',
-          icon: Mail,
-          title: 'Email Us',
-          description: 'Our friendly team is here to help.',
-          href: `mailto:${email}`,
-          label: email,
-        }
+        key: 'email',
+        icon: Mail,
+        title: 'Email Us',
+        description: 'Our friendly team is here to help.',
+        href: `mailto:${email}`,
+        label: email,
+      }
       : null,
     phone
       ? {
-          key: 'phone',
-          icon: Phone,
-          title: 'Call Us',
-          description: 'Speak with us about your order.',
-          href: `tel:${phone.replace(/[^\d+]/g, '')}`,
-          label: phone,
-        }
+        key: 'phone',
+        icon: Phone,
+        title: 'Call Us',
+        description: 'Speak with us about your order.',
+        href: `tel:${phone.replace(/[^\d+]/g, '')}`,
+        label: phone,
+      }
       : null,
     whatsappDigits
       ? {
-          key: 'whatsapp',
-          icon: MessageCircle,
-          title: 'WhatsApp',
-          description: 'Chat with us for quick inquiries.',
-          href: `https://wa.me/${whatsappDigits}`,
-          label: branding.whatsappNumber!,
-        }
+        key: 'whatsapp',
+        icon: MessageCircle,
+        title: 'WhatsApp',
+        description: 'Chat with us for quick inquiries.',
+        href: `https://wa.me/${whatsappDigits}`,
+        label: branding.whatsappNumber!,
+      }
       : null,
   ].filter((m): m is NonNullable<typeof m> => m != null);
 
@@ -85,7 +85,7 @@ export default async function ContactPage() {
             return (
               <div
                 key={method.key}
-                className="flex flex-col items-center rounded-(--radius-lg) border border-border bg-surface-raised p-8 text-center transition-shadow hover:shadow-md"
+                className="flex flex-col items-center rounded-lg border border-border bg-surface-raised p-8 text-center transition-shadow hover:shadow-md"
               >
                 <div className="flex size-12 items-center justify-center rounded-full bg-brand-blush text-brand-primary">
                   <Icon className="size-6" />
@@ -119,7 +119,7 @@ export default async function ContactPage() {
       )}
 
       <div
-        className="mt-12 animate-fade-up rounded-(--radius-lg) border border-border bg-surface-raised p-8"
+        className="mt-12 animate-fade-up rounded-lg border border-border bg-surface-raised p-8"
         style={{ animationDelay: '200ms' }}
       >
         <h2 className="mb-4 border-b border-border pb-4 text-xl font-medium text-text-primary">

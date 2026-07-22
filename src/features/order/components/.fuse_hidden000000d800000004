@@ -48,7 +48,7 @@ export function OrderConfirmation({ orderId }: { orderId: string }) {
         </p>
       </div>
 
-      <div className="mt-8 rounded-(--radius-lg) border border-border bg-surface-raised p-6">
+      <div className="mt-8 rounded-lg border border-border bg-surface-raised p-6">
         <h2 className="font-(family-name:--font-display) text-lg font-semibold">
           Order Summary
         </h2>

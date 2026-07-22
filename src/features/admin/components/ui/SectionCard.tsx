@@ -21,7 +21,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        'bg-surface-raised border border-border rounded-(--radius-lg) p-5',
+        'bg-surface-raised border border-border rounded-lg p-5',
         className
       )}
     >

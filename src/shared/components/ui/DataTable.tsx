@@ -40,7 +40,7 @@ export function DataTable<T>({
   return (
     <div
       className={cn(
-        'overflow-x-auto rounded-(--radius-lg) border border-border bg-surface-raised',
+        'overflow-x-auto rounded-lg border border-border bg-surface-raised',
         className,
       )}
     >

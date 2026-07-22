@@ -53,21 +53,21 @@ function DashboardSkeleton() {
   return (
     <div className="mt-6 space-y-6 animate-fade-up" aria-busy="true" aria-label="Loading dashboard">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Skeleton className="h-16 rounded-(--radius-lg)" />
-        <Skeleton className="h-16 rounded-(--radius-lg)" />
-        <Skeleton className="h-16 rounded-(--radius-lg)" />
+        <Skeleton className="h-16 rounded-lg" />
+        <Skeleton className="h-16 rounded-lg" />
+        <Skeleton className="h-16 rounded-lg" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-(--radius-lg)" />
+          <Skeleton key={i} className="h-24 rounded-lg" />
         ))}
       </div>
-      <Skeleton className="h-48 rounded-(--radius-lg)" />
+      <Skeleton className="h-48 rounded-lg" />
       <div className="grid gap-6 lg:grid-cols-2">
-        <Skeleton className="h-72 rounded-(--radius-lg)" />
-        <Skeleton className="h-72 rounded-(--radius-lg)" />
+        <Skeleton className="h-72 rounded-lg" />
+        <Skeleton className="h-72 rounded-lg" />
       </div>
-      <Skeleton className="h-64 rounded-(--radius-lg)" />
+      <Skeleton className="h-64 rounded-lg" />
     </div>
   );
 }

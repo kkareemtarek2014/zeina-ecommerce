@@ -103,7 +103,7 @@ export function WelcomeOfferPopup() {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="animate-fade-up w-full max-w-sm overflow-hidden rounded-(--radius-lg) border border-border bg-surface-raised shadow-lg"
+        className="animate-fade-up w-full max-w-sm overflow-hidden rounded-lg border border-border bg-surface-raised shadow-lg"
       >
         {/* Decorative header */}
         <div className="relative bg-brand-blush px-6 pb-5 pt-7 text-center">

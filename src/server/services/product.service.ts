@@ -257,3 +257,41 @@ export async function listGovernorates() {
   const db = await getRequestDb();
   return governoratesRepo.findAllGovernorates(db);
 }
+
+/**
+ * Cheapest published product's sell price per category slug — homepage price
+ * anchors ("From X EGP"). Sell price is computed (not a DB column), so this
+ * fetches each category sorted price-asc and takes the first. Categories with
+ * no published products are omitted (never show a fabricated price).
+ */
+export async function getCategoryMinPrices(
+  categorySlugs: string[],
+): Promise<Record<string, number>> {
+  const db = await getRequestDb();
+  const ctx = await loadCatalogContext(db);
+  const entries = await Promise.all(
+    categorySlugs.map(async (slug) => {
+      const rows = await productsRepo.findProducts(db, {
+        category: slug,
+        sort: 'price-asc',
+      });
+      const first = rows[0];
+      return first
+        ? ([slug, mapProduct(first, ctx).price] as const)
+        : null;
+    }),
+  );
+  return Object.fromEntries(entries.filter((e): e is readonly [string, number] => e !== null));
+}
+
+/**
+ * Site-wide review rating summary (published catalog, weighted by review
+ * count). Returns count 0 when there isn't enough real data to show yet.
+ */
+export async function getSiteRatingSummary(): Promise<{
+  average: number;
+  count: number;
+}> {
+  const db = await getRequestDb();
+  return productsRepo.siteRatingAggregate(db);
+}

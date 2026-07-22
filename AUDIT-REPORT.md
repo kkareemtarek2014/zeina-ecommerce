@@ -132,7 +132,7 @@ App Router has no `/404` page (that's a Pages-Router convention); it uses `not-f
 
 ### D4. Undefined design token `--radius-xl`
 `app/login/page.tsx:29` and `app/register/page.tsx:30` use `rounded-(--radius-xl)`, but `tokens.css` only defines `--radius` and `--radius-lg`. The corner radius silently resolves to nothing.
-**Fix:** these files should be deleted per C1; otherwise use `rounded-(--radius-lg)` or add `--radius-xl` to `tokens.css`.
+**Fix:** these files should be deleted per C1; otherwise use `rounded-lg` or add `--radius-xl` to `tokens.css`.
 
 ### D5. Password stored/compared in plaintext under a `passwordHash` name
 `users.data.ts` stores `passwordHash: 'password123'` (plaintext) and `authService.login` compares the raw password to it. The field name implies hashing that never happens.

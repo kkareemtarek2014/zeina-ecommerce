@@ -96,7 +96,7 @@ export function HomepageBuilder() {
       )}
 
       {!isLoading && ordered.length === 0 && (
-        <div className="rounded-(--radius-lg) border border-dashed border-border px-4 py-10 text-center text-sm text-text-muted">
+        <div className="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-text-muted">
           No homepage blocks yet. Add a hero or featured section to start the
           builder experience.
         </div>
@@ -106,7 +106,7 @@ export function HomepageBuilder() {
         {ordered.map((block, index) => (
           <li
             key={block.id}
-            className="flex flex-wrap items-center gap-3 rounded-(--radius-lg) border border-border bg-surface-raised p-4"
+            className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface-raised p-4"
           >
             <div className="flex flex-col gap-1">
               <Button

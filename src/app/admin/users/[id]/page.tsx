@@ -67,19 +67,19 @@ export default function AdminUserDetailPage({
       ) : (
         <div className="mt-8 space-y-10">
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-(--radius-lg) border border-border bg-surface-raised px-4 py-3">
+            <div className="rounded-lg border border-border bg-surface-raised px-4 py-3">
               <p className="text-xs text-text-muted">Orders</p>
               <p className="mt-1 text-xl font-semibold">
                 {user.stats.ordersCount}
               </p>
             </div>
-            <div className="rounded-(--radius-lg) border border-border bg-surface-raised px-4 py-3">
+            <div className="rounded-lg border border-border bg-surface-raised px-4 py-3">
               <p className="text-xs text-text-muted">Total spent</p>
               <p className="mt-1 text-xl font-semibold">
                 {formatEGP(user.stats.totalSpent)}
               </p>
             </div>
-            <div className="rounded-(--radius-lg) border border-border bg-surface-raised px-4 py-3">
+            <div className="rounded-lg border border-border bg-surface-raised px-4 py-3">
               <p className="text-xs text-text-muted">Last order</p>
               <p className="mt-1 text-sm font-medium">
                 {user.stats.lastOrderAt
@@ -122,7 +122,7 @@ export default function AdminUserDetailPage({
               {user.recentOrders.length === 0 ? (
                 <p className="text-sm text-text-muted">No orders yet.</p>
               ) : (
-                <ul className="divide-y divide-border rounded-(--radius-lg) border border-border">
+                <ul className="divide-y divide-border rounded-lg border border-border">
                   {user.recentOrders.map((order) => (
                     <li key={order.id}>
                       <Link
@@ -155,7 +155,7 @@ export default function AdminUserDetailPage({
               {user.favorites.length === 0 ? (
                 <p className="text-sm text-text-muted">No favorites.</p>
               ) : (
-                <ul className="divide-y divide-border rounded-(--radius-lg) border border-border">
+                <ul className="divide-y divide-border rounded-lg border border-border">
                   {user.favorites.map((fav) => (
                     <li key={fav.id}>
                       <Link
@@ -191,7 +191,7 @@ export default function AdminUserDetailPage({
                   {user.addresses.map((addr) => (
                     <li
                       key={addr.id}
-                      className="rounded-(--radius-lg) border border-border px-4 py-3 text-sm"
+                      className="rounded-lg border border-border px-4 py-3 text-sm"
                     >
                       <p className="font-medium">{addr.label}</p>
                       <p className="mt-1 text-text-secondary">

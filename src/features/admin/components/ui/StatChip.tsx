@@ -24,7 +24,7 @@ export function StatChip({
   return (
     <div
       className={cn(
-        'bg-surface-raised border border-border rounded-(--radius-lg) p-4 flex flex-col justify-between',
+        'bg-surface-raised border border-border rounded-lg p-4 flex flex-col justify-between',
         className
       )}
     >

@@ -42,7 +42,7 @@ export function CartView() {
         ))}
       </div>
 
-      <aside className="h-fit rounded-(--radius-lg) border border-border bg-surface-raised p-6">
+      <aside className="h-fit rounded-lg border border-border bg-surface-raised p-6">
         <h2 className="font-(family-name:--font-display) text-xl font-semibold">
           Order Summary
         </h2>
