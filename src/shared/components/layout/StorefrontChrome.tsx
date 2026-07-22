@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Header } from '@/shared/components/layout/Header';
 import { Footer } from '@/shared/components/layout/Footer';
 import { WhatsAppButton } from '@/shared/components/ui';
+import { WelcomeOfferPopup } from '@/features/welcome-offer';
 import type { SiteBrandingDTO } from '@/shared/contracts/storefront-branding.contract';
 import { normalizeWhatsAppDigits } from '@/shared/lib/contact-links';
 
@@ -31,6 +32,7 @@ export function StorefrontChrome({
       <main className="flex-1">{children}</main>
       <Footer branding={branding} />
       {whatsappDigits ? <WhatsAppButton phoneNumber={whatsappDigits} /> : null}
+      <WelcomeOfferPopup />
     </>
   );
 }

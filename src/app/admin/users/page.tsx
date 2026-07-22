@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Eye, Trash2 } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
+  FilterBar,
   useAdminUsers,
   useDeleteAdminUser,
 } from '@/features/admin';
@@ -111,11 +113,12 @@ export default function AdminUsersPage() {
       />
 
 
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <div className="min-w-[12rem] flex-1">
+      <FilterBar
+        className="mt-6"
+        leftSlot={
           <SearchInput
             aria-label="Search users"
-            placeholder="Search email, name, phone…"
+            placeholder="Search email, name, phone..."
             value={qDraft}
             onChange={(e) => setQDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -125,38 +128,42 @@ export default function AdminUsersPage() {
               }
             }}
           />
-        </div>
-        <Select
-          aria-label="Filter by role"
-          className="w-40"
-          value={role}
-          onChange={(e) => {
-            setPage(1);
-            setRole(e.target.value);
-          }}
-        >
-          <option value="">All roles</option>
-          {USER_ROLES.map((r) => (
-            <option key={r} value={r}>
-              {ROLE_LABELS[r]}
-            </option>
-          ))}
-        </Select>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setPage(1);
-            setQ(qDraft.trim());
-          }}
-        >
-          Search
-        </Button>
-      </div>
+        }
+        rightSlot={
+          <>
+            <Select
+              aria-label="Filter by role"
+              className="w-40"
+              value={role}
+              onChange={(e) => {
+                setPage(1);
+                setRole(e.target.value);
+              }}
+            >
+              <option value="">All roles</option>
+              {USER_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {ROLE_LABELS[r]}
+                </option>
+              ))}
+            </Select>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setPage(1);
+                setQ(qDraft.trim());
+              }}
+            >
+              Search
+            </Button>
+          </>
+        }
+      />
 
-      <div className="mt-6">
+      <div>
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load users.</p>
         ) : (
@@ -164,7 +171,13 @@ export default function AdminUsersPage() {
             columns={columns}
             rows={data?.items ?? []}
             rowKey={(r) => r.id}
-            emptyMessage="No users match your filters."
+            emptyContent={
+              <EmptyState
+                emoji="👤"
+                title="No users match your filters"
+                description="Try clearing search or role filters."
+              />
+            }
           />
         )}
       </div>

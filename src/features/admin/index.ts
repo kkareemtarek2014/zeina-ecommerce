@@ -32,6 +32,7 @@ export { RecentOrders } from './components/RecentOrders';
 export { LatestProducts } from './components/LatestProducts';
 export { DashboardView } from './components/DashboardView';
 export { NotificationBell } from './components/NotificationBell';
+export { CommandPalette } from './components/CommandPalette';
 export { ActivityFeed } from './components/ActivityFeed';
 export { PricingSettingsForm } from './components/settings/pricing-settings-form';
 export { SeoSettingsForm } from './components/settings/seo-settings-form';

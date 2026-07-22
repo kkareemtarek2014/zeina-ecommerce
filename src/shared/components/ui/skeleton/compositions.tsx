@@ -445,3 +445,43 @@ export function SearchResultsSkeleton({
     </ul>
   );
 }
+
+/** Admin list route skeleton: header + filter strip + table rows. */
+export function AdminListSkeleton({
+  rows = 8,
+  className,
+}: {
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn('animate-fade-up space-y-6', className)}
+      aria-busy="true"
+      aria-label="Loading list"
+    >
+      <div className="space-y-2">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-8 w-44" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+      </div>
+      <Skeleton className="h-14 w-full rounded-(--radius-lg)" />
+      <div className="overflow-hidden rounded-(--radius-lg) border border-border">
+        <div className="border-b border-border bg-brand-blush/30 px-4 py-2.5">
+          <Skeleton className="h-4 w-full" />
+        </div>
+        {Array.from({ length: rows }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 border-b border-border px-4 py-2.5 last:border-0"
+          >
+            <Skeleton className="size-10 shrink-0 rounded-(--radius)" />
+            <Skeleton className="h-4 flex-1" />
+            <Skeleton className="h-4 w-16 shrink-0" />
+            <Skeleton className="h-4 w-20 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

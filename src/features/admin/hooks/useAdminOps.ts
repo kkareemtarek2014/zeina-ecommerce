@@ -63,6 +63,7 @@ export function useUpdateAdminOrderStatus(id: string) {
     onSuccess: (order) => {
       qc.setQueryData(adminOpsKeys.order(id), order);
       void qc.invalidateQueries({ queryKey: ['admin', 'orders'] });
+      void qc.invalidateQueries({ queryKey: adminOpsKeys.stats() });
     },
   });
 }
@@ -74,6 +75,7 @@ export function useBulkUpdateAdminOrderStatus() {
       adminOrdersService.bulkUpdateStatus(input),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['admin', 'orders'] });
+      void qc.invalidateQueries({ queryKey: adminOpsKeys.stats() });
     },
   });
 }

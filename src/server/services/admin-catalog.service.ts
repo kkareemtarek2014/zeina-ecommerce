@@ -26,6 +26,7 @@ import {
   pricingInputFromRow,
   type PricingSettings,
 } from '@/server/services/pricing.service';
+import { getLowStockThreshold } from '@/server/services/inventory.service';
 import {
   deleteUploadObject,
   mediaUrlToKey,
@@ -145,6 +146,7 @@ export async function listAdminProducts(url: URL): Promise<Paginated<AdminProduc
   const featuredParam = url.searchParams.get('featured');
   const inStockParam = url.searchParams.get('inStock');
   const statusParam = url.searchParams.get('status');
+  const lowStock = url.searchParams.get('lowStock') === '1';
 
   let status: productsRepo.ProductListFilters['status'];
   if (statusParam === 'all') status = 'all';
@@ -161,6 +163,9 @@ export async function listAdminProducts(url: URL): Promise<Paginated<AdminProduc
 
   const db = await getRequestDb();
   const pricing = await getPricingSettings(db);
+  const lowStockThreshold = lowStock
+    ? await getLowStockThreshold(db)
+    : undefined;
   const { rows, total } = await productsRepo.findProductsAdmin(db, {
     page,
     pageSize,
@@ -171,6 +176,8 @@ export async function listAdminProducts(url: URL): Promise<Paginated<AdminProduc
     featured: featuredParam === 'true' ? true : undefined,
     inStock:
       inStockParam === 'true' ? true : inStockParam === 'false' ? false : undefined,
+    lowStock: lowStock || undefined,
+    lowStockThreshold,
   });
 
   return {

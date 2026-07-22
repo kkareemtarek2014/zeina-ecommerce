@@ -21,6 +21,10 @@ import { useLogout } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/shared/components/ui';
 import { NotificationBell } from './NotificationBell';
 import {
+  CommandPalette,
+  CommandPaletteTrigger,
+} from './CommandPalette';
+import {
   hasPermission,
   ROLE_LABELS,
 } from '@/shared/rbac';
@@ -206,7 +210,13 @@ export function AdminSidebar({
   );
 }
 
-export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
+export function AdminTopbar({
+  onMenuClick,
+  onOpenCommandPalette,
+}: {
+  onMenuClick: () => void;
+  onOpenCommandPalette: () => void;
+}) {
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const router = useRouter();
@@ -231,6 +241,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
         <span className="hidden sm:inline">View Website</span>
         <span className="sm:hidden">Website</span>
       </Link>
+      <CommandPaletteTrigger onOpen={onOpenCommandPalette} />
       <div className="flex-1" />
       {user && hasPermission(user.role, 'notifications:read') ? (
         <NotificationBell />
@@ -319,6 +330,7 @@ export function MobileBottomNav({ onOpenMore }: { onOpenMore: () => void }) {
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
   const pathname = usePathname();
   const bare = pathname === '/admin/login' || pathname === '/admin/forbidden';
   const ordersCount = useOrdersNeedingAction();
@@ -341,10 +353,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-surface">
       <AdminSidebar open={open} onClose={() => setOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col pb-14 lg:pb-0">
-        <AdminTopbar onMenuClick={() => setOpen(true)} />
+        <AdminTopbar
+          onMenuClick={() => setOpen(true)}
+          onOpenCommandPalette={() => setCommandOpen(true)}
+        />
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>
       <MobileBottomNav onOpenMore={() => setOpen(true)} />
+      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
       {isCmsAdminRoute(pathname) ? <CmsModeBadge /> : null}
     </div>
   );

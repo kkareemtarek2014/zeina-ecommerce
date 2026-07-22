@@ -42,9 +42,10 @@ export default function AdminTemuImportPage() {
         ]}
       />
 
-      <form
-        className="max-w-xl space-y-4 mt-6"
-        onSubmit={(e) => {
+      <div className="mt-6 max-w-xl rounded-(--radius-lg) border border-border bg-surface-raised p-5">
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
           e.preventDefault();
           void importMutation
             .mutateAsync({
@@ -96,7 +97,8 @@ export default function AdminTemuImportPage() {
         <Button type="submit" isLoading={importMutation.isPending}>
           Import as draft
         </Button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

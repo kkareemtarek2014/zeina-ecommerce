@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
   PromoForm,
   type PromoFormSubmit,
   useAdminPromos,
@@ -65,7 +66,7 @@ export default function AdminPromosPage() {
       key: 'min',
       header: 'Min order',
       cell: (row) =>
-        row.minOrderValue != null ? formatEGP(row.minOrderValue) : '—',
+        row.minOrderValue != null ? formatEGP(row.minOrderValue) : '-',
     },
     {
       key: 'usage',
@@ -182,7 +183,7 @@ export default function AdminPromosPage() {
 
       <div className="mt-6">
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load promos.</p>
         ) : (
@@ -190,7 +191,13 @@ export default function AdminPromosPage() {
             columns={columns}
             rows={promos}
             rowKey={(r) => r.code}
-            emptyMessage="No promo codes yet."
+            emptyContent={
+              <EmptyState
+                emoji="🎟️"
+                title="No promo codes yet"
+                description="Create discount codes for checkout using Add promo above."
+              />
+            }
           />
         )}
       </div>

@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ActivityFeed,
   AdminPageHeader,
+  EmptyState,
+  FilterBar,
   adminOpsService,
 } from '@/features/admin';
 import {
@@ -106,9 +108,15 @@ export default function AdminActivityPage() {
         </h2>
         <div className="mt-4">
           {activityQuery.isLoading ? (
-            <p className="text-sm text-text-muted">Loading…</p>
+            <p className="text-sm text-text-muted">Loading...</p>
           ) : activityQuery.isError ? (
             <p className="text-sm text-status-error">Failed to load activity.</p>
+          ) : (activityQuery.data?.length ?? 0) === 0 ? (
+            <EmptyState
+              emoji="📋"
+              title="No recent activity"
+              description="Admin actions will show up here as they happen."
+            />
           ) : (
             <ActivityFeed items={activityQuery.data ?? []} />
           )}
@@ -116,31 +124,35 @@ export default function AdminActivityPage() {
       </section>
 
       <section className="mt-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="font-display text-lg font-semibold text-text-primary">
-            Audit log
-          </h2>
-          <Select
-            aria-label="Filter by entity"
-            className="w-44"
-            value={entity}
-            onChange={(e) => {
-              setPage(1);
-              setEntity(e.target.value);
-            }}
-          >
-            <option value="">All entities</option>
-            {ENTITY_OPTIONS.filter(Boolean).map((e) => (
-              <option key={e} value={e}>
-                {e}
-              </option>
-            ))}
-          </Select>
-        </div>
+        <FilterBar
+          leftSlot={
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              Audit log
+            </h2>
+          }
+          rightSlot={
+            <Select
+              aria-label="Filter by entity"
+              className="w-44"
+              value={entity}
+              onChange={(e) => {
+                setPage(1);
+                setEntity(e.target.value);
+              }}
+            >
+              <option value="">All entities</option>
+              {ENTITY_OPTIONS.filter(Boolean).map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </Select>
+          }
+        />
 
-        <div className="mt-4">
+        <div>
           {auditQuery.isLoading ? (
-            <p className="text-sm text-text-muted">Loading…</p>
+            <p className="text-sm text-text-muted">Loading...</p>
           ) : auditQuery.isError ? (
             <p className="text-sm text-status-error">Failed to load audit log.</p>
           ) : (
@@ -148,7 +160,17 @@ export default function AdminActivityPage() {
               columns={columns}
               rows={auditQuery.data?.items ?? []}
               rowKey={(r) => r.id}
-              emptyMessage="No audit entries match."
+              emptyContent={
+                <EmptyState
+                  emoji="🔍"
+                  title="No audit entries match"
+                  description={
+                    entity
+                      ? 'Try a different entity filter or view all entities.'
+                      : 'Admin changes will be recorded here.'
+                  }
+                />
+              }
             />
           )}
         </div>

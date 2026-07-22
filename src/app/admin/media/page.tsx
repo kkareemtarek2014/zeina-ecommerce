@@ -5,6 +5,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Upload } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
+  FilterBar,
   adminCatalogService,
 } from '@/features/admin';
 import type { AdminMediaDTO } from '@/shared/contracts/admin-catalog.contract';
@@ -222,11 +224,12 @@ export default function AdminMediaPage() {
         }
       />
 
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <div className="min-w-[12rem] flex-1">
+      <FilterBar
+        className="mt-6"
+        leftSlot={
           <SearchInput
             aria-label="Search media"
-            placeholder="Search filename…"
+            placeholder="Search filename..."
             value={qDraft}
             onChange={(e) => setQDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -236,22 +239,24 @@ export default function AdminMediaPage() {
               }
             }}
           />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setPage(1);
-            setQ(qDraft.trim());
-          }}
-        >
-          Search
-        </Button>
-      </div>
+        }
+        rightSlot={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setPage(1);
+              setQ(qDraft.trim());
+            }}
+          >
+            Search
+          </Button>
+        }
+      />
 
-      <div className="mt-6">
+      <div>
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load media.</p>
         ) : (
@@ -259,7 +264,21 @@ export default function AdminMediaPage() {
             columns={columns}
             rows={data?.items ?? []}
             rowKey={(r) => r.id}
-            emptyMessage="No media yet. Upload an image to get started."
+            emptyContent={
+              <EmptyState
+                emoji="🖼️"
+                title={
+                  q
+                    ? 'No media matches your search'
+                    : 'No media yet'
+                }
+                description={
+                  q
+                    ? 'Try a different filename or clear the search.'
+                    : 'Upload an image using the Upload button above.'
+                }
+              />
+            }
           />
         )}
       </div>

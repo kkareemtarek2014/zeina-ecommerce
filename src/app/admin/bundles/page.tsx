@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
   BundleForm,
   type BundleFormSubmit,
   useAdminBundles,
@@ -161,11 +162,22 @@ export default function AdminBundlesPage() {
 
       <div className="mt-6">
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load bundles.</p>
         ) : (
-          <DataTable columns={columns} rows={bundles} rowKey={(r) => r.id} />
+          <DataTable
+            columns={columns}
+            rows={bundles}
+            rowKey={(r) => r.id}
+            emptyContent={
+              <EmptyState
+                emoji="🎁"
+                title="No bundles yet"
+                description="Create buy-X-get-Y or fixed-price sets using New bundle above."
+              />
+            }
+          />
         )}
       </div>
 

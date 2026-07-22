@@ -12,6 +12,9 @@ export type ProductListFilters = {
   /** Storefront default is published. Admin may pass a status or `all`. */
   status?: 'published' | 'draft' | 'hidden' | 'archived' | 'all';
   inStock?: boolean;
+  /** Admin: available qty (stock − reserved) ≤ threshold. */
+  lowStock?: boolean;
+  lowStockThreshold?: number;
 };
 
 export async function findProducts(
@@ -169,19 +172,26 @@ export async function findProductsAdmin(
         or lower(${products.description}) like ${q})`,
     );
   }
+  if (filters.lowStock === true && filters.lowStockThreshold != null) {
+    conditions.push(
+      sql`(${products.stockQty} - ${products.reservedQty}) <= ${filters.lowStockThreshold}`,
+    );
+  }
 
   const where = conditions.length ? and(...conditions) : undefined;
   const [agg] = await db.select({ total: count() }).from(products).where(where);
   const total = Number(agg?.total ?? 0);
 
   const orderBy =
-    filters.sort === 'price-asc'
-      ? asc(products.basePrice)
-      : filters.sort === 'price-desc'
-        ? desc(products.basePrice)
-        : filters.sort === 'rating'
-          ? desc(products.rating)
-          : desc(products.createdAt);
+    filters.lowStock === true
+      ? asc(sql`(${products.stockQty} - ${products.reservedQty})`)
+      : filters.sort === 'price-asc'
+        ? asc(products.basePrice)
+        : filters.sort === 'price-desc'
+          ? desc(products.basePrice)
+          : filters.sort === 'rating'
+            ? desc(products.rating)
+            : desc(products.createdAt);
 
   const rows = await db
     .select()

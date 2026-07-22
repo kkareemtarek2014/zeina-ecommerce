@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -15,9 +15,13 @@ import {
 } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
+  FilterBar,
+  StatusPill,
   adminCatalogService,
   useAdminProducts,
   useAdminCategories,
+  useAdminSettings,
   useDeleteAdminProduct,
   useRestoreAdminProduct,
   useDuplicateAdminProduct,
@@ -42,18 +46,12 @@ import { AppError } from '@/shared/contracts/errors';
 
 const PAGE_SIZE = 20;
 
-const STATUS_LABELS: Record<AdminProductDTO['status'], string> = {
-  draft: 'Draft',
-  published: 'Published',
-  hidden: 'Hidden',
-  archived: 'Archived',
-};
-
 type BulkAction = AdminProductBulk['action'];
 
 export default function AdminProductsPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const qc = useQueryClient();
   const importRef = useRef<HTMLInputElement>(null);
   const [page, setPage] = useState(1);
@@ -73,6 +71,18 @@ export default function AdminProductsPage() {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
 
+  const lowStockOnly = searchParams.get('lowStock') === '1';
+
+  const setLowStockOnly = (next: boolean) => {
+    setPage(1);
+    setSelected(new Set());
+    const params = new URLSearchParams(searchParams.toString());
+    if (next) params.set('lowStock', '1');
+    else params.delete('lowStock');
+    const qs = params.toString();
+    router.replace(qs ? `/admin/products?${qs}` : '/admin/products');
+  };
+
   const params = useMemo(
     () => ({
       page,
@@ -81,18 +91,22 @@ export default function AdminProductsPage() {
       category: category || undefined,
       status: status || undefined,
       sort: 'newest',
+      lowStock: lowStockOnly || undefined,
     }),
-    [page, q, category, status],
+    [page, q, category, status, lowStockOnly],
   );
 
   const { data, isLoading, isError } = useAdminProducts(params);
+  const { data: settings } = useAdminSettings();
   const { data: categories = [] } = useAdminCategories();
   const deleteMutation = useDeleteAdminProduct();
   const restoreMutation = useRestoreAdminProduct();
   const duplicateMutation = useDuplicateAdminProduct();
   const bulkMutation = useBulkAdminProducts();
 
+  const threshold = settings?.lowStockThreshold ?? 5;
   const rows = data?.items ?? [];
+
   const allSelected =
     rows.length > 0 && rows.every((r) => selected.has(r.id));
 
@@ -205,21 +219,7 @@ export default function AdminProductsPage() {
     {
       key: 'status',
       header: 'Status',
-      cell: (row) => (
-        <span
-          className={
-            row.status === 'published'
-              ? 'text-status-success'
-              : row.status === 'archived'
-                ? 'text-text-muted'
-                : row.status === 'hidden'
-                  ? 'text-status-warning'
-                  : ''
-          }
-        >
-          {STATUS_LABELS[row.status]}
-        </span>
-      ),
+      cell: (row) => <StatusPill status={row.status} size="sm" />,
     },
     {
       key: 'base',
@@ -234,13 +234,25 @@ export default function AdminProductsPage() {
     {
       key: 'stock',
       header: 'Stock',
-      cell: (row) => (
-        <span className={row.inStock ? '' : 'text-status-error'}>
-          {row.availableQty ?? row.stockQty}
-          {row.reservedQty ? ` (${row.reservedQty} res.)` : ''}
-          {!row.inStock ? ' · OOS' : ''}
-        </span>
-      ),
+      cell: (row) => {
+        const qty = row.availableQty ?? row.stockQty;
+        const low = qty <= threshold;
+        return (
+          <span
+            className={
+              !row.inStock || qty <= 0
+                ? 'font-semibold text-status-error'
+                : low
+                  ? 'font-semibold text-status-warning'
+                  : ''
+            }
+          >
+            {qty}
+            {row.reservedQty ? ` (${row.reservedQty} res.)` : ''}
+            {!row.inStock ? ' · OOS' : ''}
+          </span>
+        );
+      },
     },
     {
       key: 'actions',
@@ -386,12 +398,12 @@ export default function AdminProductsPage() {
         }
       />
 
-
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <div className="min-w-[12rem] flex-1">
+      <FilterBar
+        className="mt-6"
+        leftSlot={
           <SearchInput
             aria-label="Search products"
-            placeholder="Search name, SKU, tags, description…"
+            placeholder="Search name, SKU, tags, description..."
             value={qDraft}
             onChange={(e) => setQDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -401,53 +413,66 @@ export default function AdminProductsPage() {
               }
             }}
           />
-        </div>
-        <Select
-          aria-label="Filter by category"
-          className="w-44"
-          value={category}
-          onChange={(e) => {
-            setPage(1);
-            setCategory(e.target.value);
-          }}
-        >
-          <option value="">All categories</option>
-          {categories.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-        <Select
-          aria-label="Filter by status"
-          className="w-40"
-          value={status}
-          onChange={(e) => {
-            setPage(1);
-            setStatus(e.target.value);
-          }}
-        >
-          <option value="">Active (excl. archived)</option>
-          <option value="all">All statuses</option>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-          <option value="hidden">Hidden</option>
-          <option value="archived">Archived</option>
-        </Select>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setPage(1);
-            setQ(qDraft.trim());
-          }}
-        >
-          Search
-        </Button>
-      </div>
+        }
+        rightSlot={
+          <>
+            <Select
+              aria-label="Filter by category"
+              className="w-44"
+              value={category}
+              onChange={(e) => {
+                setPage(1);
+                setCategory(e.target.value);
+              }}
+            >
+              <option value="">All categories</option>
+              {categories.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+            <Select
+              aria-label="Filter by status"
+              className="w-40"
+              value={status}
+              onChange={(e) => {
+                setPage(1);
+                setStatus(e.target.value);
+              }}
+            >
+              <option value="">Active (excl. archived)</option>
+              <option value="all">All statuses</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="hidden">Hidden</option>
+              <option value="archived">Archived</option>
+            </Select>
+            <label className="inline-flex items-center gap-2 rounded-(--radius) border border-border bg-surface px-3 py-2 text-xs font-medium text-text-secondary">
+              <input
+                type="checkbox"
+                className="size-4 accent-brand-primary"
+                checked={lowStockOnly}
+                onChange={(e) => setLowStockOnly(e.target.checked)}
+              />
+              Low stock
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setPage(1);
+                setQ(qDraft.trim());
+              }}
+            >
+              Search
+            </Button>
+          </>
+        }
+      />
 
       {selected.size > 0 ? (
-        <div className="mt-4 flex flex-wrap items-end gap-2 rounded-(--radius-lg) border border-border bg-brand-blush/30 px-3 py-3">
+        <div className="mb-4 flex flex-wrap items-end gap-2 rounded-(--radius-lg) border border-border bg-brand-blush/30 px-3 py-3">
           <p className="mr-2 text-sm text-text-secondary">
             {selected.size} selected
           </p>
@@ -481,7 +506,7 @@ export default function AdminProductsPage() {
             value={bulkCategorySlug}
             onChange={(e) => setBulkCategorySlug(e.target.value)}
           >
-            <option value="">Set category…</option>
+            <option value="">Set category...</option>
             {categories.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.name}
@@ -513,9 +538,9 @@ export default function AdminProductsPage() {
         </div>
       ) : null}
 
-      <div className="mt-6">
+      <div>
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load products.</p>
         ) : (
@@ -530,13 +555,44 @@ export default function AdminProductsPage() {
                   className="size-4 rounded border-border"
                 />
                 Select all on page
+                {lowStockOnly ? (
+                  <span className="text-xs text-text-muted">
+                    · low stock (threshold {threshold})
+                    {data ? ` · ${data.total} total` : ''}
+                  </span>
+                ) : null}
               </div>
             ) : null}
             <DataTable
               columns={columns}
               rows={rows}
               rowKey={(r) => r.id}
-              emptyMessage="No products match your filters."
+              emptyContent={
+                <EmptyState
+                  emoji={lowStockOnly ? '📦' : '🧸'}
+                  title={
+                    lowStockOnly
+                      ? 'Stock looks healthy'
+                      : 'No products match your filters'
+                  }
+                  description={
+                    lowStockOnly
+                      ? `Nothing is at or below the low-stock threshold (${threshold}).`
+                      : 'Try clearing filters or add a new product.'
+                  }
+                  action={
+                    lowStockOnly
+                      ? {
+                          label: 'Show all products',
+                          href: '/admin/products',
+                        }
+                      : {
+                          label: 'Add product',
+                          href: '/admin/products/new',
+                        }
+                  }
+                />
+              }
             />
           </>
         )}
@@ -595,7 +651,7 @@ export default function AdminProductsPage() {
         open={bulkConfirm != null}
         onClose={() => setBulkConfirm(null)}
         title={bulkLabel}
-        description={`Apply “${bulkConfirm?.action ?? ''}” to ${selected.size} product(s)?`}
+        description={`Apply "${bulkConfirm?.action ?? ''}" to ${selected.size} product(s)?`}
         confirmLabel="Confirm"
         danger={bulkConfirm?.action === 'archive'}
         isLoading={bulkMutation.isPending}

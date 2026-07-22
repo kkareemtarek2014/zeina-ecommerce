@@ -10,12 +10,13 @@ export interface DataTableColumn<T> {
   cell: (row: T) => ReactNode;
 }
 
-
 interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   rows: T[];
   rowKey: (row: T) => string;
   emptyMessage?: string;
+  /** Prefer over emptyMessage when you need rich empty UI (e.g. EmptyState). */
+  emptyContent?: ReactNode;
   className?: string;
 }
 
@@ -24,9 +25,11 @@ export function DataTable<T>({
   rows,
   rowKey,
   emptyMessage = 'No rows yet.',
+  emptyContent,
   className,
 }: DataTableProps<T>) {
   if (rows.length === 0) {
+    if (emptyContent) return <>{emptyContent}</>;
     return (
       <p className="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-text-secondary">
         {emptyMessage}
@@ -37,7 +40,7 @@ export function DataTable<T>({
   return (
     <div
       className={cn(
-        'overflow-x-auto rounded-lg border border-border bg-surface-raised',
+        'overflow-x-auto rounded-(--radius-lg) border border-border bg-surface-raised',
         className,
       )}
     >
@@ -49,7 +52,7 @@ export function DataTable<T>({
                 key={col.key}
                 scope="col"
                 className={cn(
-                  'px-4 py-3 font-medium whitespace-nowrap',
+                  'px-4 py-2.5 font-medium whitespace-nowrap',
                   col.className,
                 )}
               >
@@ -60,11 +63,14 @@ export function DataTable<T>({
         </thead>
         <tbody className="divide-y divide-border">
           {rows.map((row) => (
-            <tr key={rowKey(row)} className="hover:bg-brand-blush/20">
+            <tr key={rowKey(row)} className="hover:bg-brand-blush/40">
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={cn('px-4 py-3 text-text-primary', col.className)}
+                  className={cn(
+                    'px-4 py-2.5 text-text-primary',
+                    col.className,
+                  )}
                 >
                   {col.cell(row)}
                 </td>

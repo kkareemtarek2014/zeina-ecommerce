@@ -5,11 +5,14 @@ import Link from 'next/link';
 import { Eye } from 'lucide-react';
 import {
   AdminPageHeader,
-  ORDER_STATUS_LABELS,
+  EmptyState,
+  FilterBar,
+  StatusPill,
   useAdminShipments,
 } from '@/features/admin';
 import type { ShipmentDTO } from '@/shared/contracts/shipment.contract';
 import {
+  Button,
   DataTable,
   type DataTableColumn,
   Pagination,
@@ -66,7 +69,7 @@ export default function AdminShipmentsPage() {
             <span className="font-mono text-xs">{row.trackingNumber}</span>
           )
         ) : (
-          <span className="text-text-muted">—</span>
+          <span className="text-text-muted">-</span>
         ),
     },
     {
@@ -74,7 +77,7 @@ export default function AdminShipmentsPage() {
       header: 'Bosta state',
       cell: (row) => (
         <span className="text-sm text-text-secondary">
-          {row.bostaState ?? '—'}
+          {row.bostaState ?? '-'}
         </span>
       ),
     },
@@ -82,9 +85,11 @@ export default function AdminShipmentsPage() {
       key: 'mapped',
       header: 'Order status',
       cell: (row) =>
-        row.mappedStatus
-          ? ORDER_STATUS_LABELS[row.mappedStatus]
-          : '—',
+        row.mappedStatus ? (
+          <StatusPill status={row.mappedStatus} size="sm" />
+        ) : (
+          '-'
+        ),
     },
     {
       key: 'cod',
@@ -128,11 +133,12 @@ export default function AdminShipmentsPage() {
       />
 
 
-      <div className="mt-6 flex flex-wrap items-end gap-3">
-        <div className="min-w-[12rem] flex-1">
+      <FilterBar
+        className="mt-6"
+        leftSlot={
           <SearchInput
             aria-label="Search shipments"
-            placeholder="Search order or tracking…"
+            placeholder="Search order or tracking..."
             value={qDraft}
             onChange={(e) => setQDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -142,12 +148,24 @@ export default function AdminShipmentsPage() {
               }
             }}
           />
-        </div>
-      </div>
+        }
+        rightSlot={
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setPage(1);
+              setQ(qDraft.trim());
+            }}
+          >
+            Search
+          </Button>
+        }
+      />
 
-      <div className="mt-4">
+      <div>
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load shipments.</p>
         ) : (
@@ -156,7 +174,19 @@ export default function AdminShipmentsPage() {
               columns={columns}
               rows={data?.items ?? []}
               rowKey={(r) => r.id}
-              emptyMessage="No shipments yet."
+              emptyContent={
+                <EmptyState
+                  emoji="📦"
+                  title={
+                    q ? 'No shipments match your search' : 'No shipments yet'
+                  }
+                  description={
+                    q
+                      ? 'Try a different order ID or tracking number.'
+                      : 'Shipments appear when Bosta deliveries are linked to orders.'
+                  }
+                />
+              }
             />
             {data && data.total > PAGE_SIZE ? (
               <div className="mt-4">

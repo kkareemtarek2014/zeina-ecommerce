@@ -26,6 +26,7 @@ export type AdminProductListParams = {
   inStock?: boolean;
   status?: string;
   sort?: string;
+  lowStock?: boolean;
 };
 
 function productsQuery(params: AdminProductListParams): string {
@@ -38,6 +39,7 @@ function productsQuery(params: AdminProductListParams): string {
   if (params.inStock != null) sp.set('inStock', String(params.inStock));
   if (params.status) sp.set('status', params.status);
   if (params.sort) sp.set('sort', params.sort);
+  if (params.lowStock) sp.set('lowStock', '1');
   const q = sp.toString();
   return q ? `?${q}` : '';
 }

@@ -26,4 +26,5 @@ export {
   OrderPageSkeleton,
   ReviewsSkeleton,
   SearchResultsSkeleton,
+  AdminListSkeleton,
 } from './compositions';

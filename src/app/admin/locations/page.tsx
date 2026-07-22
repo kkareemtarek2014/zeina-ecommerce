@@ -6,6 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
+  FilterBar,
   useAdminGovernorates,
   useAdminShippingZones,
   useCreateGovernorate,
@@ -180,7 +182,7 @@ export default function AdminLocationsPage() {
       header: 'Bosta city',
       cell: (row) => (
         <span className="font-mono text-xs text-text-muted">
-          {row.bostaCityId ?? '—'}
+          {row.bostaCityId ?? '-'}
         </span>
       ),
     },
@@ -230,27 +232,30 @@ export default function AdminLocationsPage() {
         </TabsList>
 
         <TabsContent value="governorates">
-          <div className="mb-4 flex justify-end">
-            <Button
-              type="button"
-              onClick={() => {
-                createForm.reset({
-                  id: '',
-                  name: '',
-                  zone: 'near',
-                  bostaCityId: '',
-                  bostaZone: '',
-                  bostaDistrict: '',
-                });
-                setCreateOpen(true);
-              }}
-            >
-              <Plus className="size-4" />
-              Add governorate
-            </Button>
-          </div>
+          <FilterBar
+            className="mb-4"
+            rightSlot={
+              <Button
+                type="button"
+                onClick={() => {
+                  createForm.reset({
+                    id: '',
+                    name: '',
+                    zone: 'near',
+                    bostaCityId: '',
+                    bostaZone: '',
+                    bostaDistrict: '',
+                  });
+                  setCreateOpen(true);
+                }}
+              >
+                <Plus className="size-4" />
+                Add governorate
+              </Button>
+            }
+          />
           {isLoading ? (
-            <p className="text-sm text-text-muted">Loading…</p>
+            <p className="text-sm text-text-muted">Loading...</p>
           ) : isError ? (
             <p className="text-sm text-status-error">Failed to load governorates.</p>
           ) : (
@@ -258,14 +263,26 @@ export default function AdminLocationsPage() {
               columns={columns}
               rows={governorates}
               rowKey={(r) => r.id}
-              emptyMessage="No governorates yet."
+              emptyContent={
+                <EmptyState
+                  emoji="📍"
+                  title="No governorates yet"
+                  description="Add governorates so customers can select them at checkout."
+                />
+              }
             />
           )}
         </TabsContent>
 
         <TabsContent value="zones">
           {zonesLoading ? (
-            <p className="text-sm text-text-muted">Loading…</p>
+            <p className="text-sm text-text-muted">Loading...</p>
+          ) : zones.length === 0 ? (
+            <EmptyState
+              emoji="🚚"
+              title="No shipping zones configured"
+              description="Zone fees appear here once loaded from settings."
+            />
           ) : (
             <div className="space-y-3">
               {zones.map((z: ShippingZoneDTO) => (

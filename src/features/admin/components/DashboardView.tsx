@@ -9,6 +9,7 @@ import {
   Calendar,
   Hash,
   Percent,
+  Banknote,
 } from 'lucide-react';
 import { ActivityFeed } from './ActivityFeed';
 import {
@@ -20,6 +21,8 @@ import {
   EmptyState,
 } from './ui';
 import { RecentOrders } from './RecentOrders';
+import { OrderQuickActions } from './OrderQuickActions';
+import { ORDER_STATUS_LABELS } from './OrderStatusSelect';
 import { SalesChart } from './SalesChart';
 import { useAdminStats } from '../hooks/useAdminOps';
 import {
@@ -54,11 +57,12 @@ function DashboardSkeleton() {
         <Skeleton className="h-16 rounded-(--radius-lg)" />
         <Skeleton className="h-16 rounded-(--radius-lg)" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
           <Skeleton key={i} className="h-24 rounded-(--radius-lg)" />
         ))}
       </div>
+      <Skeleton className="h-48 rounded-(--radius-lg)" />
       <div className="grid gap-6 lg:grid-cols-2">
         <Skeleton className="h-72 rounded-(--radius-lg)" />
         <Skeleton className="h-72 rounded-(--radius-lg)" />
@@ -74,7 +78,7 @@ export function DashboardView() {
   const needsAction = data
     ? (data.ordersByStatus.placed ?? 0) + (data.ordersByStatus.confirmed ?? 0)
     : 0;
-  const lowStockCount = data?.lowStockProducts.length ?? 0;
+  const lowStockCount = data?.lowStockCount ?? data?.lowStockProducts.length ?? 0;
   const pendingPickup = data?.ordersByStatus.sourced ?? 0;
   const hasAttention =
     needsAction > 0 || lowStockCount > 0 || pendingPickup > 0;
@@ -98,7 +102,7 @@ export function DashboardView() {
         </p>
       ) : (
         <div className="mt-6 space-y-6 animate-fade-up">
-          {/* 4.1 Action strip */}
+          {/* Action strip */}
           {hasAttention ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {needsAction > 0 && (
@@ -147,19 +151,25 @@ export function DashboardView() {
             </SectionCard>
           )}
 
-          {/* 4.2 Stat chips — deltas omitted (stats DTO has no previous-period fields) */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Stat chips + deltas + COD */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <StatChip
               label="Today revenue"
               value={formatEGP(data.revenueToday)}
               icon={Calendar}
-              hint="UTC day"
+              hint="vs yesterday"
+              {...(data.revenueTodayDeltaPct != null
+                ? { delta: data.revenueTodayDeltaPct }
+                : {})}
             />
             <StatChip
               label="This month"
               value={formatEGP(data.revenueThisMonth)}
               icon={TrendingUp}
-              hint="UTC month"
+              hint="vs prior MTD"
+              {...(data.revenueThisMonthDeltaPct != null
+                ? { delta: data.revenueThisMonthDeltaPct }
+                : {})}
             />
             <StatChip
               label="Orders"
@@ -171,10 +181,65 @@ export function DashboardView() {
               label="Avg order"
               value={formatEGP(data.avgOrderValue)}
               icon={Percent}
+              hint="30d vs prior 30d"
+              {...(data.avgOrderValueDeltaPct != null
+                ? { delta: data.avgOrderValueDeltaPct }
+                : {})}
+            />
+            <StatChip
+              label="COD to collect"
+              value={formatEGP(data.codToCollect)}
+              icon={Banknote}
+              hint="Open unpaid COD"
             />
           </div>
 
-          {/* 4.3 Chart + status funnel */}
+          {/* Needs-action queue */}
+          {data.needsActionOrders.length > 0 ? (
+            <SectionCard
+              title="Needs action"
+              description="Oldest placed and confirmed orders — advance without leaving Today"
+              action={
+                <Link
+                  href="/admin/orders?status=placed"
+                  className="text-xs font-semibold text-brand-primary hover:underline"
+                >
+                  All waiting
+                </Link>
+              }
+            >
+              <ul className="divide-y divide-border">
+                {data.needsActionOrders.map((order) => (
+                  <li
+                    key={order.id}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <Link
+                        href={`/admin/orders/${encodeURIComponent(order.id)}`}
+                        className="font-medium text-text-primary hover:text-brand-primary"
+                      >
+                        {order.id}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-text-muted">
+                        {order.address.fullName} ·{' '}
+                        {ORDER_STATUS_LABELS[order.status]} ·{' '}
+                        {formatEGP(order.total)}
+                        {order.paymentMethod === 'cod' ? ' · COD' : ''}
+                      </p>
+                    </div>
+                    <OrderQuickActions
+                      orderId={order.id}
+                      status={order.status}
+                      size="sm"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </SectionCard>
+          ) : null}
+
+          {/* Chart + status funnel */}
           <div className="grid gap-6 lg:grid-cols-2">
             <SectionCard
               title="Sales (14 days)"

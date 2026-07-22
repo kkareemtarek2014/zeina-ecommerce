@@ -7,6 +7,12 @@ export interface PromoCode {
 
 export const PROMOS_DB: PromoCode[] = [
   {
+    // First-order offer — promoted on Instagram/TikTok, shown in WelcomeOfferPopup
+    code: 'FIRST20',
+    type: 'percentage',
+    value: 0.2, // 20% off
+  },
+  {
     code: 'WELCOME10',
     type: 'percentage',
     value: 0.1, // 10% off

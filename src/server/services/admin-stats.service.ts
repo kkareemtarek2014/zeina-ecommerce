@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, count, desc, eq, gte, ne, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, lt, ne, sql } from 'drizzle-orm';
 import type { AdminStatsDTO } from '@/shared/contracts/admin-stats.contract';
 import { ORDER_STATUS_FLOW } from '@/shared/contracts/admin-ops.contract';
 import type { OrderStatus } from '@/shared/contracts/admin-ops.contract';
@@ -95,6 +95,25 @@ function daysAgoUtc(days: number): Date {
   );
 }
 
+/** Percent change; null when both periods are empty. */
+function percentDelta(current: number, previous: number): number | null {
+  if (previous === 0) return current === 0 ? null : 100;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+const COD_OPEN_STATUSES = [
+  'placed',
+  'confirmed',
+  'sourced',
+  'shipped',
+  'out_for_delivery',
+] as const satisfies ReadonlyArray<OrderStatus>;
+
+const NEEDS_ACTION_STATUSES = [
+  'placed',
+  'confirmed',
+] as const satisfies ReadonlyArray<OrderStatus>;
+
 export async function getAdminStats(): Promise<AdminStatsDTO> {
   const db = await getRequestDb();
   const pricing = await getPricingSettings(db);
@@ -111,16 +130,48 @@ export async function getAdminStats(): Promise<AdminStatsDTO> {
     .where(nonCancelled);
 
   const todayStart = startOfUtcDay();
+  const yesterdayStart = daysAgoUtc(1);
   const [revenueTodayRow] = await db
     .select({ value: sql<number>`coalesce(sum(${orders.total}), 0)` })
     .from(orders)
     .where(and(nonCancelled, gte(orders.createdAt, todayStart)));
+
+  const [revenueYesterdayRow] = await db
+    .select({ value: sql<number>`coalesce(sum(${orders.total}), 0)` })
+    .from(orders)
+    .where(
+      and(
+        nonCancelled,
+        gte(orders.createdAt, yesterdayStart),
+        lt(orders.createdAt, todayStart),
+      ),
+    );
 
   const monthStart = startOfUtcMonth();
   const [revenueMonthRow] = await db
     .select({ value: sql<number>`coalesce(sum(${orders.total}), 0)` })
     .from(orders)
     .where(and(nonCancelled, gte(orders.createdAt, monthStart)));
+
+  // Previous calendar month-to-date (same UTC day-of-month window).
+  const now = new Date();
+  const dayOfMonth = now.getUTCDate();
+  const prevMonthStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+  );
+  const prevMonthMtdEnd = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, dayOfMonth + 1),
+  );
+  const [revenuePrevMonthMtdRow] = await db
+    .select({ value: sql<number>`coalesce(sum(${orders.total}), 0)` })
+    .from(orders)
+    .where(
+      and(
+        nonCancelled,
+        gte(orders.createdAt, prevMonthStart),
+        lt(orders.createdAt, prevMonthMtdEnd),
+      ),
+    );
 
   const [avgRow] = await db
     .select({
@@ -131,6 +182,48 @@ export async function getAdminStats(): Promise<AdminStatsDTO> {
     .where(nonCancelled);
   const avgOrderValue =
     (avgRow?.n ?? 0) > 0 ? Math.round(Number(avgRow?.value ?? 0)) : 0;
+
+  const last30Start = daysAgoUtc(30);
+  const prior30Start = daysAgoUtc(60);
+  const [avgLast30Row] = await db
+    .select({
+      value: sql<number>`coalesce(avg(${orders.total}), 0)`,
+      n: count(),
+    })
+    .from(orders)
+    .where(and(nonCancelled, gte(orders.createdAt, last30Start)));
+  const [avgPrior30Row] = await db
+    .select({
+      value: sql<number>`coalesce(avg(${orders.total}), 0)`,
+      n: count(),
+    })
+    .from(orders)
+    .where(
+      and(
+        nonCancelled,
+        gte(orders.createdAt, prior30Start),
+        lt(orders.createdAt, last30Start),
+      ),
+    );
+  const avgLast30 =
+    (avgLast30Row?.n ?? 0) > 0
+      ? Math.round(Number(avgLast30Row?.value ?? 0))
+      : 0;
+  const avgPrior30 =
+    (avgPrior30Row?.n ?? 0) > 0
+      ? Math.round(Number(avgPrior30Row?.value ?? 0))
+      : 0;
+
+  const [codToCollectRow] = await db
+    .select({ value: sql<number>`coalesce(sum(${orders.total}), 0)` })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.paymentMethod, 'cod'),
+        eq(orders.paymentStatus, 'pending'),
+        inArray(orders.status, [...COD_OPEN_STATUSES]),
+      ),
+    );
 
   const [newCustomersRow] = await db
     .select({ value: count() })
@@ -212,6 +305,21 @@ export async function getAdminStats(): Promise<AdminStatsDTO> {
     if (found) recentOrders.push(toAdminOrderDTO(found.order, found.items));
   }
 
+  const needsActionRows = await db
+    .select()
+    .from(orders)
+    .where(inArray(orders.status, [...NEEDS_ACTION_STATUSES]))
+    .orderBy(asc(orders.createdAt))
+    .limit(5);
+
+  const needsActionOrders = [];
+  for (const order of needsActionRows) {
+    const found = await ordersRepo.findOrderById(db, order.id);
+    if (found) {
+      needsActionOrders.push(toAdminOrderDTO(found.order, found.items));
+    }
+  }
+
   const latestProductRows = await db
     .select()
     .from(products)
@@ -220,20 +328,41 @@ export async function getAdminStats(): Promise<AdminStatsDTO> {
 
   const threshold = await getLowStockThreshold(db);
   const lowStockRows = await findLowStockProducts(db, threshold, 8);
+  const [lowStockCountRow] = await db
+    .select({ value: count() })
+    .from(products)
+    .where(
+      sql`(${products.stockQty} - ${products.reservedQty}) <= ${threshold}
+          and ${products.status} != 'archived'`,
+    );
   const recentActivity = await listAdminActivity(8);
   const mostViewedRows = await findMostViewed(db, 5);
 
+  const revenueToday = Number(revenueTodayRow?.value ?? 0);
+  const revenueYesterday = Number(revenueYesterdayRow?.value ?? 0);
+  const revenueThisMonth = Number(revenueMonthRow?.value ?? 0);
+  const revenuePrevMonthMtd = Number(revenuePrevMonthMtdRow?.value ?? 0);
+
   return {
     revenueTotal: Number(revenueRow?.value ?? 0),
-    revenueToday: Number(revenueTodayRow?.value ?? 0),
-    revenueThisMonth: Number(revenueMonthRow?.value ?? 0),
+    revenueToday,
+    revenueThisMonth,
     avgOrderValue,
+    revenueTodayDeltaPct: percentDelta(revenueToday, revenueYesterday),
+    revenueThisMonthDeltaPct: percentDelta(
+      revenueThisMonth,
+      revenuePrevMonthMtd,
+    ),
+    avgOrderValueDeltaPct: percentDelta(avgLast30, avgPrior30),
+    codToCollect: Number(codToCollectRow?.value ?? 0),
+    lowStockCount: lowStockCountRow?.value ?? 0,
     ordersCount: ordersCountRow?.value ?? 0,
     productsCount: productsCountRow?.value ?? 0,
     usersCount: usersCountRow?.value ?? 0,
     newCustomers: newCustomersRow?.value ?? 0,
     ordersByStatus,
     recentOrders,
+    needsActionOrders,
     latestProducts: latestProductRows.map((r) => toAdminProduct(r, pricing)),
     lowStockProducts: lowStockRows.map((r) => toAdminProduct(r, pricing)),
     bestSellers: bestSellerRows.map((r) => ({

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   AdminPageHeader,
+  EmptyState,
   useAdminCategories,
   useDeleteAdminCategory,
 } from '@/features/admin';
@@ -103,7 +104,7 @@ export default function AdminCategoriesPage() {
 
       <div className="mt-6">
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading…</p>
+          <p className="text-sm text-text-muted">Loading...</p>
         ) : isError ? (
           <p className="text-sm text-status-error">Failed to load categories.</p>
         ) : (
@@ -111,7 +112,17 @@ export default function AdminCategoriesPage() {
             columns={columns}
             rows={categories}
             rowKey={(r) => r.slug}
-            emptyMessage="No categories yet."
+            emptyContent={
+              <EmptyState
+                emoji="📂"
+                title="No categories yet"
+                description="Add shop sections and SEO copy for your catalog."
+                action={{
+                  label: 'Add category',
+                  href: '/admin/categories/new',
+                }}
+              />
+            }
           />
         )}
       </div>
