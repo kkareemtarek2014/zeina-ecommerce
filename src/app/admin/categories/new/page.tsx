@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   CategoryForm,
   useCreateAdminCategory,
 } from '@/features/admin';
@@ -16,19 +16,15 @@ export default function AdminNewCategoryPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="New category"
+        subtitle="Slug is permanent. Upload an image after saving."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Categories', href: '/admin/categories' },
           { label: 'New' },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        New category
-      </h1>
-      <p className="mt-1 mb-6 text-sm text-text-secondary">
-        Slug is permanent. Upload an image after saving.
-      </p>
       <CategoryForm
         isLoading={createMutation.isPending}
         onSubmit={async (values) => {

@@ -4,7 +4,7 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   ProductForm,
   StockPanel,
   useAdminCategories,
@@ -30,49 +30,39 @@ export default function AdminEditProductPage({
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Edit product"
+        subtitle="Cost stays admin-only; sell price is derived from margin."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Products', href: '/admin/products' },
           { label: product?.name ?? 'Edit' },
         ]}
-      />
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            Edit product
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Cost stays admin-only; sell price is derived from margin.
-          </p>
-        </div>
-        {product ? (
-          <Button
-            type="button"
-            variant="outline"
-            isLoading={duplicateMutation.isPending}
-            onClick={() => {
-              duplicateMutation.mutate(id, {
-                onSuccess: (created) => {
-                  toast('Draft duplicate created', 'success');
-                  router.push(`/admin/products/${created.id}/edit`);
-                },
-                onError: (err) => {
+        action={
+          product ? (
+            <Button
+              type="button"
+              variant="outline"
+              isLoading={duplicateMutation.isPending}
+              onClick={async () => {
+                try {
+                  const dup = await duplicateMutation.mutateAsync(product.id);
+                  toast('Product duplicated as draft', 'success');
+                  router.push(`/admin/products/${dup.id}/edit`);
+                } catch (err) {
                   toast(
-                    err instanceof AppError
-                      ? err.message
-                      : 'Could not duplicate',
+                    err instanceof AppError ? err.message : 'Duplicate failed',
                     'error',
                   );
-                },
-              });
-            }}
-          >
-            <Copy className="size-4" />
-            Duplicate
-          </Button>
-        ) : null}
-      </div>
+                }
+              }}
+            >
+              <Copy className="size-4" />
+              Duplicate product
+            </Button>
+          ) : null
+        }
+      />
 
       {isLoading ? (
         <p className="text-sm text-text-muted">Loading…</p>

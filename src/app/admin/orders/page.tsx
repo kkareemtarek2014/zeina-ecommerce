@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Eye } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   ORDER_STATUS_LABELS,
   useAdminOrders,
 } from '@/features/admin';
@@ -129,15 +129,12 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Orders' }]}
+      <AdminPageHeader
+        title="Orders"
+        subtitle="View orders and advance status. Created from checkout only."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Orders' }]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        Orders
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        View orders and advance status. Created from checkout only.
-      </p>
+
 
       <div className="mt-6 flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">

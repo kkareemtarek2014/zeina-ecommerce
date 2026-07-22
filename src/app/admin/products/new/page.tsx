@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   ProductForm,
   useAdminCategories,
   useCreateAdminProduct,
@@ -18,19 +18,15 @@ export default function AdminNewProductPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="New product"
+        subtitle="Creates as draft. Publish when ready. Upload images after saving."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Products', href: '/admin/products' },
           { label: 'New' },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        New product
-      </h1>
-      <p className="mt-1 mb-6 text-sm text-text-secondary">
-        Creates as draft. Publish when ready. Upload images after saving.
-      </p>
 
       {isLoading ? (
         <p className="text-sm text-text-muted">Loading categories…</p>

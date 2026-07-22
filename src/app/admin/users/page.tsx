@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Eye, Trash2 } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   useAdminUsers,
   useDeleteAdminUser,
 } from '@/features/admin';
@@ -104,15 +104,12 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Users' }]}
+      <AdminPageHeader
+        title="Users"
+        subtitle="Manage accounts and roles. Cannot remove yourself or the last admin."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Users' }]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        Users
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Manage accounts and roles. Cannot remove yourself or the last admin.
-      </p>
+
 
       <div className="mt-6 flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   useAdminCategories,
 } from '@/features/admin';
 import { Button, Input, Select, useToast } from '@/shared/components/ui';
@@ -32,26 +32,18 @@ export default function AdminTemuImportPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Import from Alibaba / Temu"
+        subtitle="Paste a product URL to create a draft for review."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Products', href: '/admin/products' },
-          { label: 'Temu import' },
+          { label: 'Import' },
         ]}
       />
-      <h1 className="mb-2 font-(family-name:--font-display) text-2xl font-semibold">
-        Import from Temu
-      </h1>
-      <p className="mb-6 max-w-xl text-sm text-text-secondary">
-        Paste a Temu product URL to create a <strong>draft</strong> for review.
-        Images land in R2; publish only after you localize and set stock.
-        Requires <code className="text-xs">SCRAPER_API_KEY</code> (use{' '}
-        <code className="text-xs">mock</code> locally). Stop/start the scraper
-        from the dashboard kill switch.
-      </p>
 
       <form
-        className="max-w-xl space-y-4"
+        className="max-w-xl space-y-4 mt-6"
         onSubmit={(e) => {
           e.preventDefault();
           void importMutation
@@ -73,10 +65,10 @@ export default function AdminTemuImportPage() {
         }}
       >
         <Input
-          label="Temu product URL"
+          label="Product URL"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://www.temu.com/..."
+          placeholder="https://..."
           required
         />
         <Select

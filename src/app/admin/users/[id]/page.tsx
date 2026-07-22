@@ -4,7 +4,7 @@ import { use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   ORDER_STATUS_LABELS,
   UserForm,
   useAdminUser,
@@ -37,31 +37,28 @@ export default function AdminUserDetailPage({
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title={user?.name ?? 'User'}
+        subtitle={user?.email}
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Users', href: '/admin/users' },
           { label: user?.name ?? 'User' },
         ]}
+        action={
+          user && user.id !== me?.id ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-status-error text-status-error hover:bg-status-error/10"
+              onClick={() => setConfirmDelete(true)}
+            >
+              Delete user
+            </Button>
+          ) : null
+        }
       />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            {user?.name ?? 'User'}
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">{user?.email}</p>
-        </div>
-        {user && user.id !== me?.id ? (
-          <Button
-            type="button"
-            variant="outline"
-            className="border-status-error text-status-error hover:bg-status-error/10"
-            onClick={() => setConfirmDelete(true)}
-          >
-            Delete user
-          </Button>
-        ) : null}
-      </div>
+
 
       {isLoading ? (
         <p className="mt-6 text-sm text-text-muted">Loading…</p>

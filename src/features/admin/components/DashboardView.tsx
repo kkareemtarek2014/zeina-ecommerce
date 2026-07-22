@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ActivityFeed } from './ActivityFeed';
-import { AdminBreadcrumbs } from './AdminShell';
+import { AdminPageHeader } from './ui';
 import { LatestProducts } from './LatestProducts';
 import { ORDER_STATUS_LABELS } from './OrderStatusSelect';
 import { RecentOrders } from './RecentOrders';
@@ -23,15 +23,12 @@ export function DashboardView() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Dashboard' }]}
+      <AdminPageHeader
+        title="Dashboard"
+        subtitle="Store overview — revenue, orders, and recent activity."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Dashboard' }]}
       />
-      <h1 className="font-display text-3xl font-semibold text-text-primary">
-        Dashboard
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Store overview — revenue, orders, and recent activity.
-      </p>
+
 
       <div className="mt-6">
         <TemuScraperToggle />

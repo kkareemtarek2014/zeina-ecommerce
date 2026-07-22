@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Upload } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   adminCatalogService,
 } from '@/features/admin';
 import type { AdminMediaDTO } from '@/shared/contracts/admin-catalog.contract';
@@ -177,55 +177,50 @@ export default function AdminMediaPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Media"
+        subtitle="JPEG / PNG / WebP are stored as optimized WebP. SVG passes through. GIF and HEIC are rejected."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Media' },
         ]}
+        action={
+          <>
+            <Button
+              type="button"
+              isLoading={uploading}
+              onClick={() => fileRef.current?.click()}
+            >
+              <Upload className="size-4" />
+              Upload
+            </Button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setUploading(true);
+                try {
+                  await adminCatalogService.uploadMedia(file);
+                  toast('Image uploaded', 'success');
+                  void qc.invalidateQueries({ queryKey: ['admin', 'media'] });
+                } catch (err) {
+                  toast(
+                    err instanceof Error ? err.message : 'Upload failed',
+                    'error',
+                  );
+                } finally {
+                  setUploading(false);
+                  e.target.value = '';
+                }
+              }}
+            />
+          </>
+        }
       />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            Media
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            JPEG / PNG / WebP are stored as optimized WebP. SVG passes through.
-            GIF and HEIC are rejected.
-          </p>
-        </div>
-        <Button
-          type="button"
-          isLoading={uploading}
-          onClick={() => fileRef.current?.click()}
-        >
-          <Upload className="size-4" />
-          Upload
-        </Button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/svg+xml"
-          className="hidden"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setUploading(true);
-            try {
-              await adminCatalogService.uploadMedia(file);
-              toast('Image uploaded', 'success');
-              void qc.invalidateQueries({ queryKey: ['admin', 'media'] });
-            } catch (err) {
-              toast(
-                err instanceof AppError ? err.message : 'Upload failed',
-                'error',
-              );
-            } finally {
-              setUploading(false);
-              if (fileRef.current) fileRef.current.value = '';
-            }
-          }}
-        />
-      </div>
 
       <div className="mt-6 flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">

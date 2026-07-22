@@ -29,6 +29,14 @@ export function useAdminStats() {
   });
 }
 
+export function useOrdersNeedingAction(): number {
+  const { data } = useAdminStats();
+  if (!data?.ordersByStatus) return 0;
+  const placed = data.ordersByStatus.placed ?? 0;
+  const confirmed = data.ordersByStatus.confirmed ?? 0;
+  return placed + confirmed;
+}
+
 export function useAdminOrders(params: AdminOrderListParams) {
   return useQuery({
     queryKey: adminOpsKeys.orders(params),

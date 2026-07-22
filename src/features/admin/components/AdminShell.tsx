@@ -3,27 +3,18 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  LayoutDashboard,
-  Package,
-  FolderTree,
-  ShoppingBag,
-  Truck,
-  Users,
-  MapPin,
-  Ticket,
-  Settings,
+  ChevronDown,
+  ChevronRight,
   Menu,
   X,
   LogOut,
-  Activity,
-  ImageIcon,
-  LayoutTemplate,
-  Download,
-  Layers,
-  Clock,
   Globe,
+  LayoutDashboard,
+  ShoppingBag,
+  Package,
+  Grid,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { cn } from '@/shared/utils/cn';
 import { useAuthStore } from '@/features/auth/store/auth.store';
 import { useLogout } from '@/features/auth/hooks/useAuth';
@@ -32,108 +23,11 @@ import { NotificationBell } from './NotificationBell';
 import {
   hasPermission,
   ROLE_LABELS,
-  type Permission,
 } from '@/shared/rbac';
-
-const NAV: ReadonlyArray<{
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  exact?: boolean;
-  permission: Permission;
-}> = [
-  {
-    href: '/admin',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    exact: true,
-    permission: 'dashboard:read',
-  },
-  {
-    href: '/admin/products',
-    label: 'Products',
-    icon: Package,
-    permission: 'products:read',
-  },
-  {
-    href: '/admin/import',
-    label: 'Temu import',
-    icon: Download,
-    permission: 'products:write',
-  },
-  {
-    href: '/admin/media',
-    label: 'Media',
-    icon: ImageIcon,
-    permission: 'media:write',
-  },
-  {
-    href: '/admin/categories',
-    label: 'Categories',
-    icon: FolderTree,
-    permission: 'categories:write',
-  },
-  {
-    href: '/admin/orders',
-    label: 'Orders',
-    icon: ShoppingBag,
-    permission: 'orders:read',
-  },
-  {
-    href: '/admin/shipments',
-    label: 'Shipments',
-    icon: Truck,
-    permission: 'orders:read',
-  },
-  {
-    href: '/admin/users',
-    label: 'Users',
-    icon: Users,
-    permission: 'users:read',
-  },
-  {
-    href: '/admin/locations',
-    label: 'Locations',
-    icon: MapPin,
-    permission: 'locations:write',
-  },
-  {
-    href: '/admin/promos',
-    label: 'Promos',
-    icon: Ticket,
-    permission: 'promos:write',
-  },
-  {
-    href: '/admin/bundles',
-    label: 'Bundles',
-    icon: Layers,
-    permission: 'promos:write',
-  },
-  {
-    href: '/admin/homepage',
-    label: 'Homepage',
-    icon: LayoutTemplate,
-    permission: 'homepage:write',
-  },
-  {
-    href: '/admin/activity',
-    label: 'Activity',
-    icon: Activity,
-    permission: 'activity:read',
-  },
-  {
-    href: '/admin/cron',
-    label: 'Cron jobs',
-    icon: Clock,
-    permission: 'settings:write',
-  },
-  {
-    href: '/admin/settings',
-    label: 'Settings',
-    icon: Settings,
-    permission: 'settings:write',
-  },
-];
+import { useHydrated } from '@/shared/hooks/useHydrated';
+import { isFeatureEnabled, type FeatureKey } from '@/config/features.config';
+import { NAV_GROUPS } from '../config/nav.config';
+import { useOrdersNeedingAction } from '../hooks/useAdminOps';
 
 function navActive(pathname: string, href: string, exact?: boolean): boolean {
   if (exact) return pathname === href;
@@ -157,13 +51,15 @@ function isCmsAdminRoute(pathname: string | null): boolean {
 function CmsModeBadge() {
   return (
     <div
-      className="pointer-events-none fixed bottom-4 right-4 z-40 rounded-md border border-amber-700/40 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-900 shadow-sm"
+      className="pointer-events-none fixed bottom-16 lg:bottom-4 right-4 z-40 rounded-md border border-amber-700/40 bg-amber-50/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-900 shadow-sm"
       aria-hidden
     >
       CMS · Content Editor
     </div>
   );
 }
+
+const STORAGE_KEY = 'sqoosh-admin-nav';
 
 export function AdminSidebar({
   open,
@@ -174,30 +70,54 @@ export function AdminSidebar({
 }) {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
-  const items = NAV.filter(
-    (item) => user && hasPermission(user.role, item.permission),
-  );
+  const isHydrated = useHydrated();
+  const ordersCount = useOrdersNeedingAction();
+
+  // Store collapsed group IDs initialized from localStorage
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? (JSON.parse(saved) as Record<string, boolean>) : {};
+    } catch {
+      return {};
+    }
+  });
+
+
+  const toggleGroup = (groupId: string) => {
+    const updated = {
+      ...collapsedGroups,
+      [groupId]: !collapsedGroups[groupId],
+    };
+    setCollapsedGroups(updated);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore write errors
+    }
+  };
 
   return (
     <>
-      {open ? (
+      {open && (
         <button
           type="button"
           aria-label="Close sidebar"
-          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden cursor-pointer"
           onClick={onClose}
         />
-      ) : null}
+      )}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-surface-raised transition-transform lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-admin-sidebar text-admin-sidebar-text transition-transform lg:static lg:translate-x-0 border-r border-white/5',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="flex h-14 items-center justify-between border-b border-border px-4">
+        <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
           <Link
             href="/admin"
-            className="font-display text-xl font-bold italic text-brand-primary"
+            className="font-display text-xl font-bold italic text-brand-primary hover:opacity-90 transition-opacity"
             onClick={onClose}
           >
             Sqoosh Admin
@@ -205,32 +125,79 @@ export function AdminSidebar({
           <button
             type="button"
             aria-label="Close menu"
-            className="text-text-muted lg:hidden"
+            className="text-admin-sidebar-text hover:text-white lg:hidden cursor-pointer"
             onClick={onClose}
           >
             <X className="size-5" />
           </button>
         </div>
-        <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Admin">
-          {items.map((item) => {
-            const Icon = item.icon;
-            const active = navActive(pathname, item.href, item.exact);
+
+        <nav className="flex-1 space-y-4 overflow-y-auto p-3 custom-scrollbar" aria-label="Admin">
+          {NAV_GROUPS.map((group) => {
+            const filteredItems = group.items.filter((item) => {
+              if (item.featureFlag && !isFeatureEnabled(item.featureFlag as FeatureKey)) {
+                return false;
+              }
+              return user && hasPermission(user.role, item.permission);
+            });
+
+            if (filteredItems.length === 0) return null;
+            const isCollapsed = isHydrated && Boolean(collapsedGroups[group.id]);
+
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'flex items-center gap-3 rounded-(--radius) px-3 py-2.5 text-sm transition-colors',
-                  active
-                    ? 'bg-brand-blush text-brand-primary font-medium'
-                    : 'text-text-secondary hover:bg-brand-blush/50 hover:text-text-primary',
+              <div key={group.id} className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.id)}
+                  className="flex w-full items-center justify-between px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-admin-sidebar-text/60 hover:text-admin-sidebar-text transition-colors cursor-pointer"
+                  aria-expanded={!isCollapsed}
+                  aria-controls={`nav-group-${group.id}`}
+                >
+                  <span>{group.label}</span>
+                  {isCollapsed ? (
+                    <ChevronRight className="size-3" />
+                  ) : (
+                    <ChevronDown className="size-3" />
+                  )}
+                </button>
+
+                {!isCollapsed && (
+                  <div id={`nav-group-${group.id}`} className="space-y-0.5">
+                    {filteredItems.map((item) => {
+                      const Icon = item.icon;
+                      const active = navActive(pathname, item.href, item.exact);
+                      const isOrdersItem = item.badgeKey === 'orders';
+                      const badgeValue = isOrdersItem ? ordersCount : 0;
+
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={onClose}
+                          aria-current={active ? 'page' : undefined}
+                          className={cn(
+                            'flex items-center gap-3 rounded-(--radius) px-3 py-2 text-sm transition-colors font-medium',
+                            active
+                              ? 'bg-admin-sidebar-active text-white shadow-xs'
+                              : 'text-admin-sidebar-text hover:bg-white/5 hover:text-white',
+                          )}
+                        >
+                          <Icon className="size-4 shrink-0" />
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {badgeValue > 0 && (
+                            <span
+                              className="inline-flex items-center justify-center rounded-full bg-brand-accent px-1.5 py-0.5 text-[11px] font-bold text-white leading-none animate-pop"
+                              title={`${badgeValue} orders need action`}
+                            >
+                              {badgeValue}
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
-              >
-                <Icon className="size-4 shrink-0" />
-                <span className="flex-1">{item.label}</span>
-              </Link>
+              </div>
             );
           })}
         </nav>
@@ -249,7 +216,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
       <button
         type="button"
         aria-label="Open menu"
-        className="text-text-primary lg:hidden"
+        className="text-text-primary lg:hidden cursor-pointer"
         onClick={onMenuClick}
       >
         <Menu className="size-5" />
@@ -269,7 +236,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
         <NotificationBell />
       ) : null}
       <div className="hidden text-right sm:block">
-        <p className="text-sm text-text-secondary">
+        <p className="text-sm font-medium text-text-primary">
           {user?.name ?? user?.email}
         </p>
         {user ? (
@@ -297,30 +264,55 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   );
 }
 
-export function AdminBreadcrumbs({
-  items,
-}: {
-  items: { label: string; href?: string }[];
-}) {
+export function MobileBottomNav({ onOpenMore }: { onOpenMore: () => void }) {
+  const pathname = usePathname();
+  const ordersCount = useOrdersNeedingAction();
+
+  const mobileTabs = [
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+    { href: '/admin/orders', label: 'Orders', icon: ShoppingBag, badge: ordersCount },
+    { href: '/admin/products', label: 'Products', icon: Package },
+  ];
+
   return (
-    <nav aria-label="Breadcrumb" className="mb-4 text-sm text-text-muted">
-      <ol className="flex flex-wrap items-center gap-1.5">
-        {items.map((item, i) => (
-          <li key={`${item.label}-${i}`} className="flex items-center gap-1.5">
-            {i > 0 ? <span aria-hidden>/</span> : null}
-            {item.href ? (
-              <Link
-                href={item.href}
-                className="hover:text-brand-primary transition-colors"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-text-primary">{item.label}</span>
+    <nav
+      aria-label="Mobile Bottom Admin Nav"
+      className="fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-white/10 bg-admin-sidebar px-2 text-admin-sidebar-text lg:hidden"
+    >
+      {mobileTabs.map((tab) => {
+        const Icon = tab.icon;
+        const active = navActive(pathname, tab.href, tab.exact);
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              'relative flex flex-col items-center justify-center gap-0.5 px-3 py-1 text-[11px] font-medium transition-colors',
+              active ? 'text-white' : 'text-admin-sidebar-text hover:text-white'
             )}
-          </li>
-        ))}
-      </ol>
+          >
+            <div className="relative">
+              <Icon className="size-5" />
+              {Boolean(tab.badge && tab.badge > 0) && (
+                <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-[9px] font-bold text-white">
+                  {tab.badge}
+                </span>
+              )}
+            </div>
+            <span>{tab.label}</span>
+          </Link>
+        );
+      })}
+      <button
+        type="button"
+        onClick={onOpenMore}
+        aria-label="Open full admin menu"
+        className="flex flex-col items-center justify-center gap-0.5 px-3 py-1 text-[11px] font-medium text-admin-sidebar-text hover:text-white cursor-pointer"
+      >
+        <Grid className="size-5" />
+        <span>More</span>
+      </button>
     </nav>
   );
 }
@@ -329,6 +321,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const bare = pathname === '/admin/login' || pathname === '/admin/forbidden';
+  const ordersCount = useOrdersNeedingAction();
+
+  // Document title prefix (n) on /admin when orders need action
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (ordersCount > 0) {
+      document.title = `(${ordersCount}) Sqoosh Admin`;
+    } else {
+      document.title = 'Sqoosh Admin';
+    }
+  }, [ordersCount]);
 
   if (bare) {
     return <>{children}</>;
@@ -337,10 +340,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-surface">
       <AdminSidebar open={open} onClose={() => setOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col pb-14 lg:pb-0">
         <AdminTopbar onMenuClick={() => setOpen(true)} />
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>
+      <MobileBottomNav onOpenMore={() => setOpen(true)} />
       {isCmsAdminRoute(pathname) ? <CmsModeBadge /> : null}
     </div>
   );

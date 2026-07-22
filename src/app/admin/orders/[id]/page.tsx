@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import Link from 'next/link';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   ORDER_STATUS_LABELS,
   OrderStatusSelect,
   useAdminOrder,
@@ -43,16 +43,16 @@ export default function AdminOrderDetailPage({
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Order detail"
+        subtitle={order ? `Order #${order.id} · Created ${new Date(order.createdAt).toLocaleDateString()}` : undefined}
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Orders', href: '/admin/orders' },
           { label: order?.id ?? id },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        Order detail
-      </h1>
+
 
       {isLoading ? (
         <p className="mt-6 text-sm text-text-muted">Loading…</p>

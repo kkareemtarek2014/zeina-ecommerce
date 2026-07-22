@@ -3,7 +3,7 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   CategoryForm,
   useAdminCategories,
   useUpdateAdminCategory,
@@ -25,19 +25,15 @@ export default function AdminEditCategoryPage({
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Edit category"
+        subtitle="Slug cannot change. Image uploads go to R2."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Categories', href: '/admin/categories' },
           { label: category?.name ?? slug },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        Edit category
-      </h1>
-      <p className="mt-1 mb-6 text-sm text-text-secondary">
-        Slug cannot change. Image uploads go to R2.
-      </p>
 
       {isLoading ? (
         <p className="text-sm text-text-muted">Loading…</p>

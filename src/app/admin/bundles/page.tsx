@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   BundleForm,
   type BundleFormSubmit,
   useAdminBundles,
@@ -147,23 +147,17 @@ export default function AdminBundlesPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Bundles' }]}
+      <AdminPageHeader
+        title="Bundles"
+        subtitle="Buy-X-Get-Y and fixed-price sets. Discount applies server-side at checkout when the bundles flag is on."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Bundles' }]}
+        action={
+          <Button type="button" onClick={() => setCreateOpen(true)}>
+            <Plus className="size-4" /> New bundle
+          </Button>
+        }
       />
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            Bundles
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Buy-X-Get-Y and fixed-price sets. Discount applies server-side at
-            checkout when the bundles flag is on.
-          </p>
-        </div>
-        <Button type="button" onClick={() => setCreateOpen(true)}>
-          <Plus className="size-4" /> New bundle
-        </Button>
-      </div>
+
 
       <div className="mt-6">
         {isLoading ? (

@@ -14,7 +14,7 @@ import {
   Upload,
 } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   adminCatalogService,
   useAdminProducts,
   useAdminCategories,
@@ -333,64 +333,59 @@ export default function AdminProductsPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Products"
+        subtitle="Manage catalog, status, SEO, and images."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Products' },
         ]}
-      />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            Products
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Manage catalog, status, SEO, and images.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            isLoading={exporting}
-            onClick={() => void handleExport()}
-          >
-            <Download className="size-4" />
-            Export CSV
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            isLoading={importing}
-            onClick={() => importRef.current?.click()}
-          >
-            <Upload className="size-4" />
-            Import CSV
-          </Button>
-          <input
-            ref={importRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void handleImport(file);
-            }}
-          />
-          <Link href="/admin/import">
-            <Button type="button" variant="outline">
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              isLoading={exporting}
+              onClick={() => void handleExport()}
+            >
               <Download className="size-4" />
-              Temu import
+              Export CSV
             </Button>
-          </Link>
-          <Link href="/admin/products/new">
-            <Button type="button">
-              <Plus className="size-4" />
-              Add product
+            <Button
+              type="button"
+              variant="outline"
+              isLoading={importing}
+              onClick={() => importRef.current?.click()}
+            >
+              <Upload className="size-4" />
+              Import CSV
             </Button>
-          </Link>
-        </div>
-      </div>
+            <input
+              ref={importRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleImport(file);
+              }}
+            />
+            <Link href="/admin/import">
+              <Button type="button" variant="outline">
+                <Download className="size-4" />
+                Temu import
+              </Button>
+            </Link>
+            <Link href="/admin/products/new">
+              <Button type="button">
+                <Plus className="size-4" />
+                Add product
+              </Button>
+            </Link>
+          </div>
+        }
+      />
+
 
       <div className="mt-6 flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">

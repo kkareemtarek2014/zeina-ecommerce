@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Eye } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   ORDER_STATUS_LABELS,
   useAdminShipments,
 } from '@/features/admin';
@@ -118,19 +118,15 @@ export default function AdminShipmentsPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Shipments"
+        subtitle="Bosta deliveries linked to orders. Enable flag `bosta_shipping` and set secrets to create new shipments."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Shipments' },
         ]}
       />
-      <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-        Shipments
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Bosta deliveries linked to orders. Enable flag `bosta_shipping` and set
-        secrets to create new shipments.
-      </p>
+
 
       <div className="mt-6 flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">

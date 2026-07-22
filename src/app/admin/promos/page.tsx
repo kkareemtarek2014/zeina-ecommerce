@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   PromoForm,
   type PromoFormSubmit,
   useAdminPromos,
@@ -167,23 +167,18 @@ export default function AdminPromosPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Promos' }]}
+      <AdminPageHeader
+        title="Promos"
+        subtitle="Create and manage discount codes for checkout."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Promos' }]}
+        action={
+          <Button type="button" onClick={() => setCreateOpen(true)}>
+            <Plus className="size-4" />
+            Add promo
+          </Button>
+        }
       />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            Promos
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Create and manage discount codes for checkout.
-          </p>
-        </div>
-        <Button type="button" onClick={() => setCreateOpen(true)}>
-          <Plus className="size-4" />
-          Add promo
-        </Button>
-      </div>
+
 
       <div className="mt-6">
         {isLoading ? (

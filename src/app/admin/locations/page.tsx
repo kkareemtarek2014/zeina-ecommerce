@@ -5,7 +5,7 @@ import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   useAdminGovernorates,
   useAdminShippingZones,
   useCreateGovernorate,
@@ -213,18 +213,15 @@ export default function AdminLocationsPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Locations"
+        subtitle="Manage governorates and shipping zone fees."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Locations' },
         ]}
       />
-      <h1 className="font-display text-3xl font-semibold text-text-primary">
-        Locations
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Manage governorates and shipping zone fees.
-      </p>
+
 
       <Tabs defaultValue="governorates" className="mt-6">
         <TabsList>

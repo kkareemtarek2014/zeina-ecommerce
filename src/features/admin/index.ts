@@ -3,7 +3,6 @@ export {
   AdminShell,
   AdminSidebar,
   AdminTopbar,
-  AdminBreadcrumbs,
 } from './components/AdminShell';
 export * from './components/ui';
 export { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard';
@@ -50,6 +49,7 @@ export {
 } from './hooks/useAdminCatalog';
 export {
   useAdminStats,
+  useOrdersNeedingAction,
   useAdminOrders,
   useAdminOrder,
   useUpdateAdminOrderStatus,

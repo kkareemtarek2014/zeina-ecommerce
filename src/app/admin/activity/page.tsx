@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ActivityFeed,
-  AdminBreadcrumbs,
+  AdminPageHeader,
   adminOpsService,
 } from '@/features/admin';
 import {
@@ -90,18 +90,15 @@ export default function AdminActivityPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Activity log"
+        subtitle="Recent admin actions and full audit log."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Activity' },
         ]}
       />
-      <h1 className="font-display text-3xl font-semibold text-text-primary">
-        Activity
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Recent admin actions and full audit log.
-      </p>
+
 
       <section className="mt-8 rounded-lg border border-border bg-surface-raised p-5">
         <h2 className="font-display text-lg font-semibold text-text-primary">

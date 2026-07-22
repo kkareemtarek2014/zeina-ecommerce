@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   IntegrationsStatusPanel,
   SettingsForm,
   useAdminSettings,
@@ -30,15 +30,12 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Settings' }]}
+      <AdminPageHeader
+        title="Settings"
+        subtitle="Profit margin, branding, contact, SEO, maintenance, and cron automation."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Settings' }]}
       />
-      <h1 className="font-display text-3xl font-semibold text-text-primary">
-        Settings
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Profit margin, branding, contact, SEO, maintenance, and cron automation.
-      </p>
+
 
       <div className="mt-6">
         {isLoading ? (

@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   CronJobsPanel,
   useAdminSettings,
 } from '@/features/admin';
@@ -11,15 +11,11 @@ export default function AdminCronPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[{ label: 'Admin', href: '/admin' }, { label: 'Cron jobs' }]}
+      <AdminPageHeader
+        title="Cron jobs"
+        subtitle="View automated job status and execute manual smoke test runs."
+        breadcrumbs={[{ label: 'Admin', href: '/admin' }, { label: 'Cron jobs' }]}
       />
-      <h1 className="font-display text-3xl font-semibold text-text-primary">
-        Cron jobs
-      </h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        View automated job status and execute manual smoke test runs.
-      </p>
 
       <div className="mt-6">
         {isLoading ? (

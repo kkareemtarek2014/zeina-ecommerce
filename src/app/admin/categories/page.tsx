@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import {
-  AdminBreadcrumbs,
+  AdminPageHeader,
   useAdminCategories,
   useDeleteAdminCategory,
 } from '@/features/admin';
@@ -83,28 +83,23 @@ export default function AdminCategoriesPage() {
 
   return (
     <div>
-      <AdminBreadcrumbs
-        items={[
+      <AdminPageHeader
+        title="Categories"
+        subtitle="Shop sections and SEO copy."
+        breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Categories' },
         ]}
+        action={
+          <Link href="/admin/categories/new">
+            <Button type="button">
+              <Plus className="size-4" />
+              Add category
+            </Button>
+          </Link>
+        }
       />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-(family-name:--font-display) text-3xl font-semibold text-text-primary">
-            Categories
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Shop sections and SEO copy.
-          </p>
-        </div>
-        <Link href="/admin/categories/new">
-          <Button type="button">
-            <Plus className="size-4" />
-            Add category
-          </Button>
-        </Link>
-      </div>
+
 
       <div className="mt-6">
         {isLoading ? (
