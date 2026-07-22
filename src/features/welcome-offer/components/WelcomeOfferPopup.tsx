@@ -12,7 +12,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Check, Copy, X } from 'lucide-react';
 import { useFeature } from '@/shared/contexts/FeatureContext';
-import { useBackButtonClose } from '@/shared/hooks/useBackButtonClose';
+import {
+  markOverlayNavigation,
+  useBackButtonClose,
+} from '@/shared/hooks/useBackButtonClose';
 import { WELCOME_OFFER } from '../welcome-offer.config';
 
 function isExcludedPath(pathname: string | null): boolean {
@@ -172,7 +175,10 @@ export function WelcomeOfferPopup() {
 
           <Link
             href="/shop"
-            onClick={dismiss}
+            onClick={() => {
+              markOverlayNavigation();
+              dismiss();
+            }}
             className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-(--radius) bg-brand-primary px-6 text-sm font-medium text-text-inverse shadow-sm transition-colors hover:bg-brand-secondary"
           >
             Shop squishies

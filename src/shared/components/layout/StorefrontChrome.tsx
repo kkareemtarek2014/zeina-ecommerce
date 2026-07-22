@@ -6,6 +6,7 @@ import { Header } from '@/shared/components/layout/Header';
 import { Footer } from '@/shared/components/layout/Footer';
 import { WhatsAppButton } from '@/shared/components/ui';
 import { WelcomeOfferPopup } from '@/features/welcome-offer';
+import { useStorefrontConfig } from '@/features/admin';
 import type { SiteBrandingDTO } from '@/shared/contracts/storefront-branding.contract';
 import { normalizeWhatsAppDigits } from '@/shared/lib/contact-links';
 
@@ -20,11 +21,18 @@ export function StorefrontChrome({
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') ?? false;
 
+  // The layout branding is captured when the shell is rendered (often at build
+  // time, where D1 falls back to null). Read the WhatsApp number from the
+  // request-time storefront config too, so saving it in Admin → Settings makes
+  // the FAB appear without a redeploy. Fall back to the branding prop.
+  const { data: storefrontConfig } = useStorefrontConfig();
+  const whatsappDigits = normalizeWhatsAppDigits(
+    storefrontConfig?.whatsappNumber ?? branding.whatsappNumber,
+  );
+
   if (isAdmin) {
     return <>{children}</>;
   }
-
-  const whatsappDigits = normalizeWhatsAppDigits(branding.whatsappNumber);
 
   return (
     <>

@@ -4,7 +4,30 @@ import { useEffect, useRef } from 'react';
 
 let seq = 0;
 
-/** True when `history.state` is still the marker *this* hook instance pushed. */
+/**
+ * Set (module-global) by a link *inside* an overlay, synchronously, right
+ * before that link closes the overlay. See `markOverlayNavigation` below.
+ */
+let pendingOverlayNav = false;
+
+/**
+ * Call this the instant a link inside an overlay is activated — before the
+ * overlay's close handler runs. It tells the next `useBackButtonClose` close
+ * NOT to `history.back()`.
+ *
+ * Why it's needed: the App Router pushes its own history entry *asynchronously*,
+ * after the RSC payload arrives — not synchronously on click. So when our close
+ * effect runs (synchronously, right after the click) `history.state` is still
+ * our overlay marker; we can't tell "user navigated" from "user closed in
+ * place" by inspecting history. If we called `history.back()` there it would
+ * race/cancel the pending forward navigation and the link would appear to do
+ * nothing. This flag lets a navigating link opt the close out of the pop.
+ */
+export function markOverlayNavigation(): void {
+  pendingOverlayNav = true;
+}
+
+/** True when `history.state` is still the marker *this* overlay pushed. */
 function isOwnState(marker: string): boolean {
   const state = window.history.state as { __overlay?: string } | null;
   return state?.__overlay === marker;
@@ -12,71 +35,51 @@ function isOwnState(marker: string): boolean {
 
 /**
  * On open, pushes a history entry so Android back / iOS swipe-back closes the
- * overlay instead of leaving the page. On programmatic close (or unmount), pops
- * that entry — but only when it's still on top of the history stack.
- *
- * Closing via a `<Link>` inside the overlay (e.g. cart drawer "Checkout") fires
- * our close handler AND a real client-side navigation from the *same* click.
- * That navigation calls `history.pushState` itself, replacing `history.state`
- * before our effect cleanup runs. If we called `history.back()` unconditionally
- * there, it would undo that navigation (button "does nothing"). Checking
- * `history.state` first means we only pop our own entry when nothing else has
- * touched history since — real navigations are left alone.
+ * overlay instead of leaving the page. The pushed entry is popped in exactly
+ * one place — the effect cleanup — and only for a genuine "close in place"
+ * action (X / backdrop / Esc). It is intentionally NOT popped when:
+ *   - the browser already went back (popstate closed us), or
+ *   - a link inside the overlay is navigating forward
+ *     (`markOverlayNavigation()` was called).
  */
 export function useBackButtonClose(
   isOpen: boolean,
   onClose: () => void,
 ): void {
   const onCloseRef = useRef(onClose);
-  const pushedRef = useRef(false);
   const closingViaBackRef = useRef(false);
-  const markerRef = useRef<string | null>(null);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
   useEffect(() => {
-    if (!isOpen) {
-      if (
-        pushedRef.current &&
-        !closingViaBackRef.current &&
-        markerRef.current &&
-        isOwnState(markerRef.current)
-      ) {
-        window.history.back();
-      }
-      pushedRef.current = false;
-      closingViaBackRef.current = false;
-      return;
-    }
+    if (!isOpen) return;
+
+    // Fresh overlay — clear any stale flag from a prior instance.
+    pendingOverlayNav = false;
+    closingViaBackRef.current = false;
 
     const marker = `sqoosh-overlay-${(seq += 1)}`;
-    markerRef.current = marker;
     window.history.pushState({ __overlay: marker }, '');
-    pushedRef.current = true;
 
     const onPopState = () => {
-      if (!pushedRef.current) return;
-      pushedRef.current = false;
       closingViaBackRef.current = true;
       onCloseRef.current();
     };
-
     window.addEventListener('popstate', onPopState);
+
     return () => {
       window.removeEventListener('popstate', onPopState);
-      // SearchModal (and similar) unmount while still "open" — pop our entry,
-      // unless a navigation already moved history past it (same race as above).
-      if (
-        pushedRef.current &&
-        !closingViaBackRef.current &&
-        markerRef.current &&
-        isOwnState(markerRef.current)
-      ) {
+
+      const navigating = pendingOverlayNav;
+      pendingOverlayNav = false;
+
+      // Only remove our own entry for a plain close — not a back-press, not a
+      // forward navigation — and only while it's still on top of the stack.
+      if (!navigating && !closingViaBackRef.current && isOwnState(marker)) {
         window.history.back();
       }
-      pushedRef.current = false;
     };
   }, [isOpen]);
 }

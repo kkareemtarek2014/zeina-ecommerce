@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, User } from 'lucide-react';
 import { Drawer } from '@/shared/components/ui';
+import { markOverlayNavigation } from '@/shared/hooks/useBackButtonClose';
 import { cn } from '@/shared/utils/cn';
 
 export interface MobileNavLink {
@@ -37,6 +38,12 @@ export function MobileNavDrawer({
   }, [pathname]);
 
   const close = () => onOpenChange(false);
+  // Closing as part of a link navigation: keep useBackButtonClose from popping
+  // history and cancelling the forward navigation (App Router pushes async).
+  const closeForNav = () => {
+    markOverlayNavigation();
+    onOpenChange(false);
+  };
 
   return (
     <>
@@ -71,7 +78,7 @@ export function MobileNavDrawer({
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={close}
+                  onClick={closeForNav}
                   className={cn(
                     'rounded-lg px-3 py-3 text-sm font-medium transition-colors active:scale-[0.97]',
                     isActive

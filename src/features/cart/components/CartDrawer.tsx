@@ -9,6 +9,7 @@ import { FREE_SHIPPING_THRESHOLD } from '@/config/site.config';
 import { useStorefrontConfig } from '@/features/admin';
 import { Button, Drawer, QuantityStepper } from '@/shared/components/ui';
 import { useHydrated } from '@/shared/hooks/useHydrated';
+import { markOverlayNavigation } from '@/shared/hooks/useBackButtonClose';
 import { CartRecommendations } from './CartRecommendations';
 import { FreeShippingProgress } from './FreeShippingProgress';
 import {
@@ -35,6 +36,18 @@ export function CartDrawer() {
   const removeCoupon = useCartStore((s) => s.removeCoupon);
   const setQuantity = useCartStore((s) => s.setQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
+
+  /**
+   * Close the drawer as part of a client navigation. `markOverlayNavigation`
+   * stops `useBackButtonClose` from firing `history.back()` on this close, which
+   * would otherwise race and cancel the link's forward navigation (App Router
+   * pushes its history entry asynchronously). Used for every link inside the
+   * drawer; the X / backdrop / Esc keep the plain `closeDrawer`.
+   */
+  const closeForNav = () => {
+    markOverlayNavigation();
+    closeDrawer();
+  };
 
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -147,13 +160,19 @@ export function CartDrawer() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Link href="/checkout" onClick={closeDrawer}>
-            <Button fullWidth>Checkout</Button>
+          <Link
+            href="/checkout"
+            onClick={closeForNav}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-(--radius) bg-brand-primary px-6 text-sm font-medium tracking-wide text-text-inverse shadow-sm transition-colors hover:bg-brand-secondary active:scale-[0.97]"
+          >
+            Checkout
           </Link>
-          <Link href="/cart" onClick={closeDrawer}>
-            <Button fullWidth variant="outline">
-              View full bag
-            </Button>
+          <Link
+            href="/cart"
+            onClick={closeForNav}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-(--radius) border border-border-strong px-6 text-sm font-medium tracking-wide text-text-primary transition-colors hover:border-brand-primary hover:text-brand-primary active:scale-[0.97]"
+          >
+            View full bag
           </Link>
         </div>
       </>
@@ -189,8 +208,12 @@ export function CartDrawer() {
           <div className="flex flex-col items-center gap-4 py-16 text-center">
             <ShoppingBag className="size-12 text-border-strong" />
             <p className="text-sm text-text-secondary">Your bag is empty.</p>
-            <Link href="/shop" onClick={closeDrawer}>
-              <Button variant="outline">Start shopping</Button>
+            <Link
+              href="/shop"
+              onClick={closeForNav}
+              className="flex h-11 items-center justify-center gap-2 rounded-(--radius) border border-border-strong px-6 text-sm font-medium tracking-wide text-text-primary transition-colors hover:border-brand-primary hover:text-brand-primary active:scale-[0.97]"
+            >
+              Start shopping
             </Link>
           </div>
         ) : (
@@ -200,7 +223,7 @@ export function CartDrawer() {
                 <div key={item.productId} className="flex gap-3 py-4">
                   <Link
                     href={`/product/${item.productId}`}
-                    onClick={closeDrawer}
+                    onClick={closeForNav}
                     className="relative size-16 shrink-0 overflow-hidden rounded-(--radius) bg-brand-blush"
                   >
                     <Image
@@ -216,7 +239,7 @@ export function CartDrawer() {
                     <div className="flex items-start justify-between gap-2">
                       <Link
                         href={`/product/${item.productId}`}
-                        onClick={closeDrawer}
+                        onClick={closeForNav}
                         className="line-clamp-2 text-xs font-medium hover:text-brand-primary"
                       >
                         {item.name}
@@ -248,7 +271,7 @@ export function CartDrawer() {
             <div className="mt-4">
               <CartRecommendations
                 remainingForFree={remainingForFree}
-                onNavigate={closeDrawer}
+                onNavigate={closeForNav}
               />
             </div>
           </>

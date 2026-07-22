@@ -10,7 +10,10 @@ import { SearchResultsSkeleton } from '@/shared/components/ui';
 import { useEscapeKey } from '@/shared/hooks/useEscapeKey';
 import { useScrollLock } from '@/shared/hooks/useScrollLock';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
-import { useBackButtonClose } from '@/shared/hooks/useBackButtonClose';
+import {
+  markOverlayNavigation,
+  useBackButtonClose,
+} from '@/shared/hooks/useBackButtonClose';
 import { useRecentSearches, useSearch } from '../hooks/useSearch';
 
 interface SearchModalProps {
@@ -33,6 +36,9 @@ export function SearchModal({ onClose }: SearchModalProps) {
 
   const handleResultClick = () => {
     if (value.trim()) saveRecent(value.trim());
+    // This close accompanies a forward navigation to the product page — keep
+    // useBackButtonClose from popping history and cancelling it.
+    markOverlayNavigation();
     onClose();
   };
 
