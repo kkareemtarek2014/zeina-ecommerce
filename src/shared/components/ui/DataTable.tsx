@@ -5,10 +5,11 @@ import { cn } from '@/shared/utils/cn';
 
 export interface DataTableColumn<T> {
   key: string;
-  header: string;
+  header: ReactNode;
   className?: string;
   cell: (row: T) => ReactNode;
 }
+
 
 interface DataTableProps<T> {
   columns: DataTableColumn<T>[];

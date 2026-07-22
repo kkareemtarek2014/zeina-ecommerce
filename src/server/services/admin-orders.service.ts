@@ -159,4 +159,28 @@ export async function patchAdminOrderStatus(
   return toAdminOrderDTO(updated, found.items, timeline);
 }
 
+export async function bulkUpdateAdminOrderStatus(
+  ids: string[],
+  targetStatus: OrderStatus,
+  actorId: string,
+): Promise<{ succeeded: string[]; failed: Array<{ id: string; error: string }> }> {
+  const succeeded: string[] = [];
+  const failed: Array<{ id: string; error: string }> = [];
+
+  for (const id of ids) {
+    try {
+      await patchAdminOrderStatus(id, { status: targetStatus }, actorId);
+      succeeded.push(id);
+    } catch (err) {
+      failed.push({
+        id,
+        error: err instanceof Error ? err.message : 'Update failed',
+      });
+    }
+  }
+
+  return { succeeded, failed };
+}
+
 export { toAdminOrderDTO };
+

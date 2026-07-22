@@ -9,9 +9,12 @@ export interface StatusPillProps {
 
 const STATUS_STYLE_MAP: Record<string, string> = {
   // Order statuses
+  placed: 'bg-status-warning/10 text-status-warning border-status-warning/30',
   pending: 'bg-status-warning/10 text-status-warning border-status-warning/30',
   confirmed: 'bg-status-info/10 text-status-info border-status-info/30',
+  sourced: 'bg-brand-primary/10 text-brand-primary border-brand-primary/30',
   shipped: 'bg-brand-primary/10 text-brand-primary border-brand-primary/30',
+  out_for_delivery: 'bg-brand-primary/10 text-brand-primary border-brand-primary/30',
   delivered: 'bg-status-success/10 text-status-success border-status-success/30',
   cancelled: 'bg-status-error/10 text-status-error border-status-error/30',
   refunded: 'bg-status-error/10 text-status-error border-status-error/30',
@@ -23,6 +26,7 @@ const STATUS_STYLE_MAP: Record<string, string> = {
   hidden: 'bg-text-muted/10 text-text-muted border-text-muted/30',
   archived: 'bg-text-muted/10 text-text-muted border-text-muted/30',
 };
+
 
 function formatStatusLabel(status: string): string {
   const normalized = status.toLowerCase();

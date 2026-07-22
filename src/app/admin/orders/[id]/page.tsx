@@ -2,10 +2,14 @@
 
 import { use, useState } from 'react';
 import Link from 'next/link';
+import { Copy, MessageCircle, Printer } from 'lucide-react';
 import {
   AdminPageHeader,
   ORDER_STATUS_LABELS,
+  OrderQuickActions,
   OrderStatusSelect,
+  SectionCard,
+  StatusPill,
   useAdminOrder,
   useAdminOrderShipment,
   useCreateAdminShipment,
@@ -41,268 +45,371 @@ export default function AdminOrderDetailPage({
   const status = draftStatus ?? order?.status ?? 'placed';
   const hasShipment = Boolean(shipment) && !shipmentMissing;
 
+  const handleCopyAddress = async () => {
+    if (!order) return;
+    const { fullName, phone, governorate, city, street, notes } = order.address;
+    const text = `Customer: ${fullName}\nPhone: ${phone}\nAddress: ${street}, ${city}, ${governorate}\nNotes: ${notes ?? 'None'}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Shipping address copied to clipboard', 'success');
+    } catch {
+      toast('Failed to copy address', 'error');
+    }
+  };
+
+  const getWhatsappUrl = (phone: string) => {
+    const digits = phone.replace(/\D/g, '');
+    const formatted = digits.startsWith('0') ? `2${digits}` : digits;
+    return `https://wa.me/${formatted}`;
+  };
+
   return (
     <div>
+      <style jsx global>{`
+        @media print {
+          aside,
+          header,
+          nav,
+          .print\\:hidden {
+            display: none !important;
+          }
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          .print\\:block {
+            display: block !important;
+          }
+          .print\\:w-full {
+            width: 100% !important;
+          }
+        }
+      `}</style>
+
       <AdminPageHeader
-        title="Order detail"
-        subtitle={order ? `Order #${order.id} · Created ${new Date(order.createdAt).toLocaleDateString()}` : undefined}
+        title={order ? `Order #${order.id}` : 'Order detail'}
+        subtitle={
+          order
+            ? `Placed on ${new Date(order.createdAt).toLocaleString()} · ${order.paymentMethod.toUpperCase()} (${order.paymentStatus})`
+            : undefined
+        }
         breadcrumbs={[
           { label: 'Admin', href: '/admin' },
           { label: 'Orders', href: '/admin/orders' },
           { label: order?.id ?? id },
         ]}
+        action={
+          order ? (
+            <div className="flex items-center gap-2 print:hidden">
+              <OrderQuickActions
+                orderId={order.id}
+                status={order.status}
+                size="md"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => window.print()}
+                className="gap-1.5"
+              >
+                <Printer className="size-4" />
+                <span>Packing slip</span>
+              </Button>
+            </div>
+          ) : undefined
+        }
       />
 
-
       {isLoading ? (
-        <p className="mt-6 text-sm text-text-muted">Loading…</p>
+        <p className="mt-6 text-sm text-text-muted">Loading order details…</p>
       ) : isError || !order ? (
         <p className="mt-6 text-sm text-status-error">Order not found.</p>
       ) : (
-        <div className="mt-6 space-y-8">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="w-56">
-              <OrderStatusSelect
-                current={order.status}
-                value={status}
-                onChange={setDraftStatus}
-                disabled={updateMutation.isPending}
-              />
+        <div className="mt-6 space-y-6">
+          {/* Top Status & Advance Controls */}
+          <SectionCard className="print:hidden">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <StatusPill status={order.status} />
+                <span className="text-xs text-text-muted">
+                  Current Status: <strong>{ORDER_STATUS_LABELS[order.status]}</strong>
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="w-52">
+                  <OrderStatusSelect
+                    current={order.status}
+                    value={status}
+                    onChange={setDraftStatus}
+                    disabled={updateMutation.isPending}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={status === order.status || updateMutation.isPending}
+                  isLoading={updateMutation.isPending}
+                  onClick={() => {
+                    updateMutation.mutate(
+                      { status },
+                      {
+                        onSuccess: () => {
+                          toast('Status updated successfully', 'success');
+                          setDraftStatus(null);
+                        },
+                        onError: (err) => {
+                          toast(
+                            err instanceof AppError
+                              ? err.message
+                              : 'Update failed',
+                            'error',
+                          );
+                        },
+                      },
+                    );
+                  }}
+                >
+                  Apply status
+                </Button>
+              </div>
             </div>
-            <Button
-              type="button"
-              disabled={status === order.status || updateMutation.isPending}
-              isLoading={updateMutation.isPending}
-              onClick={() => {
-                updateMutation.mutate(
-                  { status },
-                  {
-                    onSuccess: () => {
-                      toast('Status updated', 'success');
-                      setDraftStatus(null);
-                    },
-                    onError: (err) => {
-                      toast(
-                        err instanceof AppError
-                          ? err.message
-                          : 'Update failed',
-                        'error',
-                      );
-                    },
-                  },
-                );
-              }}
-            >
-              Update status
-            </Button>
-          </div>
+          </SectionCard>
 
-          <OrderStatusTimeline
-            currentStatus={order.status}
-            timeline={order.timeline}
-          />
-
-          {bostaOn ? (
-            <section className="space-y-3 rounded-(--radius-lg) border border-border p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="font-medium text-text-primary">
-                  Bosta shipment
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {hasShipment ? (
+          {/* Details Grid */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Customer & Shipping Card */}
+            <SectionCard title="Customer & Shipping" className="lg:col-span-1">
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center justify-between print:hidden">
+                  <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                    Fulfilment Info
+                  </span>
+                  <div className="flex items-center gap-1.5">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      isLoading={refreshShipment.isPending}
-                      disabled={refreshShipment.isPending}
-                      onClick={() => {
-                        refreshShipment.mutate(undefined, {
-                          onSuccess: () =>
-                            toast('Shipment refreshed', 'success'),
-                          onError: (err) =>
-                            toast(
-                              err instanceof AppError
-                                ? err.message
-                                : 'Refresh failed',
-                              'error',
-                            ),
-                        });
-                      }}
+                      onClick={() => void handleCopyAddress()}
+                      className="h-7 text-xs"
                     >
-                      Refresh from Bosta
+                      <Copy className="size-3" />
+                      <span>Copy</span>
                     </Button>
+                    <a
+                      href={getWhatsappUrl(order.address.phone)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-7 items-center gap-1 rounded-(--radius) bg-emerald-600 px-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
+                    >
+                      <MessageCircle className="size-3" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="font-semibold text-text-primary">
+                    {order.address.fullName}
+                  </p>
+                  <p className="text-text-secondary">{order.address.phone}</p>
+                  <p className="text-text-secondary">
+                    {order.address.street}, {order.address.city},{' '}
+                    <span className="font-semibold text-text-primary">
+                      {order.address.governorate}
+                    </span>
+                  </p>
+                  {order.address.notes && (
+                    <p className="mt-2 text-xs italic text-text-muted bg-surface p-2.5 rounded border border-border">
+                      Note: &quot;{order.address.notes}&quot;
+                    </p>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-border text-xs text-text-muted print:hidden">
+                  {order.userId ? (
+                    <Link
+                      href={`/admin/users/${order.userId}`}
+                      className="text-brand-primary hover:underline"
+                    >
+                      View user account profile &rarr;
+                    </Link>
                   ) : (
-                    <Button
-                      type="button"
-                      size="sm"
-                      isLoading={createShipment.isPending}
-                      disabled={createShipment.isPending || shipmentLoading}
-                      onClick={() => {
-                        createShipment.mutate(
-                          {},
-                          {
-                            onSuccess: () =>
-                              toast('Shipment created', 'success'),
+                    <span>Guest checkout order</span>
+                  )}
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* Items Card */}
+            <SectionCard title="Order Items" className="lg:col-span-2">
+              <div className="divide-y divide-border">
+                {order.items.map((item) => (
+                  <div
+                    key={`${item.productId}-${item.name}`}
+                    className="flex items-center justify-between py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.image && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.image}
+                          alt=""
+                          className="size-12 rounded border border-border object-cover print:hidden"
+                        />
+                      )}
+                      <div>
+                        <p className="font-medium text-text-primary text-sm">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          Qty: {item.quantity} &times; {formatEGP(item.unitPrice)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-semibold text-text-primary text-sm">
+                      {formatEGP(item.unitPrice * item.quantity)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Totals Summary inside Items card */}
+              <div className="mt-4 pt-4 border-t border-border space-y-1.5 text-sm">
+                <div className="flex justify-between text-text-secondary">
+                  <span>Subtotal</span>
+                  <span>{formatEGP(order.subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-text-secondary">
+                  <span>Shipping</span>
+                  <span>{order.shipping === 0 ? 'Free' : formatEGP(order.shipping)}</span>
+                </div>
+                {order.discount > 0 && (
+                  <div className="flex justify-between text-status-success font-medium">
+                    <span>Discount ({order.promoCode ?? 'Promo'})</span>
+                    <span>-{formatEGP(order.discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between pt-2 font-bold text-text-primary text-base border-t border-border">
+                  <span>Total ({order.paymentMethod.toUpperCase()})</span>
+                  <span>{formatEGP(order.total)}</span>
+                </div>
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Bosta Integration Card */}
+          {bostaOn ? (
+            <SectionCard title="Bosta Shipment Integration">
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+                  <p className="text-xs text-text-secondary">
+                    Manage fulfilment and courier tracking status via Bosta API.
+                  </p>
+                  <div className="flex gap-2">
+                    {hasShipment ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        isLoading={refreshShipment.isPending}
+                        disabled={refreshShipment.isPending}
+                        onClick={() => {
+                          refreshShipment.mutate(undefined, {
+                            onSuccess: () => toast('Shipment refreshed', 'success'),
                             onError: (err) =>
                               toast(
                                 err instanceof AppError
                                   ? err.message
-                                  : 'Create failed',
+                                  : 'Refresh failed',
                                 'error',
                               ),
-                          },
-                        );
-                      }}
-                    >
-                      Create Bosta shipment
-                    </Button>
-                  )}
+                          });
+                        }}
+                      >
+                        Sync Bosta Status
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        isLoading={createShipment.isPending}
+                        disabled={createShipment.isPending || shipmentLoading}
+                        onClick={() => {
+                          createShipment.mutate(
+                            {},
+                            {
+                              onSuccess: () => toast('Shipment created', 'success'),
+                              onError: (err) =>
+                                toast(
+                                  err instanceof AppError
+                                    ? err.message
+                                    : 'Create failed',
+                                  'error',
+                                ),
+                            },
+                          );
+                        }}
+                      >
+                        Create Bosta Shipment
+                      </Button>
+                    )}
+                  </div>
                 </div>
+
+                {shipmentLoading ? (
+                  <p className="text-sm text-text-muted">Loading shipment details…</p>
+                ) : hasShipment && shipment ? (
+                  <dl className="grid gap-3 text-sm sm:grid-cols-4 bg-surface p-4 rounded border border-border">
+                    <div>
+                      <dt className="text-xs text-text-muted">Tracking Number</dt>
+                      <dd className="font-mono font-medium">
+                        {shipment.trackingUrl ? (
+                          <a
+                            href={shipment.trackingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-primary hover:underline"
+                          >
+                            {shipment.trackingNumber}
+                          </a>
+                        ) : (
+                          shipment.trackingNumber ?? '—'
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-text-muted">Bosta State</dt>
+                      <dd className="font-medium text-text-primary">{shipment.bostaState ?? '—'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-text-muted">Mapped Status</dt>
+                      <dd className="font-medium text-text-primary">
+                        {shipment.mappedStatus ? ORDER_STATUS_LABELS[shipment.mappedStatus] : '—'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-text-muted">COD Amount</dt>
+                      <dd className="font-medium text-text-primary">{formatEGP(shipment.codAmount)}</dd>
+                    </div>
+                  </dl>
+                ) : (
+                  <p className="text-sm text-text-muted">
+                    No active Bosta shipment. Create one when ready for dispatch.
+                  </p>
+                )}
               </div>
-              {shipmentLoading ? (
-                <p className="text-sm text-text-muted">Loading shipment…</p>
-              ) : hasShipment && shipment ? (
-                <dl className="grid gap-2 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="text-text-muted">Tracking</dt>
-                    <dd>
-                      {shipment.trackingUrl && shipment.trackingNumber ? (
-                        <a
-                          href={shipment.trackingUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-mono text-brand-primary hover:underline"
-                        >
-                          {shipment.trackingNumber}
-                        </a>
-                      ) : (
-                        <span className="font-mono">
-                          {shipment.trackingNumber ?? '—'}
-                        </span>
-                      )}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-muted">Bosta state</dt>
-                    <dd>{shipment.bostaState ?? '—'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-muted">Mapped status</dt>
-                    <dd>
-                      {shipment.mappedStatus
-                        ? ORDER_STATUS_LABELS[shipment.mappedStatus]
-                        : '—'}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-muted">COD amount</dt>
-                    <dd>{formatEGP(shipment.codAmount)}</dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="text-sm text-text-muted">
-                  No shipment yet. Create one after the order is ready to
-                  fulfil, or wait for auto-create on COD / paid card.
-                </p>
-              )}
-            </section>
+            </SectionCard>
           ) : null}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="space-y-2 text-sm">
-              <h2 className="font-medium text-text-primary">Customer</h2>
-              <p>{order.address.fullName}</p>
-              <p className="text-text-secondary">{order.address.phone}</p>
-              <p className="text-text-secondary">
-                {order.address.street}, {order.address.city},{' '}
-                {order.address.governorate}
-              </p>
-              {order.address.notes ? (
-                <p className="text-text-muted">Note: {order.address.notes}</p>
-              ) : null}
-              {order.userId ? (
-                <p>
-                  <Link
-                    href={`/admin/users/${order.userId}`}
-                    className="text-brand-primary hover:underline"
-                  >
-                    View account
-                  </Link>
-                </p>
-              ) : (
-                <p className="text-text-muted">Guest checkout</p>
-              )}
-            </section>
-
-            <section className="space-y-2 text-sm">
-              <h2 className="font-medium text-text-primary">Totals</h2>
-              <dl className="space-y-1 text-text-secondary">
-                <div className="flex justify-between gap-4">
-                  <dt>Subtotal</dt>
-                  <dd>{formatEGP(order.subtotal)}</dd>
-                </div>
-                {order.discount > 0 ? (
-                  <div className="flex justify-between gap-4">
-                    <dt>Discount</dt>
-                    <dd>-{formatEGP(order.discount)}</dd>
-                  </div>
-                ) : null}
-                <div className="flex justify-between gap-4">
-                  <dt>Shipping</dt>
-                  <dd>
-                    {order.shipping === 0 ? 'Free' : formatEGP(order.shipping)}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-4 font-medium text-text-primary">
-                  <dt>Total</dt>
-                  <dd>{formatEGP(order.total)}</dd>
-                </div>
-              </dl>
-              <p className="pt-2 text-xs uppercase tracking-wide text-text-muted">
-                {order.paymentMethod} · {order.paymentStatus} ·{' '}
-                {ORDER_STATUS_LABELS[order.status]}
-              </p>
-              {order.promoCode ? (
-                <p className="text-xs text-text-muted">
-                  Promo: {order.promoCode}
-                </p>
-              ) : null}
-              {order.note ? (
-                <p className="text-xs text-text-muted">Order note: {order.note}</p>
-              ) : null}
-            </section>
-          </div>
-
-          <section>
-            <h2 className="mb-3 font-medium text-text-primary">Items</h2>
-            <ul className="divide-y divide-border rounded-(--radius-lg) border border-border">
-              {order.items.map((item) => (
-                <li
-                  key={`${item.productId}-${item.name}`}
-                  className="flex items-center gap-3 px-4 py-3"
-                >
-                  <div className="size-12 shrink-0 overflow-hidden rounded-(--radius) bg-brand-blush/40">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.image}
-                      alt=""
-                      className="size-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{item.name}</p>
-                    <p className="text-xs text-text-muted">
-                      ×{item.quantity} · {formatEGP(item.unitPrice)}
-                    </p>
-                  </div>
-                  <p className="text-sm font-medium">
-                    {formatEGP(item.unitPrice * item.quantity)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/* Timeline History Card */}
+          <SectionCard title="Status History & Audit Log" className="print:hidden">
+            <OrderStatusTimeline
+              currentStatus={order.status}
+              timeline={order.timeline}
+            />
+          </SectionCard>
         </div>
       )}
     </div>

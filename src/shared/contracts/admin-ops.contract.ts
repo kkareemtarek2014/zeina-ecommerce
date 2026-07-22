@@ -22,6 +22,14 @@ export const adminOrderStatusPatchSchema = z.object({
 
 export type AdminOrderStatusPatch = z.infer<typeof adminOrderStatusPatchSchema>;
 
+export const adminOrderBulkStatusSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1).max(50),
+  status: orderStatusSchema,
+});
+
+export type AdminOrderBulkStatus = z.infer<typeof adminOrderBulkStatusSchema>;
+
+
 export const adminUserDtoSchema = z.object({
   id: z.string(),
   email: z.string().email(),

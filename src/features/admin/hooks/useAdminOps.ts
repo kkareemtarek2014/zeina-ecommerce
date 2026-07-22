@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   AdminOrderStatusPatch,
+  AdminOrderBulkStatus,
   AdminUserWrite,
 } from '@/shared/contracts/admin-ops.contract';
 import {
@@ -63,6 +64,18 @@ export function useUpdateAdminOrderStatus(id: string) {
     },
   });
 }
+
+export function useBulkUpdateAdminOrderStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AdminOrderBulkStatus) =>
+      adminOrdersService.bulkUpdateStatus(input),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'orders'] });
+    },
+  });
+}
+
 
 export function useAdminUsers(params: AdminUserListParams) {
   return useQuery({

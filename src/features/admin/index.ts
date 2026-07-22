@@ -16,6 +16,9 @@ export {
   OrderStatusSelect,
   ORDER_STATUS_LABELS,
 } from './components/OrderStatusSelect';
+export { OrderQuickActions } from './components/OrderQuickActions';
+export { OrderDrawer } from './components/OrderDrawer';
+
 export { UserForm } from './components/UserForm';
 export { SettingsForm } from './components/SettingsForm';
 export { CronJobsPanel } from './components/CronJobsPanel';
@@ -53,12 +56,14 @@ export {
   useAdminOrders,
   useAdminOrder,
   useUpdateAdminOrderStatus,
+  useBulkUpdateAdminOrderStatus,
   useAdminUsers,
   useAdminUser,
   useUpdateAdminUser,
   useDeleteAdminUser,
   adminOpsKeys,
 } from './hooks/useAdminOps';
+
 export { adminCatalogService } from './services/admin-catalog.service';
 export {
   adminOrdersService,

@@ -2,6 +2,7 @@ import { api } from '@/shared/lib/api-client';
 import type {
   AdminOrderDTO,
   AdminOrderStatusPatch,
+  AdminOrderBulkStatus,
   AdminUserDetailDTO,
   AdminUserDTO,
   AdminUserWrite,
@@ -72,7 +73,14 @@ export const adminOrdersService = {
       input,
     );
   },
+
+  bulkUpdateStatus(
+    input: AdminOrderBulkStatus,
+  ): Promise<{ succeeded: string[]; failed: Array<{ id: string; error: string }> }> {
+    return api.post('/api/admin/orders/bulk-status', input);
+  },
 };
+
 
 export const adminUsersService = {
   list(params: AdminUserListParams = {}): Promise<Paginated<AdminUserDTO>> {
