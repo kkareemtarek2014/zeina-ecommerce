@@ -5,6 +5,8 @@ export {
   AdminTopbar,
   AdminBreadcrumbs,
 } from './components/AdminShell';
+export * from './components/ui';
+export { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard';
 export { AdminLoginForm } from './components/AdminLoginForm';
 export { ProductForm } from './components/ProductForm';
 export { StockPanel } from './components/StockPanel';

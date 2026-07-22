@@ -14,6 +14,11 @@
   --color-surface-raised:  #ffffff;  /* Cards, modals, drawers */
   --color-surface-overlay: #22333a;  /* Backdrop (used at opacity) */
 
+  /* Admin surfaces */
+  --color-admin-sidebar:      #22333a;  /* Deep slate — sidebar bg */
+  --color-admin-sidebar-text: #b9c7cb;  /* Muted text on dark sidebar */
+  --color-admin-sidebar-active: #129488;/* Active item fill (brand primary) */
+
   /* Text */
   --color-text-primary:    #26343a;  /* Deep slate — body copy, headings */
   --color-text-secondary:  #5d6b70;  /* Subtitles, labels */
